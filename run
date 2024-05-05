@@ -90,7 +90,7 @@ function deploy() {
 function ci() {
   check
  # test-with-coverage
-  tag
+  #tag
   deploy
 }
 
