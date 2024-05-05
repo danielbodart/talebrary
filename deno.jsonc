@@ -1,0 +1,15 @@
+// presence of this file ensures the deno.lock file is used
+{
+  "compilerOptions": {
+    "experimentalDecorators": true
+  },
+  "lint": {
+    "include": ["src/", "test/"],
+    "rules": {
+      "exclude": ["no-explicit-any", "no-inferrable-types", "no-unused-vars"]
+    }
+  },
+  "imports": {
+    "std/": "https://deno.land/std@0.224.0/",
+  }
+}
