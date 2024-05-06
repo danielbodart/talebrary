@@ -45,13 +45,13 @@ main {
     width: 100%;
     margin: 0 2em 4em 2em;
     max-width: 80em;
-
 }
 
 section {
     background: var( --theme-light);
     border: 1px solid black;
     padding: 1em;
+    margin: 0 2em;
 }
 
 h1 {
