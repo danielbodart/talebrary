@@ -1,12 +1,10 @@
-import {client, Uri} from "./http.ts";
+import {App} from "./App.ts";
+import {client} from "./http.ts";
+
+const app = new App(client);
 
 export default {
     fetch(request: Request, env: any) {
-        const uri = new Uri(request.url);
-        if (uri.path.endsWith('/')) {
-            uri.path += '/index.html';
-            return client(new Request(uri.toString(), request));
-        }
-        return client(request);
+        return app.handle(request);
     },
 }
