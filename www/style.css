@@ -1,7 +1,84 @@
+@import url("https://fonts.googleapis.com/css2?family=Fleur+De+Leah&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
+
+:root {
+    --theme-darkest: #21211c;
+    --theme-dark: #583a29;
+    --theme-medium: #845e49;
+    --theme-mid: #b58b73;
+    --theme-light: #e3c8b9;
+    --theme-lightest: #F5ECE1;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
+    font-family: "Libre Baskerville", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13pt;
+    color: var(--theme-darkest);
+    background-color: var(--theme-darkest);
     background-image: url('library.jpeg');
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
-    color: #FFFFFF;
+    background-position: center bottom;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
 }
+
+@media (min-width: 1800px) {
+    body {
+        background-size: 1800px auto    ;
+        background-position: center bottom;
+    }
+}
+
+main {
+    width: 100%;
+    margin: 0 2em 4em 2em;
+    max-width: 80em;
+
+}
+
+section {
+    background: var( --theme-light);
+    border: 1px solid black;
+    padding: 1em;
+}
+
+h1 {
+    margin: 1em 0;
+    padding: 0;
+    font-family: "League Spartan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 57pt;
+    color: var(--theme-lightest);
+    text-align: center;
+}
+
+h2 {
+    font-family: "Libre Baskerville", serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 27pt;
+    text-align: center;
+}
+
+b {
+    font-family: "Libre Baskerville", serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 13pt;
+}
+
+
