@@ -64,6 +64,11 @@ h1 {
     font-size: 57pt;
     color: var(--theme-lightest);
     text-align: center;
+    text-shadow:
+            -1px -1px 0 var(--theme-darkest),
+            1px -1px 0 var(--theme-darkest),
+            -1px  1px 0 var(--theme-darkest),
+            1px  1px 0 var(--theme-darkest);
 }
 
 h2 {
@@ -72,6 +77,27 @@ h2 {
     font-style: italic;
     font-size: 27pt;
     text-align: center;
+    position: relative;
+}
+
+h2::before,
+h2::after {
+    content: '';
+    display: inline-block;
+    width: 2em;
+    height: 2px;
+    background: black;
+    position: relative;
+    top: -10px;
+    margin: 0 10px;
+}
+
+h2::before {
+    border-radius: 5px 0 0 5px; /* Rounds the left end of the line */
+}
+
+h2::after {
+    border-radius: 0 5px 5px 0; /* Rounds the right end of the line */
 }
 
 b {
