@@ -1,0 +1,29 @@
+{
+  "version": "3",
+  "packages": {
+    "specifiers": {
+      "npm:fast-xml-parser@4.3.6": "npm:fast-xml-parser@4.3.6"
+    },
+    "npm": {
+      "fast-xml-parser@4.3.6": {
+        "integrity": "sha512-M2SovcRxD4+vC493Uc2GZVcZaj66CCJhWurC4viynVSTvrpErCShNcDz1lAho6n9REQKvL/ll4A4/fw6Y9z8nw==",
+        "dependencies": {
+          "strnum": "strnum@1.0.5"
+        }
+      },
+      "strnum@1.0.5": {
+        "integrity": "sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==",
+        "dependencies": {}
+      }
+    }
+  },
+  "remote": {
+    "https://deno.land/std@0.224.0/assert/assertion_error.ts": "ba8752bd27ebc51f723702fac2f54d3e94447598f54264a6653d6413738a8917",
+    "https://deno.land/x/bodar@0.151.136/totallylazy/asserts/assertThat.ts": "1f47269480e7231fbb116b512c7f882bdcba93621d15dd584ede06765efdd14f",
+    "https://deno.land/x/bodar@0.151.136/totallylazy/functions/equal.ts": "0f948073f2f16d7fe8732786d290820532316abd192fc42fc58bc92389a28501",
+    "https://deno.land/x/bodar@0.151.136/totallylazy/functions/toString.ts": "9dc7476ad13b931babcd7c13c86582ed47ed228214ca6b2a2175916dd8a9fb7e",
+    "https://deno.land/x/bodar@0.151.136/totallylazy/predicates/EqualsPredicate.ts": "4605acbeda3d672e614917add28e45a5f0a333124ea6ed270b018d98fc406ebf",
+    "https://deno.land/x/bodar@0.151.136/totallylazy/predicates/IsPredicate.ts": "130df76452d66118bf27ed34d5fa2fe38a2ce8b83838ed68ae3cb9b1c892a6e0",
+    "https://deno.land/x/bodar@0.151.136/totallylazy/predicates/Predicate.ts": "1ba4e7a17c8b618a7db29090ec663de9bd959d36cdd1e28b89b26272e76317c8"
+  }
+}
