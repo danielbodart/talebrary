@@ -2,6 +2,16 @@
 
 # Just in time installers, these functions replace themselves with the real command when called for the first time
 
+function curl() {
+  unset -f curl
+  if [[ ! $(command -v curl) ]]; then
+    sudo apt install -y curl
+  fi
+  curl "$@"
+}
+export -f curl
+
+
 function asdf() {
   unset -f asdf
   if [[ ! -f "$HOME/.asdf/asdf.sh" ]]; then
@@ -36,3 +46,12 @@ function denoflare() {
 }
 export -f denoflare
 
+
+function rclone() {
+  unset -f rclone
+  if [[ ! $(command -v rclone) ]]; then
+    sudo -v ; curl https://rclone.org/install.sh | sudo bash
+  fi
+  rclone "$@"
+}
+export -f rclone
