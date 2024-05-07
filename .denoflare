@@ -3,7 +3,12 @@
     "scripts": {
         "talebrary": {
             "path": "src/index.ts",
-            "localPort": 3030
+            "localPort": 3030,
+            "bindings": {
+                "db" : {
+                    "d1DatabaseUuid": "72a0543e-663c-4bf0-bc0e-c24bcd666888",
+                }
+            }
         }
     }
 }
