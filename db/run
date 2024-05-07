@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -Eeo pipefail
-set -x
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -19,7 +18,7 @@ function convert() {
   cat drop.sql | sqlite3 talebrary.sqlite
   sqlite3 talebrary.sqlite .dump > d1.sql
   sed -i '/^BEGIN TRANSACTION;$/d; /^COMMIT;$/d' d1.sql
-  rm -f talebrary.sqlite full.sql
+  rm -f full.sql
   popd
 }
 

@@ -6,7 +6,7 @@
   "lint": {
     "include": ["src/", "test/"],
     "rules": {
-      "exclude": ["no-explicit-any", "no-inferrable-types", "no-unused-vars"]
+      "exclude": ["no-explicit-any", "no-inferrable-types", "no-unused-vars", "require-await"]
     }
   },
   "imports": {

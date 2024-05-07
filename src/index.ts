@@ -1,10 +1,9 @@
 import {App} from "./App.ts";
 import {client} from "./http.ts";
 
-const app = new App(client);
-
 export default {
     fetch(request: Request, env: any) {
+        const app = new App(client, env);
         return app.handle(request);
     },
 }

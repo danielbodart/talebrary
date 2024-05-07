@@ -26,7 +26,7 @@ export interface GameResult {
     "coverArtLink": string // url
 }
 
-export class GameFinder {
+export class HttpGameFinder {
     constructor(private http: HttpHandler, private parser = new XMLParser()) {
     }
 
