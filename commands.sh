@@ -30,7 +30,7 @@ function deno() {
     echo "* Downloading and installing deno plugin..."
     asdf plugin add deno > /dev/null 2>&1
   fi
-  asdf install
+  asdf install > /dev/null 2>&1
   deno "$@"
 }
 export -f deno
@@ -55,3 +55,47 @@ function rclone() {
   rclone "$@"
 }
 export -f rclone
+
+
+function node() {
+  unset -f node
+  if [[ ! $(asdf plugin list) =~ nodejs ]]; then
+    echo "* Downloading and installing node plugin..."
+    asdf plugin add nodejs > /dev/null 2>&1
+  fi
+  asdf install > /dev/null 2>&1
+  node "$@"
+}
+export -f node
+
+
+function npm() {
+  unset -f npm
+  node -v > /dev/null 2>&1
+  npm "$@"
+}
+export -f npm
+
+
+function npx() {
+  unset -f npx
+  if [[ ! $(command -v npx) ]]; then
+    echo "* Downloading and installing npx ..."
+    npm install -g npx > /dev/null 2>&1
+    asdf reshim nodejs
+  fi
+  npx "$@"
+}
+export -f npx
+
+
+function wrangler() {
+  unset -f wrangler
+  if [[ ! $(command -v wrangler) ]]; then
+    echo "* Downloading and installing wrangler ..."
+    npm install -g wrangler > /dev/null 2>&1
+    asdf reshim nodejs
+  fi
+  wrangler "$@"
+}
+export -f wrangler

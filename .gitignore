@@ -1,2 +1,5 @@
 .idea
 artifacts
+
+# Ignore node
+node_modules
