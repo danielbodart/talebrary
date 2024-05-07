@@ -30,7 +30,7 @@ function deno() {
     echo "* Downloading and installing deno plugin..."
     asdf plugin add deno > /dev/null 2>&1
   fi
-  asdf install > /dev/null 2>&1
+  asdf install deno > /dev/null 2>&1
   deno "$@"
 }
 export -f deno
@@ -63,7 +63,7 @@ function node() {
     echo "* Downloading and installing node plugin..."
     asdf plugin add nodejs > /dev/null 2>&1
   fi
-  asdf install > /dev/null 2>&1
+  asdf install nodejs > /dev/null 2>&1
   node "$@"
 }
 export -f node
