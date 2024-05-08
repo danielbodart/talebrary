@@ -23,12 +23,11 @@ function tag() {
 
 function clean() {
   rm -rf artifacts
+  bun install > /dev/null 2>&1
 }
 
 function check() {
-  bun install
-  #deno check {src,test}/**/*.ts
-  #deno lint --compact
+  bun run tsc --noEmit
 }
 
 function test() {

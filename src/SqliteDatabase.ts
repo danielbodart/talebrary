@@ -11,7 +11,7 @@ export class SqlitePrepareStatement implements D1PreparedStatement {
 
     first<T = unknown>(colName: string): Promise<T | null>;
     first<T = Record<string, unknown>>(): Promise<T | null>;
-    first(colName?: unknown): Promise<any> {
+    first(_colName?: unknown): Promise<any> {
         throw new Error("Method not implemented.");
     }
 
@@ -27,7 +27,7 @@ export class SqlitePrepareStatement implements D1PreparedStatement {
 
     raw<T = unknown[]>(options: { columnNames: true; }): Promise<[string[], ...T[]]>;
     raw<T = unknown[]>(options?: { columnNames?: false | undefined; } | undefined): Promise<T[]>;
-    raw(options?: unknown): Promise<any> {
+    raw(_options?: unknown): Promise<any> {
         throw new Error("Method not implemented.");
     }
 }
@@ -44,11 +44,11 @@ export class SqliteDatabase implements D1Database {
         throw new Error("Method not implemented.");
     }
 
-    batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]> {
+    batch<T = unknown>(_ignore: D1PreparedStatement[]): Promise<D1Result<T>[]> {
         throw new Error("Method not implemented.");
     }
 
-    exec(query: string): Promise<D1ExecResult> {
+    exec(_query: string): Promise<D1ExecResult> {
         throw new Error("Method not implemented.");
     }
 }
