@@ -1,8 +1,11 @@
+import type {D1Database} from "@cloudflare/workers-types";
+
 export class D1GameFinder {
-    constructor(private db: any) {
+    constructor(private db: D1Database) {
     }
 
     async find(search: string): Promise<any[]> {
-        return [];
+        const statement = this.db.prepare("select id, title from games where title like ?").bind(`%${search}%`);
+        return (await statement.all()).results;
     }
 }

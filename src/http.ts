@@ -4,20 +4,7 @@ export interface HttpHandler {
 
 export const client: HttpHandler = (request: Request): Promise<Response> => fetch(request, {redirect: 'manual'});
 
-export function fileHandler(root: string = Deno.cwd()): HttpHandler {
-    return async (request: Request) => {
-        const path = new Uri(request.url);
-        console.log("CWD", root, "path", path);
-        try {
-            const data = await Deno.readFile(root + path);
-            return new Response(data, {status: 200})
-        } catch (e) {
-            return new Response(e.message, {status: 404})
-        }
-    };
-}
-
-export type HttpMethod =  'HEAD' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
+export type HttpMethod = 'HEAD' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
 export type HttpHeader = [string, string];
 
@@ -64,7 +51,7 @@ export class Uri {
         return result.join('');
     }
 
-    toJSON(){
+    toJSON() {
         return this.toString();
     }
 }

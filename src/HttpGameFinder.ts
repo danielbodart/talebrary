@@ -1,5 +1,5 @@
-import {get, HttpHandler} from "./http.ts";
-import {XMLParser} from "npm:fast-xml-parser@4.3.6";
+import {get, type HttpHandler} from "./http.ts";
+import {XMLParser} from "fast-xml-parser";
 
 interface SearchResult {
     searchReply: {
@@ -33,7 +33,7 @@ export class HttpGameFinder {
     async find(search: string): Promise<GameResult[]> {
         const uri = `https://ifdb.org/search?xml&game&searchfor=${search}`;
         const response = await this.http(get(uri));
-        if(response.status !== 200) return [];
+        if (response.status !== 200) return [];
         const text = await response.text();
         const result: SearchResult = this.parser.parse(text);
         return result.searchReply.games.game;
