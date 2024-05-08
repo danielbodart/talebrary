@@ -1,5 +1,5 @@
 import {type HttpHandler, Uri} from "./http.ts";
-import type {D1GameFinder} from "./D1GameFinder.ts";
+import {D1GameFinder} from "./D1GameFinder.ts";
 
 export class App {
     constructor(private handler: HttpHandler, private finder: D1GameFinder) {
