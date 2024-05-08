@@ -1,14 +1,16 @@
-import {HttpHandler, Uri} from "./http.ts";
-import { D1Database } from "npm:@cloudflare/workers-types";
+import {type HttpHandler, Uri} from "./http.ts";
+import type {D1GameFinder} from "./D1GameFinder.ts";
 
 export class App {
-    constructor(private handler: HttpHandler, private db: D1Database) {
+    constructor(private handler: HttpHandler, private finder: D1GameFinder) {
     }
 
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
-        if (uri.path === '/env') {
-            return new Response(JSON.stringify(this.db))
+
+        if (uri.path === '/search') {
+            const result = await this.finder.find(uri.query ?? '');
+            return new Response(JSON.stringify(result))
         }
 
         if (uri.path.endsWith('/')) {

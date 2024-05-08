@@ -26,18 +26,19 @@ function clean() {
 }
 
 function check() {
-  deno check {src,test}/**/*.ts
-  deno lint --compact
+  bun install
+  #deno check {src,test}/**/*.ts
+  #deno lint --compact
 }
 
 function test() {
-    deno test --parallel --allow-net "$@" ./test/
+    bun test "$@"
 }
 
 function test-with-coverage() {
     mkdir -p artifacts/coverage
-    test --junit-path=artifacts/test-results --coverage=artifacts/coverage
-    deno coverage --lcov artifacts/coverage/ --output=artifacts/coverage.lcov
+    #test --junit-path=artifacts/test-results --coverage=artifacts/coverage
+    #deno coverage --lcov artifacts/coverage/ --output=artifacts/coverage.lcov
 }
 
 function dev() {
@@ -51,13 +52,13 @@ function build() {
 
 function start() {
   check
-  denoflare serve talebrary
+  wrangler dev --remote
 }
 
 function deploy() {
   check
+  wrangler deploy
   rclone --config rclone.conf sync www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60"
-  denoflare push talebrary
 }
 
 function ci() {

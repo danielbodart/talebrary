@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 # Just in time installers, these functions replace themselves with the real command when called for the first time
 
 function curl() {
@@ -22,29 +24,6 @@ function asdf() {
   asdf "$@"
 }
 export -f asdf
-
-
-function deno() {
-  unset -f deno
-  if [[ ! $(asdf plugin list) =~ deno ]]; then
-    echo "* Downloading and installing deno plugin..."
-    asdf plugin add deno > /dev/null 2>&1
-  fi
-  asdf install deno > /dev/null 2>&1
-  deno "$@"
-}
-export -f deno
-
-
-function denoflare() {
-  unset -f denoflare
-  if [[ ! $(command -v denoflare) ]]; then
-    deno install --unstable-worker-options --allow-read --allow-net --allow-env --allow-run --name denoflare --force "https://raw.githubusercontent.com/skymethod/denoflare/v0.6.0/cli/cli.ts"
-    asdf reshim deno
-  fi
-  denoflare "$@"
-}
-export -f denoflare
 
 
 function rclone() {
@@ -77,18 +56,6 @@ function npm() {
 export -f npm
 
 
-function npx() {
-  unset -f npx
-  if [[ ! $(command -v npx) ]]; then
-    echo "* Downloading and installing npx ..."
-    npm install -g npx > /dev/null 2>&1
-    asdf reshim nodejs
-  fi
-  npx "$@"
-}
-export -f npx
-
-
 function wrangler() {
   unset -f wrangler
   if [[ ! $(command -v wrangler) ]]; then
@@ -99,3 +66,15 @@ function wrangler() {
   wrangler "$@"
 }
 export -f wrangler
+
+
+function bun() {
+  unset -f bun
+  if [[ ! $(asdf plugin list) =~ bun ]]; then
+    echo "* Downloading and installing bun plugin..."
+    asdf plugin add bun > /dev/null 2>&1
+  fi
+  asdf install bun > /dev/null 2>&1
+  bun "$@"
+}
+export -f bun
