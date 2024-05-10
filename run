@@ -27,17 +27,15 @@ function clean() {
 }
 
 function check() {
-  bun run tsc --noEmit
+  bun run --bun tsc --noEmit
 }
 
 function test() {
-    bun test "$@"
+  bun test "$@"
 }
 
-function test-with-coverage() {
-    mkdir -p artifacts/coverage
-    #test --junit-path=artifacts/test-results --coverage=artifacts/coverage
-    #deno coverage --lcov artifacts/coverage/ --output=artifacts/coverage.lcov
+function coverage() {
+  test --coverage
 }
 
 function dev() {
@@ -62,8 +60,7 @@ function deploy() {
 
 function ci() {
   check
-  test
- # test-with-coverage
+  coverage
   #tag
   deploy
 }

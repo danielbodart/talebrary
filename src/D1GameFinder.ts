@@ -5,7 +5,7 @@ export class D1GameFinder {
     }
 
     async find(search: string): Promise<any[]> {
-        const statement = this.db.prepare("select id, title from games where title like ?").bind(`%${search}%`);
+        const statement = this.db.prepare("select g.id, g.title, g.author from games g where g.title like ?").bind(`%${search}%`);
         return (await statement.all()).results;
     }
 }
