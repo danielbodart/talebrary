@@ -1,5 +1,5 @@
 import {type HttpHandler, Uri} from "./http.ts";
-import type {Librarian} from "./Librarian.ts";
+import type {Librarian} from "./Librarian.tsx";
 
 export class App {
     constructor(private handler: HttpHandler, private librarian: Librarian) {
