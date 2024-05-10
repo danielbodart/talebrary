@@ -1,16 +1,15 @@
 import {type HttpHandler, Uri} from "./http.ts";
-import {D1GameFinder} from "./D1GameFinder.ts";
+import type {Librarian} from "./Librarian.ts";
 
 export class App {
-    constructor(private handler: HttpHandler, private finder: D1GameFinder) {
+    constructor(private handler: HttpHandler, private librarian: Librarian) {
     }
 
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
 
-        if (uri.path === '/search') {
-            const result = await this.finder.find(uri.query ?? '');
-            return new Response(JSON.stringify(result))
+        if (uri.path === '/librarian') {
+            return this.librarian.handle(request);
         }
 
         if (uri.path.endsWith('/')) {
