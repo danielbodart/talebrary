@@ -2,7 +2,7 @@ import {App} from "./App.ts";
 import {client} from "./http.ts";
 import {D1Database} from "@cloudflare/workers-types"
 import {D1GameFinder} from "./D1GameFinder.ts";
-import {Librarian} from "./Librarian.ts";
+import {Librarian} from "./Librarian.tsx";
 
 interface Env {
     db: D1Database;
