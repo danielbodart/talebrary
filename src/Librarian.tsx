@@ -21,7 +21,7 @@ export function books(games: GameInfo[]): string {
     </head>
     <body>
     <ul>
-        {games.map((game) => <li>{game.name}</li>)}
+        {games.map((game) => <li>{game.title}</li>)}
     </ul>
     </body>
     </html>

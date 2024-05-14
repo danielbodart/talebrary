@@ -2,7 +2,7 @@ import type {D1Database} from "@cloudflare/workers-types";
 
 export interface GameInfo {
     id: string;
-    name: string;
+    title: string;
     author: string;
 }
 
