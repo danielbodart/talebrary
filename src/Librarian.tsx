@@ -10,7 +10,7 @@ export class Librarian {
         const uri = new Uri(request.url);
         const search = new URLSearchParams(uri.query).get('search');
         const result = await this.finder.find(search ?? '');
-        return new Response(books(result))
+        return new Response(books(result), { status: 200, headers: { 'Content-Type': 'text/html' } });
     }
 }
 
