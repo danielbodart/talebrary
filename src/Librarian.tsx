@@ -17,12 +17,10 @@ export class Librarian {
 export function books(games: GameInfo[]): string {
     return <html>
     <head>
-
+        <title>Results</title>
     </head>
     <body>
-    <ul>
-        {games.map((game) => <li>{game.title}</li>)}
-    </ul>
+        {games.map((game) => <section>{game.title}</section>)}
     </body>
     </html>
 }

@@ -1,8 +1,9 @@
 import {type HttpHandler, Uri} from "./http.ts";
 import type {Librarian} from "./Librarian.tsx";
 
-export class App {
-    constructor(private handler: HttpHandler, private librarian: Librarian) {
+
+export class Routing {
+    constructor(private httpClient: HttpHandler, private librarian: Librarian ) {
     }
 
     async handle(request: Request): Promise<Response> {
@@ -14,8 +15,8 @@ export class App {
 
         if (uri.path.endsWith('/')) {
             uri.path += 'index.html';
-            return this.handler(new Request(uri.toString(), request));
+            return this.httpClient(new Request(uri.toString(), request));
         }
-        return this.handler(request);
+        return this.httpClient(request);
     }
 }
