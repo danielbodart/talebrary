@@ -1,6 +1,6 @@
 {
   "name": "talebrary",
-  "module": "src/index.ts",
+  "module": "src/cloudflare.ts",
   "type": "module",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240502.0",
@@ -13,6 +13,7 @@
   "dependencies": {
     "emglken": "^0.6.0",
     "fast-xml-parser": "^4.3.6",
+    "linkedom": "^0.18.0",
     "mute-stream": "^1.0.0",
     "typed-html": "^3.0.1"
   }
