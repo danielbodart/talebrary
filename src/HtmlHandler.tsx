@@ -2,15 +2,13 @@ import {type HttpHandler, Uri} from "./http.ts";
 import {parseHTML} from 'linkedom';
 import * as elements from 'typed-html';
 
-const htmlTypes = new Set(["text/html"]);
-
 export function htmlHandler(http: HttpHandler): HttpHandler {
     return async (request) => {
         const response = await http(request);
         if (!response.ok) return response;
 
         const contentType = response.headers.get('content-type');
-        if ((contentType && htmlTypes.has(contentType)) || new Uri(request.url).path.endsWith('.html')) {
+        if ((contentType && contentType.includes('html')) || new Uri(request.url).path.endsWith('.html')) {
             const {document} = parseHTML(await response.text());
             return new Response(template(document), response)
         }
