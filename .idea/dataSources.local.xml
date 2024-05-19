@@ -2,8 +2,15 @@
 <project version="4">
   <component name="dataSourceStorageLocal" created-in="WS-241.15989.105">
     <data-source name="talebrary" uuid="4054a2a7-cc33-4079-baa1-ba87f7a2f5c0">
-      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="SQLITE" />
-      <schema-mapping />
+      <database-info product="SQLite" version="3.45.1" jdbc-version="4.2" driver-name="SQLite JDBC" driver-version="3.45.1.0" dbms="SQLITE" exact-version="3.45.1" exact-driver-version="3.45">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="schema" qname="main" />
+        </introspection-scope>
+      </schema-mapping>
     </data-source>
   </component>
 </project>

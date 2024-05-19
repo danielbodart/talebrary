@@ -10,7 +10,7 @@ export class Librarian {
         const uri = new Uri(request.url);
         const search = new URLSearchParams(uri.query).get('search');
         const result = await this.finder.find(search ?? '');
-        return new Response(books(result), { status: 200, headers: { 'Content-Type': 'text/html' } });
+        return new Response(books(result), {status: 200, headers: {'Content-Type': 'text/html'}});
     }
 }
 
@@ -20,7 +20,12 @@ export function books(games: GameInfo[]): string {
         <title>Results</title>
     </head>
     <body>
-        {games.map((game) => <section>{game.title}</section>)}
+    {games.map((game) =>
+        <section>
+            <h2>{game.title}</h2>
+            <p>{game.description}</p>
+        </section>
+    )}
     </body>
     </html>
 }
