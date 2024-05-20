@@ -22,7 +22,8 @@ body {
     font-family: Arial, sans-serif;
     text-align: center;
     box-shadow: 0px 0px 20px #21211c;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .rating {
@@ -64,6 +65,7 @@ body {
 
 
 .image {
+    flex-shrink: 0;
     height: 250px;
     background-color: #000;
     background-repeat: no-repeat;
@@ -82,7 +84,9 @@ body {
 }
 
 .description {
+    flex-grow: 1;
     margin: 10px;
     font-size: 1em;
     padding: 0;
+    overflow: hidden;
 }
