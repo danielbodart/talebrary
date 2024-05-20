@@ -1,6 +1,7 @@
 import {Uri} from "./http.ts";
 import {D1GameFinder, type GameInfo} from "./D1GameFinder.ts";
 import * as elements from 'typed-html';
+import {parseHTML} from "linkedom";
 
 export class Librarian {
     constructor(private finder: D1GameFinder) {
@@ -18,13 +19,10 @@ function roundStep(value: number, step: number = 0.5): number {
     return Math.round(value / step) * step;
 }
 
-function escapeHtml(unsafe: string | null | undefined): string {
+function wellFormed(unsafe: string | null | undefined): string {
     if (!unsafe) return ''
-    return unsafe
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    const {document} = parseHTML(unsafe);
+    return document.toString();
 }
 
 export function books(games: GameInfo[]): string {
@@ -35,11 +33,11 @@ export function books(games: GameInfo[]): string {
     </head>
     <body>
     {games.map((game) =>
-        <div class="card">
+        <div id={game.id} class="card">
             <div class="rating">{roundStep(game.rating, 0.5)}</div>
             <div class="image" style={`background-image: url('${game.coverart}')`}></div>
-            <div class="title">{escapeHtml(game.title)}</div>
-            <div class="description">{escapeHtml(game.description)}</div>
+            <div class="title">{wellFormed(game.title)}</div>
+            <div class="description">{wellFormed(game.description)}</div>
         </div>
     )}
     </body>

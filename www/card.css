@@ -13,22 +13,21 @@ body {
 .card {
     margin: 20px;
     width: 300px;
-    height: 450px;
+    height: 500px;
     background: linear-gradient(to bottom, #c09a61, #4a2c16);
-    border-radius: 15px;
-    border: 15px ridge #F5D39D ;
+    border-radius: 16px;
+    border: 16px ridge #F5D39D ;
     position: relative;
     color: #fff;
     font-family: Arial, sans-serif;
     text-align: center;
     box-shadow: 0px 0px 20px #21211c;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
 }
 
 .rating {
     position: absolute;
-    top: -7.5px;
+    top: -8px;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     height: 40px;
@@ -42,8 +41,8 @@ body {
 .rating:before {
     position: absolute;
     content: '';
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     height: 100%;
     width: 100%;
     transform: rotateX(45deg) rotateZ(45deg);
@@ -65,7 +64,7 @@ body {
 
 
 .image {
-    height: 200px;
+    height: 250px;
     background-color: #000;
     background-repeat: no-repeat;
     background-size: contain;
@@ -83,9 +82,7 @@ body {
 }
 
 .description {
-    height: 200px;
     margin: 10px;
     font-size: 1em;
     padding: 0;
-    overflow: hidden;
 }
