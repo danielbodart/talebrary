@@ -1,5 +1,14 @@
 import {type HttpHandler, Uri} from "./http.ts";
 import {parseHTML} from 'linkedom';
+import {library} from "./templates/library.tsx";
+import {card} from "./templates/card.tsx";
+
+type Template = (document:Document) => string;
+
+const templates: {[key: string]: Template} = {
+    'library': library,
+    'card': card
+}
 
 export function htmlHandler(http: HttpHandler): HttpHandler {
     return async (request) => {
@@ -10,8 +19,8 @@ export function htmlHandler(http: HttpHandler): HttpHandler {
         if ((contentType && contentType.includes('html')) || new Uri(request.url).path.endsWith('.html')) {
             const {document} = parseHTML(await response.text());
             const name = document.querySelector('meta[name=template]')?.getAttribute('content');
-            if (!name) return response;
-            const {template} = await import(`./templates/${name}.tsx`);
+            if (!name || !(name in templates)) return response;
+            const template = templates[name];
             return new Response(template(document), response)
         }
 

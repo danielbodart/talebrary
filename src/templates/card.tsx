@@ -1,6 +1,6 @@
 import * as elements from "typed-html";
 
-export function template(document: Document) {
+export function card(document: Document) {
     return '<!DOCTYPE html>' +
         <html lang="en">
         <head>
