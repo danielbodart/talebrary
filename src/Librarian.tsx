@@ -18,6 +18,15 @@ function roundStep(value: number, step: number = 0.5): number {
     return Math.round(value / step) * step;
 }
 
+function escapeHtml(unsafe: string | null | undefined): string {
+    if (!unsafe) return ''
+    return unsafe
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 export function books(games: GameInfo[]): string {
     return <html lang="en">
     <head>
@@ -29,8 +38,8 @@ export function books(games: GameInfo[]): string {
         <div class="card">
             <div class="rating">{roundStep(game.rating, 0.5)}</div>
             <div class="image" style={`background-image: url('${game.coverart}')`}></div>
-            <div class="title">{game.title}</div>
-            <div class="description">{game.description}</div>
+            <div class="title">{escapeHtml(game.title)}</div>
+            <div class="description">{escapeHtml(game.description)}</div>
         </div>
     )}
     </body>
