@@ -22,6 +22,8 @@ body {
     font-family: Arial, sans-serif;
     text-align: center;
     box-shadow: 0px 0px 20px #21211c;
+    display: flex;
+    flex-direction: column;
 }
 
 .rating {
@@ -64,7 +66,7 @@ body {
 
 .image {
     height: 200px;
-    background-color: #21211c;
+    background-color: #000;
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
@@ -81,8 +83,9 @@ body {
 }
 
 .description {
-    margin-top: 10px;
+    height: 200px;
+    margin: 10px;
     font-size: 1em;
-    padding: 0 10px;
+    padding: 0;
     overflow: hidden;
 }
