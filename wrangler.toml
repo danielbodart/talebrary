@@ -6,3 +6,7 @@ main = "src/cloudflare.ts"
 binding = "db"
 database_name = "talebrary"
 database_id = "72a0543e-663c-4bf0-bc0e-c24bcd666888"
+
+[[r2_buckets]]
+binding = 'r2'
+bucket_name = 'talebrary'
