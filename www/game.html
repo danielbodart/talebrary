@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            background-image: url('desk.jpeg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center bottom;
+        }
+
+        .card {
+            width: 300px;
+            height: 450px;
+            background: linear-gradient(to bottom, #c09a61, #4a2c16);
+            border-radius: 15px;
+            border: 15px ridge #F5D39D ;
+            position: relative;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            box-shadow: 0px 0px 20px #21211c;
+        }
+
+        .rating {
+            position: absolute;
+            top: -7.5px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            height: 40px;
+            width: 40px;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: whitesmoke;
+        }
+
+        .rating:before {
+            position: absolute;
+            content: '';
+            top: 0px;
+            left: 0px;
+            height: 100%;
+            width: 100%;
+            transform: rotateX(45deg) rotateZ(45deg);
+            box-shadow: 0px 0px 12px gray;
+            background-color: #4a2c16;
+            z-index: -1;
+        }
+
+        .rating:after {
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            content: '';
+            height: calc(100% - 12px); /* -22px is 2 * 10px gap on either side - 2px border on either side */
+            width: calc(100% - 12px); /* -22px is 2 * 10px gap on either side - 2px border on either side */
+            border: 10px ridge #F5D39D;
+            transform: rotateX(45deg) rotateZ(45deg);
+        }
+
+
+        .image {
+            height: 200px;
+            background-color: #21211c;
+            background-repeat: no-repeat;
+            /*background-attachment: fixed;*/
+            background-size: cover;
+            background-position: center;
+        }
+
+        .title {
+            padding: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            background-color: #1D1C0E;
+            color: whitesmoke;
+            border-top: 10px ridge #F5D39D;
+            border-bottom: 10px ridge #F5D39D;
+        }
+
+        .description {
+            margin-top: 10px;
+            font-size: 1em;
+            padding: 0 10px;
+
+        }
+    </style>
+    <title>Card</title>
+</head>
+<body>
+<div class="card">
+    <div class="rating">1</div>
+    <div class="image" style="background-image: url('hook.jpg')"></div>
+    <div class="title">Talakk's Hookstrike</div>
+    <div class="description">An old technique that deals high damage and drains health.</div>
+</div>
+</body>
+</html>

@@ -21,7 +21,8 @@ export function books(games: GameInfo[]): string {
     </head>
     <body>
     {games.map((game) =>
-        <section>
+        <section class="game">
+            <img src={game.coverart}/>
             <h2>{game.title}</h2>
             <p>{game.description}</p>
         </section>

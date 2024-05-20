@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e283b5fe-16a3-43e8-b716-bd3de8eceed8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/game.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/D1GameFinder.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/D1GameFinder.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Librarian.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/Librarian.tsx" afterDir="false" />
@@ -18,8 +18,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="TypeScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -128,7 +128,8 @@
       <workItem from="1715322555462" duration="9807000" />
       <workItem from="1715582277876" duration="989000" />
       <workItem from="1716021155544" duration="19361000" />
-      <workItem from="1716105168738" duration="2256000" />
+      <workItem from="1716105168738" duration="3881000" />
+      <workItem from="1716190619401" duration="6034000" />
     </task>
     <servers />
   </component>

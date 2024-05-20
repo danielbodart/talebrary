@@ -2,9 +2,11 @@ import type {D1Database} from "@cloudflare/workers-types";
 
 export interface GameInfo {
     id: string;
+    rating: number;
     title: string;
     author: string;
     description: string;
+    coverart: string;
 }
 
 export class D1GameFinder {
@@ -12,12 +14,15 @@ export class D1GameFinder {
     }
 
     async find(search: string): Promise<GameInfo[]> {
-        const sql = `select g.id, avg(r.rating) as rating, g.title, g.author, g.desc as description, g.coverart, l.url
+        const sql = `
+select g.id, avg(r.rating) as rating, g.title, g.author, g.desc as description, g.coverart, l.url
 from games g
          join reviews r on g.id = r.gameid
          join gamelinks l on g.id = l.gameid
 where g.title like ? 
-  and l.displayorder = 0 group by 1
+  and l.displayorder = 0
+and g.coverart is not null
+group by 1
 order by 2 desc;`;
         const statement = this.db.prepare(sql).bind(`%${search}%`);
         return (await statement.all()).results as any;
