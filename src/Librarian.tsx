@@ -15,17 +15,19 @@ export class Librarian {
 }
 
 export function books(games: GameInfo[]): string {
-    return <html>
+    return <html lang="en">
     <head>
-        <title>Results</title>
+        <meta name="template" content="card"/>
+        <title>Card</title>
     </head>
     <body>
     {games.map((game) =>
-        <section class="game">
-            <img src={game.coverart}/>
-            <h2>{game.title}</h2>
-            <p>{game.description}</p>
-        </section>
+        <div class="card">
+            <div class="rating">{game.rating}</div>
+            <div class="image" style={`background-image: url('${game.coverart}')`}></div>
+            <div class="title">{game.title}</div>
+            <div class="description">{game.description}</div>
+        </div>
     )}
     </body>
     </html>
