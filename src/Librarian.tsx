@@ -14,6 +14,10 @@ export class Librarian {
     }
 }
 
+function roundStep(value: number, step: number = 0.5): number {
+    return Math.round(value / step) * step;
+}
+
 export function books(games: GameInfo[]): string {
     return <html lang="en">
     <head>
@@ -23,7 +27,7 @@ export function books(games: GameInfo[]): string {
     <body>
     {games.map((game) =>
         <div class="card">
-            <div class="rating">{game.rating}</div>
+            <div class="rating">{roundStep(game.rating, 0.5)}</div>
             <div class="image" style={`background-image: url('${game.coverart}')`}></div>
             <div class="title">{game.title}</div>
             <div class="description">{game.description}</div>
