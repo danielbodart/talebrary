@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e283b5fe-16a3-43e8-b716-bd3de8eceed8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/CovertArtHandler.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/MediaType.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/www/card.css" beforeDir="false" afterPath="$PROJECT_DIR$/www/card.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ApplicationScope.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/ApplicationScope.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FileHandler.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/FileHandler.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/HtmlHandler.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/TemplateHandler.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Librarian.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/Librarian.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/bun.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/bun.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cloudflare.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/cloudflare.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wrangler.toml" beforeDir="false" afterPath="$PROJECT_DIR$/wrangler.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,45 +44,49 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Database Script.ifdb-archive.sql.executor&quot;: &quot;Run&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Deno.Deno: D1GameFinder.ts.executor&quot;: &quot;Run&quot;,
-    &quot;Deno.Deno: Finder.test.ts.executor&quot;: &quot;Debug&quot;,
-    &quot;Deno.Deno: GameFinder.test.ts.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Shell Script.Bun Test.executor&quot;: &quot;Run&quot;,
-    &quot;deno.use.library&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;js.last.introduce.type&quot;: &quot;CONST&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/dan/.asdf/shims/bun&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;/home/dan/.nvm/versions/node/v18.12.1/bin/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/home/dan/Projects/talebrary/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Database Script.ifdb-archive.sql.executor": "Run",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Deno.Deno: D1GameFinder.ts.executor": "Run",
+    "Deno.Deno: Finder.test.ts.executor": "Debug",
+    "Deno.Deno: GameFinder.test.ts.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Shell Script.Bun Test.executor": "Run",
+    "deno.use.library": "true",
+    "git-widget-placeholder": "master",
+    "js.last.introduce.type": "CONST",
+    "last_opened_file_path": "/home/dan/Projects/talebrary/src",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "/home/dan/.nvm/versions/node/v18.12.1/bin/node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "/home/dan/Projects/talebrary/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;,
-      &quot;mariadb&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite",
+      "mariadb"
     ],
-    &quot;RunConfigurationTargetLRU&quot;: [
-      &quot;43b3c3f7-24af-48d7-8692-745d2db6d336&quot;
+    "RunConfigurationTargetLRU": [
+      "43b3c3f7-24af-48d7-8692-745d2db6d336"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/test" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/www" />
+    </key>
+    <key name="es6.move.members.recent.items">
+      <recent name="$PROJECT_DIR$/src/MediaType.ts" />
     </key>
   </component>
   <component name="RunManager">
@@ -128,7 +140,7 @@
       <workItem from="1715582277876" duration="989000" />
       <workItem from="1716021155544" duration="19361000" />
       <workItem from="1716105168738" duration="3881000" />
-      <workItem from="1716190619401" duration="18942000" />
+      <workItem from="1716190619401" duration="23414000" />
     </task>
     <servers />
   </component>

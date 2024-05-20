@@ -10,7 +10,7 @@ const templates: {[key: string]: Template} = {
     'card': card
 }
 
-export function htmlHandler(http: HttpHandler): HttpHandler {
+export function templateHandler(http: HttpHandler): HttpHandler {
     return async (request) => {
         const response = await http(request);
         if (!response.ok) return response;

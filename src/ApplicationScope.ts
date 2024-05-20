@@ -1,12 +1,14 @@
-import {D1Database} from "@cloudflare/workers-types";
+import {D1Database, R2Bucket} from "@cloudflare/workers-types";
 import {Librarian} from "./Librarian.tsx";
 import {D1GameFinder} from "./D1GameFinder.ts";
 import {type HttpHandler} from "./http.ts";
 import {Routing} from "./Routing.ts";
-import {htmlHandler} from "./HtmlHandler.ts";
+import {templateHandler} from "./TemplateHandler.ts";
+import {covertArtHandler} from "./CovertArtHandler.ts";
 
 export interface Env {
     db: D1Database;
+    r2: R2Bucket;
 }
 
 export class ScopeBuilder {
@@ -18,13 +20,13 @@ export class ScopeBuilder {
     }
 }
 
-export function applicationScope(db: D1Database, httpClient: HttpHandler) {
+export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2Bucket) {
     return new ScopeBuilder()
-        .add({db, httpClient})
+        .add({db, httpClient, r2})
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({librarian: new Librarian(finder)}))
-        .add(({httpClient, librarian}) => ({routing: new Routing(httpClient, librarian)}))
-        .add(({routing}) => ({handler: htmlHandler(request => routing.handle(request))}))
+        .add(({httpClient, librarian, r2}) => ({routing: new Routing(covertArtHandler(httpClient, r2), librarian)}))
+        .add(({routing}) => ({handler: templateHandler(request => routing.handle(request))}))
 }
 
 export type ApplicationScope = Omit<ReturnType<typeof applicationScope>, keyof ScopeBuilder>
