@@ -3,7 +3,7 @@ import {Librarian} from "./Librarian.tsx";
 import {D1GameFinder} from "./D1GameFinder.ts";
 import {type HttpHandler} from "./http.ts";
 import {Routing} from "./Routing.ts";
-import {htmlHandler} from "./HtmlHandler.tsx";
+import {htmlHandler} from "./HtmlHandler.ts";
 
 export interface Env {
     db: D1Database;
