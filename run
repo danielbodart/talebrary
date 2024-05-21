@@ -52,6 +52,11 @@ function start() {
   bun run src/bun.ts
 }
 
+function start-w() {
+  check
+  wrangler dev --remote
+}
+
 function deploy() {
   check
   wrangler deploy
