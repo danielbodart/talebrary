@@ -4,7 +4,7 @@ import {D1GameFinder} from "./D1GameFinder.ts";
 import {type HttpHandler} from "./http.ts";
 import {Routing} from "./Routing.ts";
 import {templateHandler} from "./TemplateHandler.ts";
-import {covertArtHandler} from "./CovertArtHandler.ts";
+import {CoverArtHandler} from "./CoverArtHandler.ts";
 
 export interface Env {
     db: D1Database;
@@ -25,7 +25,8 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
         .add({db, httpClient, r2})
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({librarian: new Librarian(finder)}))
-        .add(({httpClient, librarian, r2}) => ({routing: new Routing(covertArtHandler(httpClient, r2), librarian)}))
+        .add(({httpClient, r2}) => ({coverArt: new CoverArtHandler(httpClient, r2)}))
+        .add(({httpClient, librarian, coverArt}) => ({routing: new Routing(httpClient, librarian, coverArt)}))
         .add(({routing}) => ({handler: templateHandler(request => routing.handle(request))}))
 }
 

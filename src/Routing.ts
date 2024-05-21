@@ -1,9 +1,10 @@
 import {type HttpHandler, Uri} from "./http.ts";
 import type {Librarian} from "./Librarian.tsx";
+import type {CoverArtHandler} from "./CoverArtHandler.ts";
 
 
 export class Routing {
-    constructor(private httpClient: HttpHandler, private librarian: Librarian ) {
+    constructor(private httpClient: HttpHandler, private librarian: Librarian, private coverArt: CoverArtHandler) {
     }
 
     async handle(request: Request): Promise<Response> {
@@ -11,6 +12,10 @@ export class Routing {
 
         if (uri.path === '/librarian') {
             return this.librarian.handle(request);
+        }
+
+        if (uri.path.endsWith('/cover-art')) {
+            return this.coverArt.handler(request)
         }
 
         if (uri.path.endsWith('/')) {
