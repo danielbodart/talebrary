@@ -20,7 +20,7 @@ export function etagHandler(http: HttpHandler) {
     return async (request: Request) => {
         const response = await http(request);
         const etag = response.headers.get('etag');
-        if (!(request.method === 'GET' && response.ok && !etag)) return response;
+        if (!(request.method === 'GET' && response.ok && etag)) return response;
 
         if (etag === request.headers.get('if-none-match')) {
             return new Response(null, {status: 304, headers: copySafeHeaders(response)});
