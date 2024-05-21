@@ -24,7 +24,8 @@ export function covertArtHandler(http: HttpHandler, r2: R2Bucket): HttpHandler {
                 if (body) {
                     const [one, two] = body.tee();
                     try {
-                        const result = await r2.put(path, one as any, {
+                        // Drop slash as R2 does not correctly handle paths
+                        const result = await r2.put(path.substring(1), one as any, {
                             httpMetadata: {
                                 contentType: response.headers.get('content-type') ?? MediaType.APPLICATION_OCTET_STREAM,
                                 cacheControl: 'public, max-age=60'
