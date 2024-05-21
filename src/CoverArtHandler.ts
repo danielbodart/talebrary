@@ -15,6 +15,7 @@ export class CoverArtHandler {
         const object = await this.r2.get(key);
 
         if (object !== null) {
+            console.log('Found in R2', key);
             const headers = new Headers();
             object.writeHttpMetadata(headers as any);
             headers.set('etag', object.httpEtag);
