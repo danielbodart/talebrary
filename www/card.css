@@ -97,3 +97,15 @@ body {
     padding: 0;
     overflow: hidden;
 }
+
+.image, .title {
+    transition: flex 0.5s ease, height 0.5s ease;
+}
+
+.card:hover .image, .card:hover .title {
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    visibility: hidden;
+}
