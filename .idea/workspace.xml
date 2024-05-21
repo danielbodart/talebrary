@@ -5,10 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e283b5fe-16a3-43e8-b716-bd3de8eceed8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/EtagHandler.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/templates/card.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/templates/card.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/www/card.css" beforeDir="false" afterPath="$PROJECT_DIR$/www/card.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/www/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/www/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run" beforeDir="false" afterPath="$PROJECT_DIR$/run" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ApplicationScope.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/ApplicationScope.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,9 +18,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="HTML File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -135,7 +135,7 @@
       <workItem from="1716021155544" duration="19361000" />
       <workItem from="1716105168738" duration="3881000" />
       <workItem from="1716190619401" duration="25710000" />
-      <workItem from="1716272399441" duration="10502000" />
+      <workItem from="1716272399441" duration="14732000" />
     </task>
     <servers />
   </component>
