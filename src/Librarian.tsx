@@ -33,11 +33,13 @@ export function books(games: GameInfo[]): string {
     </head>
     <body>
     {games.map((game) =>
-        <div id={game.id} class="card">
+        <div id={game.id} class="card" tabindex="0">
             <div class="rating">{roundStep(game.rating, 0.5)}</div>
             <div class="image" style={`background-image: url('/content/${game.id}/cover-art')`}></div>
             <div class="title">{wellFormed(game.title)}</div>
-            <div class="description">{wellFormed(game.description)}</div>
+            <div class="container">
+                <div class="description">{wellFormed(game.description)}</div>
+            </div>
         </div>
     )}
     </body>
