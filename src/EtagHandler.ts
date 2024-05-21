@@ -25,7 +25,6 @@ export function etagHandler(http: HttpHandler) {
         if (etag === request.headers.get('if-none-match')) {
             return new Response(null, {status: 304, headers: copySafeHeaders(response)});
         }
-        response.headers.set('etag', etag!);
         return response;
     }
 }
