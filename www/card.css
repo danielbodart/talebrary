@@ -108,12 +108,15 @@ body {
     transform: rotateY(180deg);
     text-align: justify;
     overflow-y: auto;
+    scrollbar-color: #A18B67 transparent;
+    scrollbar-width: thin;
 }
 
 .card {
     perspective: 1000px;
     transition: transform 1s;
     transform-style: preserve-3d;
+    cursor: pointer;
 }
 
 .card > * {
