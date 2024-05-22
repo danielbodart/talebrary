@@ -114,7 +114,7 @@ body {
 }
 
 .card > * {
-    transition: 1s ease;
+    transition: 0.5s ease;
 }
 
 .card:focus > *:not(.description):not(.rating)  {
