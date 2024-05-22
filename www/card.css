@@ -67,7 +67,6 @@ body {
     transform: rotateX(45deg) rotateZ(45deg);
 }
 
-
 .image {
     flex-shrink: 0;
     height: 250px;
@@ -105,9 +104,7 @@ body {
     padding: 10px 10px 10px 10px;
     font-size: 1em;
     text-align: justify;
-    overflow-y: auto;
-    scrollbar-color: #A18B67 transparent;
-    scrollbar-width: thin;
+    display: none;
     height: 0;
 }
 
@@ -117,11 +114,10 @@ body {
 }
 
 .card > * {
-    transition: 0.5s ease;
+    transition: 3s ease;
 }
 
 .card:focus > *:not(.description):not(.rating)  {
-    flex-grow: inherit;
     height: 0;
     margin: 0;
     padding: 0;
@@ -132,6 +128,10 @@ body {
 
 .card:focus > .description  {
     height: auto;
+    overflow-y: auto;
+    scrollbar-color: #A18B67 transparent;
+    scrollbar-width: thin;
+    display: block;
 }
 
 
