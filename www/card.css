@@ -122,12 +122,8 @@ body {
     cursor: pointer;
 }
 
-.card > * {
+.card > *:not(.rating) {
     backface-visibility: hidden;
-}
-
-.card > .rating {
-    backface-visibility: visible;
 }
 
 .orientation {
@@ -139,11 +135,12 @@ body {
 }
 
 .rating {
-    transition: 0s 0.3s;
+    transition: 0s 0.15s;
 }
 
 .orientation:checked + .card > .rating  {
     color: transparent;
+    z-index: 1;
 }
 
 
