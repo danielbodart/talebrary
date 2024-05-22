@@ -104,37 +104,34 @@ body {
 .description {
     padding: 10px 10px 10px 10px;
     font-size: 1em;
-    display: none;
-    transform: rotateY(180deg);
     text-align: justify;
     overflow-y: auto;
     scrollbar-color: #A18B67 transparent;
     scrollbar-width: thin;
+    height: 0;
 }
 
 .card {
-    perspective: 1000px;
-    transition: transform 1s;
-    transform-style: preserve-3d;
     cursor: pointer;
+    user-select: none;
 }
 
 .card > * {
-    backface-visibility: hidden;
-    transition: display 0.5s;
+    transition: 0.5s ease;
 }
 
-.card:focus {
-    transform: rotateY(180deg);
-    min-height: 500px;
-}
-
-.card:focus > *:not(.description)  {
-    display: none;
+.card:focus > *:not(.description):not(.rating)  {
+    flex-grow: inherit;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+    visibility: hidden;
 }
 
 .card:focus > .description  {
-    display: block;
+    height: auto;
 }
 
 
