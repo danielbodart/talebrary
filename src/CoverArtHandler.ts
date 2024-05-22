@@ -12,14 +12,17 @@ export class CoverArtHandler {
         const {path} = uri;
         // Drop leading slash as R2 does not correctly handle them
         const key = path.substring(1);
-        const object = await this.r2.get(key);
-
-        if (object !== null) {
-            console.log('Found in R2', key);
-            const headers = new Headers();
-            object.writeHttpMetadata(headers as any);
-            headers.set('etag', object.httpEtag);
-            return new Response(object.body as any, {headers});
+        try {
+            const object = await this.r2.get(key);
+            if (object !== null) {
+                console.log('Found in R2', key);
+                const headers = new Headers();
+                object.writeHttpMetadata(headers as any);
+                headers.set('etag', object.httpEtag);
+                return new Response(object.body as any, {headers});
+            }
+        } catch (e) {
+            console.error(e);
         }
 
         console.log('Not found in R2', key);
