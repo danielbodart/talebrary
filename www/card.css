@@ -88,6 +88,10 @@ body {
     color: whitesmoke;
     border-top: 10px ridge #F5D39D;
     border-bottom: 10px ridge #F5D39D;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 80px;
 }
 
 .author {
