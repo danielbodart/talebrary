@@ -92,19 +92,22 @@ body {
 
 .author {
     flex-grow: 1;
-    margin: 10px;
+    padding: 10px;
     font-size: 1em;
-    padding: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    overflow-y: auto;
+    scrollbar-color: #A18B67 transparent;
+    scrollbar-width: thin;
 }
 
 .description {
     padding: 10px 10px 10px 10px;
     font-size: 1em;
-    display: none;
+    position: absolute;
+    height: calc(100% - 20px);
     transform: rotateY(180deg);
     text-align: justify;
     overflow-y: auto;
@@ -121,7 +124,6 @@ body {
 
 .card > * {
     backface-visibility: hidden;
-    transition: 1.5s 0s, transform 3s;
 }
 
 .card > .rating {
@@ -136,16 +138,12 @@ body {
     transform: rotateY(180deg);
 }
 
-.orientation:checked + .card > *:not(.description):not(.rating)  {
-    display: none;
-}
-
-.orientation:checked + .card > .description  {
-    display: initial;
+.rating {
+    transition: 0s 0.3s;
 }
 
 .orientation:checked + .card > .rating  {
-    color: #4a2c16;
+    color: transparent;
 }
 
 

@@ -63,6 +63,10 @@ function deploy() {
   rclone --config rclone.conf sync www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60"
 }
 
+function pull() {
+  rclone --config rclone.conf sync cloudflare:talebrary www
+}
+
 function ci() {
   check
   coverage
