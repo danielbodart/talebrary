@@ -90,33 +90,48 @@ body {
     border-bottom: 10px ridge #F5D39D;
 }
 
-.description {
+.author {
     flex-grow: 1;
     margin: 10px;
     font-size: 1em;
     padding: 0;
     overflow: hidden;
-    user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
 }
 
-.card:hover .image, .card:hover .title {
-    transition: flex 0.5s ease, height 0.5s ease;
-    height: 0;
-    margin: 0;
-    padding: 0;
-    border: none;
-    visibility: hidden;
+.description {
+    padding: 10px 10px 10px 10px;
+    font-size: 1em;
+    display: none;
+    transform: rotateY(180deg);
+    text-align: justify;
+    overflow-y: auto;
 }
 
-.container {
-    overflow: hidden;
+.card {
+    perspective: 1000px;
+    transition: transform 1s;
+    transform-style: preserve-3d;
 }
 
-.card:active .image, .card:active .title  {
+.card > * {
+    backface-visibility: hidden;
+    transition: display 0.5s;
+}
+
+.card:focus {
+    transform: rotateY(180deg);
+    min-height: 500px;
+}
+
+.card:focus > *:not(.description)  {
     display: none;
 }
 
-.card:active .description {
-    margin-top: -460px;
-    transition: margin-top 0.5s ease;
+.card:focus > .description  {
+    display: block;
 }
+
+

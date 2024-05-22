@@ -37,9 +37,8 @@ export function books(games: GameInfo[]): string {
             <div class="rating">{roundStep(game.rating, 0.5)}</div>
             <div class="image" style={`background-image: url('/content/${game.id}/cover-art')`}></div>
             <div class="title">{wellFormed(game.title)}</div>
-            <div class="container">
-                <div class="description">{wellFormed(game.description)}</div>
-            </div>
+            <div class="author">{wellFormed(game.author)}</div>
+            <div class="description">{wellFormed(game.description)}</div>
         </div>
     )}
     </body>
