@@ -114,10 +114,11 @@ body {
 }
 
 .card > * {
-    transition: 3s ease;
+    transition: 1s ease;
 }
 
 .card:focus > *:not(.description):not(.rating)  {
+    flex: initial;
     height: 0;
     margin: 0;
     padding: 0;
