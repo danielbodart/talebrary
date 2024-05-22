@@ -67,6 +67,7 @@ body {
     transform: rotateX(45deg) rotateZ(45deg);
 }
 
+
 .image {
     flex-shrink: 0;
     height: 250px;
@@ -103,35 +104,36 @@ body {
 .description {
     padding: 10px 10px 10px 10px;
     font-size: 1em;
-    text-align: justify;
     display: none;
-    height: 0;
-}
-
-.card {
-    cursor: pointer;
-    user-select: none;
-}
-
-.card > * {
-    transition: 0.5s ease;
-}
-
-.card:focus > *:not(.description):not(.rating)  {
-    flex: initial;
-    height: 0;
-    margin: 0;
-    padding: 0;
-    border: none;
-    overflow: hidden;
-    visibility: hidden;
-}
-
-.card:focus > .description  {
-    height: auto;
+    transform: rotateY(180deg);
+    text-align: justify;
     overflow-y: auto;
     scrollbar-color: #A18B67 transparent;
     scrollbar-width: thin;
+}
+
+.card {
+    perspective: 1000px;
+    transition: transform 1s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.card > * {
+    backface-visibility: hidden;
+    transition: display 0.5s;
+}
+
+.card:focus {
+    transform: rotateY(180deg);
+    min-height: 500px;
+}
+
+.card:focus > *:not(.description)  {
+    display: none;
+}
+
+.card:focus > .description  {
     display: block;
 }
 
