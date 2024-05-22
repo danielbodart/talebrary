@@ -121,20 +121,31 @@ body {
 
 .card > * {
     backface-visibility: hidden;
-    transition: display 0.5s;
+    transition: 1.5s 0s, transform 3s;
 }
 
-.card:focus {
-    transform: rotateY(180deg);
-    min-height: 500px;
+.card > .rating {
+    backface-visibility: visible;
 }
 
-.card:focus > *:not(.description)  {
+.orientation {
     display: none;
 }
 
-.card:focus > .description  {
-    display: block;
+.orientation:checked + .card {
+    transform: rotateY(180deg);
+}
+
+.orientation:checked + .card > *:not(.description):not(.rating)  {
+    display: none;
+}
+
+.orientation:checked + .card > .description  {
+    display: initial;
+}
+
+.orientation:checked + .card > .rating  {
+    color: #4a2c16;
 }
 
 
