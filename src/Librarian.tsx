@@ -2,6 +2,7 @@ import {Uri} from "./http.ts";
 import {D1GameFinder, type GameInfo} from "./D1GameFinder.ts";
 import * as elements from 'typed-html';
 import {parseHTML} from "linkedom";
+import {Fragment} from "./templates/Fragment.tsx";
 
 export class Librarian {
     constructor(private finder: D1GameFinder) {
@@ -33,13 +34,16 @@ export function books(games: GameInfo[]): string {
     </head>
     <body>
     {games.map((game) =>
-        <div id={game.id} class="card" tabindex="0">
-            <div class="rating">{roundStep(game.rating, 0.5)}</div>
-            <div class="image" style={`background-image: url('/content/${game.id}/cover-art')`}></div>
-            <div class="title">{wellFormed(game.title)}</div>
-            <div class="author">{wellFormed(game.author)}</div>
-            <div class="description">{wellFormed(game.description)}</div>
-        </div>
+        <Fragment>
+            <input class="orientation" type="checkbox" id={game.id}/>
+            <label for={game.id} class="card" tabindex="0">
+                <div class="rating">{roundStep(game.rating, 0.5)}</div>
+                <div class="image" style={`background-image: url('/content/${game.id}/cover-art')`}></div>
+                <div class="title">{wellFormed(game.title)}</div>
+                <div class="author">{wellFormed(game.author)}</div>
+                <div class="description">{wellFormed(game.description)}</div>
+            </label>
+        </Fragment>
     )}
     </body>
     </html>
