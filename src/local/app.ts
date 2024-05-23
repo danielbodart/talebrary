@@ -1,11 +1,12 @@
 import {serve} from "bun";
-import {applicationScope} from "./ApplicationScope.ts";
+import {applicationScope} from "../ApplicationScope.ts";
 import {talebrary} from "./SqliteDatabase.ts";
 import {localhostHandler} from "./FileHandler.ts";
-import type { R2Bucket } from "@cloudflare/workers-types";
+import {FolderBucket} from "./buckets/FolderBucket.ts";
 
-const r2 = new Proxy<R2Bucket>({} as any, {});
-const app = applicationScope(talebrary(), localhostHandler(`${import.meta.dir}/../www/`), r2);
+const root = `${import.meta.dir}/../../www/`;
+const r2 = new FolderBucket(root);
+const app = applicationScope(talebrary(), localhostHandler(root), r2);
 
 const server = serve({
     async fetch(req) {

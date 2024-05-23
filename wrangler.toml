@@ -1,6 +1,6 @@
 compatibility_date = "2024-05-08"
 name = "talebrary"
-main = "src/cloudflare.ts"
+main = "src/app.ts"
 
 [[d1_databases]]
 binding = "db"

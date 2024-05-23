@@ -17,7 +17,8 @@ export class CoverArtHandler {
                 console.log('Found in R2', key);
                 const headers = new Headers();
                 object.writeHttpMetadata(headers as any);
-                headers.set('etag', object.httpEtag);
+                const etag = object.httpEtag;
+                if (etag) headers.set('etag', etag);
                 return new Response(object.body as any, {headers});
             }
         } catch (e) {

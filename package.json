@@ -1,6 +1,6 @@
 {
   "name": "talebrary",
-  "module": "src/cloudflare.ts",
+  "module": "src/app.ts",
   "type": "module",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240502.0",
