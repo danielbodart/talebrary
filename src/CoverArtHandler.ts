@@ -1,6 +1,5 @@
 import {get, type HttpHandler, Uri} from "./http.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
-import {MediaType} from "./MediaType.ts";
 
 
 export class CoverArtHandler {
@@ -39,7 +38,7 @@ export class CoverArtHandler {
         try {
             const result = await this.r2.put(key, one as any, {
                 httpMetadata: {
-                    contentType: response.headers.get('content-type') ?? MediaType.APPLICATION_OCTET_STREAM,
+                    contentType: response.headers.get('content-type') ?? "application/octet-stream",
                     cacheControl: 'public, max-age=60'
                 }
             });

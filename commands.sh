@@ -28,9 +28,11 @@ export -f asdf
 
 function rclone() {
   unset -f rclone
-  if [[ ! $(command -v rclone) ]]; then
-    sudo -v ; curl https://rclone.org/install.sh | sudo bash
+  if [[ ! $(asdf plugin list) =~ rclone ]]; then
+    echo "* Downloading and installing rclone plugin..."
+    asdf plugin add rclone > /dev/null 2>&1
   fi
+  asdf install rclone > /dev/null 2>&1
   rclone "$@"
 }
 export -f rclone

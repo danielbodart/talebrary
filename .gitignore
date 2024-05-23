@@ -1,4 +1,5 @@
 .wrangler
 artifacts
 node_modules
+www/content
 

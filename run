@@ -57,14 +57,22 @@ function start-w() {
   wrangler dev --remote
 }
 
+function check-rclone() {
+    : "${RCLONE_CONFIG_CLOUDFLARE_ACCESS_KEY_ID?Required}"
+    : "${RCLONE_CONFIG_CLOUDFLARE_SECRET_ACCESS_KEY?Required}"
+    : "${RCLONE_CONFIG_CLOUDFLARE_ENDPOINT?Required}"
+}
+
 function deploy() {
   check
   wrangler deploy
+  check-rclone
   rclone --config rclone.conf sync www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60"
 }
 
 function pull() {
-  rclone --config rclone.conf sync cloudflare:talebrary www
+  check-rclone
+  rclone --config rclone.conf sync cloudflare:talebrary www/ --metadata
 }
 
 function ci() {

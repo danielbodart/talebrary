@@ -1,35 +1,6 @@
 import {client, get, type HttpHandler, Uri} from "./http.ts";
 import {file} from 'bun';
-import {MediaType} from "./MediaType.ts";
 
-const extensionToMimeType = new Map<string, string>([
-        ["png", MediaType.IMAGE_PNG],
-        ["gif", MediaType.IMAGE_GIF],
-        ["jpg", MediaType.IMAGE_JPEG],
-        ["jpeg", MediaType.IMAGE_JPEG],
-        ["ico", MediaType.IMAGE_X_ICON],
-        ["svg", MediaType.IMAGE_SVG],
-        ["js", MediaType.TEXT_JAVASCRIPT],
-        ["json", MediaType.APPLICATION_JSON],
-        ["map", MediaType.APPLICATION_JAVASCRIPT],
-        ["css", MediaType.TEXT_CSS],
-        ["less", MediaType.TEXT_CSS],
-        ["html", MediaType.TEXT_HTML],
-        ["xml", MediaType.TEXT_XML],
-        ["xsl", MediaType.TEXT_XML],
-        ["csv", MediaType.TEXT_CSV],
-        ["txt", MediaType.TEXT_PLAIN],
-        ["appcache", MediaType.TEXT_CACHE_MANIFEST],
-        ["otf", MediaType.FONT_SFNT],
-        ["ttf", MediaType.FONT_SFNT],
-        ["woff", MediaType.FONT_WOFF],
-    ]
-);
-
-export function contentType(path: string): string {
-    const [extension] = path.split('.').toReversed();
-    return extensionToMimeType.get(extension) ?? MediaType.APPLICATION_OCTET_STREAM
-}
 
 export function fileHandler(): HttpHandler {
     return async (request: Request) => {
@@ -43,7 +14,7 @@ export function fileHandler(): HttpHandler {
                 status: 200,
                 headers: {
                     'last-modified': new Date(data.lastModified).toISOString(),
-                    'content-type': contentType(path),
+                    'content-type': data.type,
                     'content-length': data.size.toString()
                 }
             })
