@@ -56,7 +56,7 @@ export class FolderBucket implements R2Bucket {
         }
         {
             for (const [key, value] of Object.entries(options.httpMetadata)) {
-                if (value) setAttribute(data.name!, Strings.kebabCase(key), value as string);
+                if (value) setAttribute(data.name!, `user.${Strings.kebabCase(key)}`, value as string);
             }
         }
         return new FileObject(key, data);
