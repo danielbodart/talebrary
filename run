@@ -49,7 +49,7 @@ function build() {
 
 function start() {
   check
-  bun run src/bun.ts
+  bun run src/local/app.ts
 }
 
 function start-w() {

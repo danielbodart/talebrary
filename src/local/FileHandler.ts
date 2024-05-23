@@ -1,4 +1,4 @@
-import {client, get, type HttpHandler, Uri} from "./http.ts";
+import {client, get, type HttpHandler, Uri} from "../http.ts";
 import {file} from 'bun';
 
 
