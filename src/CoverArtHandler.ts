@@ -1,5 +1,6 @@
 import {get, type HttpHandler, Uri} from "./http.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
+import {toResponse} from "./ToResponse.ts";
 
 
 export class CoverArtHandler {
@@ -12,14 +13,10 @@ export class CoverArtHandler {
         // Drop leading slash as R2 does not correctly handle them
         const key = path.substring(1);
         try {
-            const object = await this.r2.get(key);
-            if (object !== null) {
+            const response = toResponse(await this.r2.get(key));
+            if (response.status !== 404) {
                 console.log('Found in R2', key);
-                const headers = new Headers();
-                object.writeHttpMetadata(headers as any);
-                const etag = object.httpEtag;
-                if (etag) headers.set('etag', etag);
-                return new Response(object.body as any, {headers});
+                return response;
             }
         } catch (e) {
             console.error(e);

@@ -1,10 +1,12 @@
-import {type HttpHandler, Uri} from "./http.ts";
+import {Uri} from "./http.ts";
 import type {Librarian} from "./Librarian.tsx";
 import type {CoverArtHandler} from "./CoverArtHandler.ts";
+import type {R2Bucket} from "@cloudflare/workers-types";
+import {toResponse} from "./ToResponse.ts";
 
 
 export class Routing {
-    constructor(private httpClient: HttpHandler, private librarian: Librarian, private coverArt: CoverArtHandler) {
+    constructor(private r2: R2Bucket, private librarian: Librarian, private coverArt: CoverArtHandler) {
     }
 
     async handle(request: Request): Promise<Response> {
@@ -20,8 +22,7 @@ export class Routing {
 
         if (uri.path.endsWith('/')) {
             uri.path += 'index.html';
-            return this.httpClient(new Request(uri.toString(), request));
         }
-        return this.httpClient(request);
+        return toResponse(await this.r2.get(uri.path));
     }
 }
