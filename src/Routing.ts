@@ -23,6 +23,7 @@ export class Routing {
         if (uri.path.endsWith('/')) {
             uri.path += 'index.html';
         }
-        return toResponse(await this.r2.get(uri.path));
+
+        return toResponse(await this.r2.get(uri.path.slice(1)));
     }
 }
