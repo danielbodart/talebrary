@@ -6,6 +6,7 @@ import {Routing} from "./Routing.ts";
 import {templateHandler} from "./TemplateHandler.ts";
 import {CoverArtHandler} from "./CoverArtHandler.ts";
 import {etagHandler} from "./EtagHandler.ts";
+import {cacheHandler} from "./CacheControl.ts";
 
 export interface Env {
     db: D1Database;
@@ -28,7 +29,7 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
         .add(({finder}) => ({librarian: new Librarian(finder)}))
         .add(({httpClient, r2}) => ({coverArt: new CoverArtHandler(httpClient, r2)}))
         .add(({r2, librarian, coverArt}) => ({routing: new Routing(r2, librarian, coverArt)}))
-        .add(({routing}) => ({handler: etagHandler(templateHandler(request => routing.handle(request)))}))
+        .add(({routing}) => ({handler: etagHandler(cacheHandler(templateHandler(request => routing.handle(request))))}))
 }
 
 export type ApplicationScope = Omit<ReturnType<typeof applicationScope>, keyof ScopeBuilder>

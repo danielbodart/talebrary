@@ -17,7 +17,7 @@ import {file} from "bun";
 import {setAttribute} from "./attributes.ts";
 import {FileObject} from "./FileObject.ts";
 import {Strings} from "./Strings.ts";
-import {getHttpMetadata} from "./GetHttpMetadata.ts";
+import {getHttpEtag, getHttpMetadata} from "./GetHttpMetadata.ts";
 
 export class FolderBucket implements R2Bucket {
     constructor(private root: string) {
@@ -34,7 +34,7 @@ export class FolderBucket implements R2Bucket {
     async get(key: string, _options?: any): Promise<any> {
         const data = file(`${this.root}${key}`);
         if (!await data.exists()) return null;
-        return new FileObject(key, data, getHttpMetadata(data.name!));
+        return new FileObject(key, data, getHttpMetadata(data), await getHttpEtag(data));
     }
 
     put(key: string, value: string | ReadableStream<any> | ArrayBuffer | ArrayBufferView | Blob | null, options?: (R2PutOptions & {
