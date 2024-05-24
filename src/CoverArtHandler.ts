@@ -3,6 +3,10 @@ import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 
 
+function unquote(oldEtag: string) {
+    return oldEtag.replace('"', '');
+}
+
 export class CoverArtHandler {
     constructor(private http: HttpHandler, private r2: R2Bucket) {
     }
@@ -13,9 +17,10 @@ export class CoverArtHandler {
         // Drop leading slash as R2 does not correctly handle them
         const key = path.substring(1);
         try {
-            const response = toResponse(await this.r2.get(key));
+            const oldEtag = request.headers.get('if-none-match');
+            const response = toResponse(await this.r2.get(key, oldEtag ?{onlyIf: {etagMatches: unquote(oldEtag)}} : undefined));
             if (response.status !== 404) {
-                console.log('Found in R2', key);
+                console.log('Found in R2', key, response.status);
                 return response;
             }
         } catch (e) {
@@ -47,5 +52,3 @@ export class CoverArtHandler {
         return new Response(two, {status: 200})
     }
 }
-
-

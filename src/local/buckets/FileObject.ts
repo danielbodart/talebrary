@@ -7,13 +7,14 @@ import type {
     R2Range,
     ReadableStream
 } from "@cloudflare/workers-types";
-import type {BunFile} from "bun";
+import {type BunFile} from "bun";
 import {Strings} from "./Strings.ts";
 
 export class FileObject implements R2ObjectBody {
     constructor(public key: string,
                 private file: BunFile,
                 public httpMetadata: R2HTTPMetadata = {},
+                public etag: string = '',
                 private response: Response = new Response(file.stream())) {
         if (!this.httpMetadata.contentType) this.httpMetadata.contentType = file.type;
     }
@@ -48,12 +49,9 @@ export class FileObject implements R2ObjectBody {
         return this.file.size;
     }
 
-    get etag(): string {
-        throw new Error("Method not implemented.");
-    }
-
     get httpEtag(): string {
-        return ''
+        // Strong Etag
+        return `"${this.etag}"`;
     }
 
     get checksums(): R2Checksums {
