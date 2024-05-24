@@ -19,10 +19,22 @@ export function getAttribute(path: string, name: string): string | undefined {
     return new TextDecoder().decode(buffer).slice(0, length);
 }
 
-export function setAttribute(path: string, name: string, value: string): void {
+export enum SetAttributeOptions {
+    None = 0,
+    /**
+     * Set value, fail if attr already exists
+     */
+    Create = 1,
+    /**
+     * Set value, fail if attr does not exist
+     */
+    Replace = 2
+}
+
+export function setAttribute(path: string, name: string, value: string, options: SetAttributeOptions = SetAttributeOptions.None): void {
     const encoder = new TextEncoder();
     const buffer = encoder.encode(value);
-    const result = libc.symbols.setxattr(encoder.encode(path), encoder.encode(name), buffer, buffer.length, 0);
+    const result = libc.symbols.setxattr(encoder.encode(path), encoder.encode(name), buffer, buffer.length, options);
     if (result === -1) {
         throw new Error("Failed to set extended attribute");
     }

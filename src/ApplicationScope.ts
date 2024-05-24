@@ -27,7 +27,7 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({librarian: new Librarian(finder)}))
         .add(({httpClient, r2}) => ({coverArt: new CoverArtHandler(httpClient, r2)}))
-        .add(({httpClient, librarian, coverArt}) => ({routing: new Routing(httpClient, librarian, coverArt)}))
+        .add(({r2, librarian, coverArt}) => ({routing: new Routing(r2, librarian, coverArt)}))
         .add(({routing}) => ({handler: etagHandler(templateHandler(request => routing.handle(request)))}))
 }
 

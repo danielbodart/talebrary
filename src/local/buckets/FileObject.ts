@@ -13,8 +13,9 @@ import {Strings} from "./Strings.ts";
 export class FileObject implements R2ObjectBody {
     constructor(public key: string,
                 private file: BunFile,
-                public httpMetadata: R2HTTPMetadata = {contentType: file.type},
+                public httpMetadata: R2HTTPMetadata = {},
                 private response: Response = new Response(file.stream())) {
+        if (!this.httpMetadata.contentType) this.httpMetadata.contentType = file.type;
     }
 
     get body(): ReadableStream<any> {
