@@ -22,7 +22,8 @@ export function cacheHandler(http: HttpHandler) {
     return async (request: Request) => {
         const response = await http(request);
         const cacheControl = response.headers.get('cache-control');
-        if (request.method === 'GET' && response.ok && cacheControl && cacheControl.includes('public') ) {
+        if (request.method === 'GET' && response.ok) {
+            if (cacheControl && cacheControl.includes('private')) return response;
             response.headers.set('cache-control', CacheControl.Public);
         }
         return response;
