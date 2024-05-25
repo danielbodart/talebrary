@@ -1,4 +1,5 @@
 import type {HttpHandler} from "./http.ts";
+import type {Digest} from "./digest.ts";
 
 const safeHeaders = [
     'date',
@@ -16,15 +17,33 @@ function copySafeHeaders(source: Response): Record<string, string> {
     }, {} as Record<string, string>);
 }
 
-export function etagHandler(http: HttpHandler) {
+
+export function etagHandler(digest: Digest, http: HttpHandler) {
     return async (request: Request) => {
         const response = await http(request);
-        console.log('Final Headers', response.headers.get('vary'), response.headers.get('etag'));
-        const etag = response.headers.get('etag');
-        if (request.method === 'GET' && response.ok && etag && etag === request.headers.get('if-none-match')) {
-            return new Response(null, {status: 304, headers: copySafeHeaders(response)});
+        if (request.method === 'GET' && response.ok && response.body) {
+            const etag = response.headers.get('etag');
+            const oldEtag = request.headers.get('if-none-match');
+            if (etag && etag === oldEtag) {
+                return new Response(null, {status: 304, headers: copySafeHeaders(response)});
+            }
+
+            const body = await response.arrayBuffer();
+            const newEtag = strongEtag(await digest(body));
+            if (newEtag === oldEtag) {
+                return new Response(null, {status: 304, headers: copySafeHeaders(response)});
+            }
+
+            const newResponse = new Response(body, response)
+            newResponse.headers.set('etag', newEtag)
+            return newResponse;
+
         }
         return response;
     }
+}
+
+export function strongEtag(value: string): string {
+    return `"${value}"`
 }
 

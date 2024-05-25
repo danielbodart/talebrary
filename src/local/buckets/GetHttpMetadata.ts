@@ -1,6 +1,6 @@
 import type {R2HTTPMetadata} from "@cloudflare/workers-types";
 import {getAttribute} from "./attributes.ts";
-import {type BunFile, CryptoHasher} from "bun";
+import {type BunFile} from "bun";
 
 export function getHttpMetadata(file: BunFile): R2HTTPMetadata | undefined {
     if (!file.name) return undefined;
@@ -10,8 +10,3 @@ export function getHttpMetadata(file: BunFile): R2HTTPMetadata | undefined {
     }
 }
 
-export async function getHttpEtag(file: BunFile): Promise<string> {
-    const hasher = new CryptoHasher("md5");
-    hasher.update(await file.arrayBuffer());
-    return hasher.digest('hex');
-}
