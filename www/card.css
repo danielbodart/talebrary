@@ -120,7 +120,7 @@ body {
 
 .card {
     perspective: 1000px;
-    transition: transform 1s;
+    transition: transform 0.5s;
     transform-style: preserve-3d;
     cursor: pointer;
 }
