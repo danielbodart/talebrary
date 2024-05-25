@@ -52,7 +52,7 @@ function start() {
   bun run src/local/app.ts
 }
 
-function start-w() {
+function startw() {
   check
   wrangler dev --remote
 }

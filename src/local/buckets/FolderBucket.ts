@@ -17,7 +17,8 @@ import {file} from "bun";
 import {setAttribute} from "./attributes.ts";
 import {FileObject} from "./FileObject.ts";
 import {Strings} from "./Strings.ts";
-import {getHttpEtag, getHttpMetadata} from "./GetHttpMetadata.ts";
+import {getHttpMetadata} from "./GetHttpMetadata.ts";
+import {md5} from "../digest.ts";
 
 export class FolderBucket implements R2Bucket {
     constructor(private root: string) {
@@ -34,7 +35,7 @@ export class FolderBucket implements R2Bucket {
     async get(key: string, _options?: any): Promise<any> {
         const data = file(`${this.root}${key}`);
         if (!await data.exists()) return null;
-        return new FileObject(key, data, getHttpMetadata(data), await getHttpEtag(data));
+        return new FileObject(key, data, getHttpMetadata(data), await md5(await data.arrayBuffer()));
     }
 
     put(key: string, value: string | ReadableStream<any> | ArrayBuffer | ArrayBufferView | Blob | null, options?: (R2PutOptions & {
@@ -56,6 +57,9 @@ export class FolderBucket implements R2Bucket {
                     for (let result = await reader.read(); !result.done; result = await reader.read()) {
                         writer.write(result.value);
                     }
+                }
+                if ('length' in value && typeof value.length === 'number') {
+                    writer.write(value as any);
                 }
                 throw new Error("Unsupported value");
             }

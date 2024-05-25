@@ -7,6 +7,7 @@ import {templateHandler} from "./TemplateHandler.ts";
 import {CoverArtHandler} from "./CoverArtHandler.ts";
 import {etagHandler} from "./EtagHandler.ts";
 import {cacheHandler} from "./CacheControl.ts";
+import type {Digest} from "./digest.ts";
 
 export interface Env {
     db: D1Database;
@@ -22,14 +23,14 @@ export class ScopeBuilder {
     }
 }
 
-export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2Bucket) {
+export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2Bucket, digest:Digest) {
     return new ScopeBuilder()
-        .add({db, httpClient, r2})
+        .add({db, httpClient, r2, digest})
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({librarian: new Librarian(finder)}))
         .add(({httpClient, r2}) => ({coverArt: new CoverArtHandler(httpClient, r2)}))
         .add(({r2, librarian, coverArt}) => ({routing: new Routing(r2, librarian, coverArt)}))
-        .add(({routing}) => ({handler: etagHandler(cacheHandler(templateHandler(request => routing.handle(request))))}))
+        .add(({routing, digest}) => ({handler: etagHandler(digest, cacheHandler(templateHandler(request => routing.handle(request))))}))
 }
 
 export type ApplicationScope = Omit<ReturnType<typeof applicationScope>, keyof ScopeBuilder>

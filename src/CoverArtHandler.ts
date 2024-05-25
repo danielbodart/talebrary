@@ -37,9 +37,9 @@ export class CoverArtHandler {
         const body = response.body;
         if (!body) return new Response('Not Found', {status: 404});
 
-        const [one, two] = body.tee();
+        const buffer = await response.arrayBuffer();
         try {
-            const result = await this.r2.put(key, one as any, {
+            const result = await this.r2.put(key, buffer, {
                 httpMetadata: {
                     contentType: response.headers.get('content-type') ?? "application/octet-stream",
                     cacheControl: 'public, max-age=60'
@@ -49,6 +49,6 @@ export class CoverArtHandler {
         } catch (e) {
             console.error("Error uploading to R2", e);
         }
-        return new Response(two, {status: 200})
+        return new Response(buffer, {status: 200})
     }
 }
