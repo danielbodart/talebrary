@@ -15,7 +15,7 @@ export class Seconds {
 }
 
 export class CacheControl {
-    static Public = `public, max-age=${Seconds.minutes(1)}, stale-while-revalidate=${Seconds.minutes(10)}, stale-if-error=${Seconds.minutes(10)}`;
+    static Public = `public, max-age=${Seconds.minutes(1)}, stale-while-revalidate=${Seconds.minutes(10)}, stale-if-error=${Seconds.minutes(10)}, no-transform`;
 }
 
 export function cacheHandler(http: HttpHandler) {
