@@ -70,11 +70,11 @@ body {
 
 .image {
     flex-shrink: 0;
-    height: 250px;
+    object-fit: contain;
+    width: 100%;
+    min-height: 200px;
+    max-height: 330px;
     background-color: #000;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
 }
 
 .title {
@@ -91,7 +91,6 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    height: 80px;
 }
 
 .author {
