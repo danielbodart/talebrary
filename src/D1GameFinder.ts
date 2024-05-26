@@ -7,6 +7,7 @@ export interface GameInfo {
     author: string;
     description: string;
     coverart: string;
+    url: string;
 }
 
 export class D1GameFinder {
