@@ -2,4 +2,4 @@
 artifacts
 node_modules
 www/content
-
+db/full.sql
