@@ -169,6 +169,10 @@ body {
     cursor: pointer;
 }
 
+.card:hover {
+    transform: scale(1.03);
+}
+
 .card > *:not(.rating) {
     backface-visibility: hidden;
 }
@@ -179,6 +183,10 @@ body {
 
 .orientation:checked + .card {
     transform: rotateY(180deg);
+}
+
+.orientation:checked + .card:hover {
+    transform: rotateY(180deg) scale(1.03);
 }
 
 .rating {

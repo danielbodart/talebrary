@@ -18,8 +18,6 @@ drop table downloadhelp;
 
 drop table extreviews;
 
-drop table filetypes;
-
 drop table gamefwds;
 
 drop table gameprofilelinks;

@@ -45,7 +45,7 @@ export function books(games: GameInfo[]): string {
                 <div class="description">{wellFormed(game.description)}</div>
                 {
                     // TODO Submit bug fix for typed-html
-                    isPlayable(game.url) ?
+                    game.playable ?
                         <a class="play" href={`/content/${game.id}/`}>Play</a> :
                         <a class="play">Play</a>
                 }
@@ -55,15 +55,4 @@ export function books(games: GameInfo[]): string {
     )}
     </body>
     </html>
-}
-
-export function extension(path: string): string | undefined {
-    return path.split('.').pop()
-}
-
-const playable = new Set(['ulx', 'gblorb'])
-
-export function isPlayable(url: string): boolean {
-    const ext = extension(new Uri(url).path);
-    return ext ? playable.has(ext) : false;
 }
