@@ -3,8 +3,6 @@ set -Eeo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-. $SCRIPT_DIR/../commands.sh
-
 function mariadb() {
   docker run --detach --name ifarchive --env MARIADB_USER=ifarchive --env MARIADB_PASSWORD=password \
     --env MARIADB_DATABASE=ifarchive --env MARIADB_RANDOM_ROOT_PASSWORD=1 -p 3306:3306 mariadb:10.5.15
@@ -15,16 +13,16 @@ function convert() {
   rm -f talebrary.sqlite full.sql d1.sql
   ./mysql2sqlite ifdb-archive.sql > full.sql
   cat full.sql | sqlite3 talebrary.sqlite
-  cat drop.sql | sqlite3 talebrary.sqlite
+#  cat drop.sql | sqlite3 talebrary.sqlite
   sqlite3 talebrary.sqlite .dump > d1.sql
   sed -i '/^BEGIN TRANSACTION;$/d; /^COMMIT;$/d' d1.sql
-  rm -f full.sql
+#  rm -f full.sql
   popd
 }
 
 function upload() {
+  . $SCRIPT_DIR/../commands.sh
   wrangler d1 execute talebrary --remote --file=$SCRIPT_DIR/d1.sql
-  rm -rf $SCRIPT_DIR/../node_modules
 }
 
 command="${1-convert}"

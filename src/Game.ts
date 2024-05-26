@@ -46,7 +46,7 @@ const formats = [
 async function run(){
     const dir = import.meta.dir;
 
-    const storyfile = dir + '/../../talebrary.materials/Release/Talebrary Athenaeum.gblorb';
+    const storyfile = dir + '/../Varkana.gblorb';
 
     const format = formats.find(f =>  f.extensions.test(storyfile))
 
