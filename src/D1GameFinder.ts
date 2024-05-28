@@ -1,4 +1,5 @@
 import type {D1Database} from "@cloudflare/workers-types";
+import type {SupportedGameType} from "./types.ts";
 
 export interface GameBase {
     id: string;
@@ -17,7 +18,7 @@ export interface GameInfo extends GameBase {
 
 export interface GameStory extends GameBase {
     url: string;
-    type: 'zcode' | 'blorb/zcode' | 'glulx' | 'blorb/glulx' | 'hugo' | 'adrift' | 'tads2' | 'tads3'
+    type: SupportedGameType
 }
 
 export class D1GameFinder {

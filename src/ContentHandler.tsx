@@ -23,7 +23,7 @@ export function render(game: GameStory): string {
     <head>
         <title>{game.title}</title>
         <meta name="template" content="card"/>
-        <link id="story" rel="preload" href={game.url} as="fetch"/>
+        <link id="story" rel="preload" href={game.url} as="fetch" data-type={game.type}/>
     </head>
     <body>
     <div class="card">
@@ -32,7 +32,6 @@ export function render(game: GameStory): string {
         <div class="author">Loading...</div>
     </div>
 
-    <script src="/client.js"></script>
     </body>
     </html>
 }

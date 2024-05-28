@@ -42,6 +42,10 @@ function dev() {
   test --watch
 }
 
+function build-client() {
+  bun build ./src/client.ts --outdir ./www
+}
+
 function build() {
   check
   test
