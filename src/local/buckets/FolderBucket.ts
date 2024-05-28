@@ -19,6 +19,8 @@ import {FileObject} from "./FileObject.ts";
 import {Strings} from "./Strings.ts";
 import {getHttpMetadata} from "./GetHttpMetadata.ts";
 import {md5} from "../digest.ts";
+import {mkdir} from "node:fs/promises";
+import {dirname} from "node:path";
 
 export class FolderBucket implements R2Bucket {
     constructor(private root: string) {
@@ -44,28 +46,20 @@ export class FolderBucket implements R2Bucket {
     put(key: string, value: string | ReadableStream<any> | ArrayBuffer | ArrayBufferView | Blob | null, options?: R2PutOptions | undefined): Promise<R2Object>;
     async put(key: string, value: string | ReadableStream<any> | ArrayBuffer | ArrayBufferView | Blob | null, options?: any): Promise<any> {
         if (!value) return null;
-        const data = file(`${this.root}${key}`);
+        const path = `${this.root}${key}`;
+        await mkdir(dirname(path), { recursive: true });
+
+        const data = file(path);
         const writer = data.writer();
-        switch (typeof value) {
-            case "string": {
-                writer.write(value);
-                break;
+        if (typeof value === 'object' && 'getReader' in value && typeof value.getReader === 'function') {
+            const reader = value.getReader();
+            for (let result = await reader.read(); !result.done; result = await reader.read()) {
+                writer.write(result.value);
             }
-            case "object": {
-                if ('getReader' in value && typeof value.getReader === 'function') {
-                    const reader = value.getReader();
-                    for (let result = await reader.read(); !result.done; result = await reader.read()) {
-                        writer.write(result.value);
-                    }
-                }
-                if ('length' in value && typeof value.length === 'number') {
-                    writer.write(value as any);
-                }
-                throw new Error("Unsupported value");
-            }
-            default:
-                throw new Error("Unsupported value");
+        } else {
+            writer.write(value as any);
         }
+
         if (options && typeof options === 'object' && 'httpMetadata' in options) {
             for (const [key, value] of Object.entries(options.httpMetadata)) {
                 if (value) setAttribute(data.name!, `user.${Strings.kebabCase(key)}`, value as string);

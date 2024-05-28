@@ -1,8 +1,8 @@
 import {Uri} from "./http.ts";
 import {D1GameFinder, type GameInfo} from "./D1GameFinder.ts";
 import * as elements from 'typed-html';
-import {parseHTML} from "linkedom";
 import {Fragment} from "./templates/Fragment.tsx";
+import {roundStep, wellFormed} from "./misc.ts";
 
 export class Librarian {
     constructor(private finder: D1GameFinder) {
@@ -11,23 +11,13 @@ export class Librarian {
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
         const search = new URLSearchParams(uri.query).get('search');
-        const result = await this.finder.find(search ?? '');
+        const games = await this.finder.find(search ?? '');
         // result.length = 10;
-        return new Response(books(result), {status: 200, headers: {'Content-Type': 'text/html'}});
+        return new Response(render(games), {status: 200, headers: {'Content-Type': 'text/html'}});
     }
 }
 
-function roundStep(value: number, step: number = 0.5): number {
-    return Math.round(value / step) * step;
-}
-
-function wellFormed(unsafe: string | null | undefined): string {
-    if (!unsafe) return ''
-    const {document} = parseHTML(unsafe);
-    return document.toString();
-}
-
-export function books(games: GameInfo[]): string {
+export function render(games: GameInfo[]): string {
     return <html lang="en">
     <head>
         <meta name="template" content="card"/>
@@ -44,7 +34,7 @@ export function books(games: GameInfo[]): string {
                 <div class="author">{wellFormed(game.author)}</div>
                 <div class="description">{wellFormed(game.description)}</div>
                 {
-                    // TODO Submit bug fix for typed-html
+                    // TODO Submit bug fix for typed-html to handle undefined attributes (should ignore)
                     game.playable ?
                         <a class="play" href={`/content/${game.id}/`}>Play</a> :
                         <a class="play">Play</a>

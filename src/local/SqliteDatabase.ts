@@ -11,8 +11,8 @@ export class SqlitePrepareStatement implements D1PreparedStatement {
 
     first<T = unknown>(colName: string): Promise<T | null>;
     first<T = Record<string, unknown>>(): Promise<T | null>;
-    first(_colName?: unknown): Promise<any> {
-        throw new Error("Method not implemented.");
+    async first(_colName?: unknown): Promise<any> {
+        return this.statement.get(...this.values);
     }
 
     run(): Promise<D1Response> {
@@ -21,7 +21,7 @@ export class SqlitePrepareStatement implements D1PreparedStatement {
 
     async all<T = Record<string, unknown>>(): Promise<D1Result<T>> {
         return {
-            results: this.statement.all(this.values)
+            results: this.statement.all(...this.values)
         } as any;
     }
 
