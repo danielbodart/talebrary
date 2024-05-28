@@ -3,6 +3,10 @@ declare namespace JSX {
         href?: string | false
     }
 
+    interface HtmlLinkTag {
+        as?: string
+    }
+
     interface HtmlImageTag {
         loading: 'lazy' | 'eager'
     }

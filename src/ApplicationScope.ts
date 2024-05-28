@@ -8,6 +8,7 @@ import {CoverArtHandler} from "./CoverArtHandler.ts";
 import {etagHandler} from "./EtagHandler.ts";
 import {cacheHandler} from "./CacheControl.ts";
 import type {Digest} from "./digest.ts";
+import {ContentHandler} from "./ContentHandler.tsx";
 
 export interface Env {
     db: D1Database;
@@ -29,7 +30,8 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({librarian: new Librarian(finder)}))
         .add(({httpClient, r2}) => ({coverArt: new CoverArtHandler(httpClient, r2)}))
-        .add(({r2, librarian, coverArt}) => ({routing: new Routing(r2, librarian, coverArt)}))
+        .add(({finder}) => ({content: new ContentHandler(finder)}))
+        .add(({r2, librarian, coverArt, content}) => ({routing: new Routing(r2, librarian, coverArt, content)}))
         .add(({routing, digest}) => ({handler: etagHandler(digest, cacheHandler(templateHandler(request => routing.handle(request))))}))
 }
 
