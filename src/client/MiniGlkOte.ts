@@ -1,27 +1,27 @@
-import type {MessageHandler} from "./types.ts";
+import type {Logger, MessageHandler, Metrics} from "./types.ts";
 
 export class MiniGlkOte {
     private iface: any;
 
-    constructor(private message: MessageHandler) {
+    constructor(private messageHandler: MessageHandler, private logger: Logger) {
     }
 
     init(iface: any) {
-        console.log('MiniGlkOte.init', iface);
+        this.logger.log('MiniGlkOte.init', iface);
         this.iface = iface;
-        this.message.addEventListener('message', message => {
-            if (message.data.type === 'update') return;
-            this.accept(message.data)
+        this.messageHandler.onMessage(message => {
+            if (message.type === 'update') return;
+            this.accept(message)
         })
     }
 
     getinterface() {
-        console.log('MiniGlkOte.getinterface');
+        this.logger.log('MiniGlkOte.getinterface');
         return this.iface
     }
 
     accept(data: any) {
-        console.log('MiniGlkOte.accept', data);
+        this.logger.log('MiniGlkOte.accept', data);
         if (data.type === 'init') {
             data.metrics = Object.assign({}, default_metrics, data.metrics)
         }
@@ -32,30 +32,30 @@ export class MiniGlkOte {
     }
 
     update(data: any) {
-        console.log('MiniGlkOte.update', data);
-        this.message.postMessage(data)
+        this.logger.log('MiniGlkOte.update', data);
+        this.messageHandler.postMessage(data)
     }
 
     error(msg: any) {
-        console.log('MiniGlkOte.error', msg);
+        this.logger.log('MiniGlkOte.error', msg);
     }
 }
 
-const default_metrics = {
+const default_metrics: Metrics = {
+    width: 80,
+    height: 25,
     buffercharheight: 1,
     buffercharwidth: 1,
+    gridcharheight: 1,
+    gridcharwidth: 1,
     buffermarginx: 0,
     buffermarginy: 0,
     graphicsmarginx: 0,
     graphicsmarginy: 0,
-    gridcharheight: 1,
-    gridcharwidth: 1,
     gridmarginx: 0,
     gridmarginy: 0,
-    height: 25,
     inspacingx: 0,
     inspacingy: 0,
     outspacingx: 0,
     outspacingy: 0,
-    width: 80,
 }
