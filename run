@@ -12,15 +12,6 @@ function version() {
   echo version: ${VERSION}
 }
 
-function tag() {
-  version
-
-  git config --global user.name "Server"
-  git config --global user.email "server@bodar.com"
-  git tag -a ${VERSION} -m "Release ${VERSION}"
-  git push origin ${VERSION}
-}
-
 function clean() {
   rm -rf artifacts
   bun install > /dev/null 2>&1
@@ -42,12 +33,9 @@ function dev() {
   test --watch
 }
 
-function build-client() {
-  bun build ./src/client/main.tsx --outdir ./www/client/
-}
-
 function build() {
   check
+  bun build ./src/client/main.tsx --outdir ./www/client/
   test
 }
 
@@ -80,9 +68,7 @@ function pull() {
 }
 
 function ci() {
-  check
-  coverage
-  #tag
+  build
   deploy
 }
 
