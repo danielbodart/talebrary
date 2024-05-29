@@ -2,7 +2,7 @@ export interface HttpHandler {
     (request: Request): Promise<Response>;
 }
 
-export const client: HttpHandler = (request: Request): Promise<Response> => fetch(request, {redirect: 'manual'});
+export const client: HttpHandler = (request: Request): Promise<Response> => fetch(request);
 
 export type HttpMethod = 'HEAD' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
