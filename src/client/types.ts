@@ -13,7 +13,19 @@ export const engineMapping = new Map<SupportedGameType, SupportedEngines>([
     ['tads3', 'tads']
 ])
 
-export type MessageHandler = Pick<Window, 'postMessage' | 'addEventListener'>
+export interface MessageHandler {
+    postMessage<T extends BaseMessage>(message: T): void;
+    onMessage<T extends BaseMessage>(fun:(message: T) => void): void
+}
+
+export interface Logger {
+    log(message?: any, ...optionalParams: any[]): void;
+}
+
+export class NoLogger implements Logger {
+    log(_message?: any, ..._optionalParams: any[]): void {
+    }
+}
 
 export interface GridWindow {
     "id": number,
@@ -69,9 +81,37 @@ export interface InputContent {
     "maxlen": number
 }
 
-export interface RemGLKMessage {
-    "type": "update",
+export interface Metrics {
+    width: number,
+    height: number,
+    buffercharheight: number
+    buffercharwidth: number,
+    gridcharheight: number,
+    gridcharwidth: number,
+    buffermarginx: number,
+    buffermarginy: number,
+    graphicsmarginx: number,
+    graphicsmarginy: number,
+    gridmarginx: number,
+    gridmarginy: number,
+    inspacingx: number,
+    inspacingy: number,
+    outspacingx: number,
+    outspacingy: number,
+}
+
+export interface BaseMessage {
+    "type": string,
     "gen": number,
+}
+
+export interface InitMessage extends BaseMessage {
+    "type": "init",
+    "metrics": Partial<Metrics>
+}
+
+export interface UpdateMessage extends BaseMessage {
+    "type": "update",
     "windows": (GridWindow | BufferWindow)[],
     "content": (GridContent | BufferContent)[],
     "input": InputContent[]

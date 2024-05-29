@@ -7,7 +7,6 @@ export async function fileHandler(request: Request) {
         if (request.method !== 'GET') return new Response('Method Not Allowed', {status: 405});
         const {scheme, path} = new Uri(request.url);
         if (scheme !== 'file') return new Response('Not found', {status: 404});
-        console.log(path)
         const data = file(path);
         if (!(await data.exists())) return new Response('Not found', {status: 404});
         return new Response(data.stream(), {
