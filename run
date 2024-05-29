@@ -43,7 +43,7 @@ function dev() {
 }
 
 function build-client() {
-  bun build ./src/client.ts --outdir ./www
+  bun build ./src/client/main.tsx --outdir ./www/client/
 }
 
 function build() {
