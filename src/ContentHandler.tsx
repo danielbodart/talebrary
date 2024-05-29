@@ -23,7 +23,7 @@ export function render(game: GameStory): string {
     <head>
         <title>{game.title}</title>
         <meta name="template" content="card"/>
-        <link id="story" rel="preload" href={game.url} as="fetch" data-type={game.type} crossorigin="crossorigin"/>
+        <link id="story" rel="preload" href={`/content/${game.id}/story`} as="fetch" data-type={game.type} crossorigin="crossorigin"/>
     </head>
     <body>
     <div class="card">

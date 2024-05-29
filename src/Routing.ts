@@ -1,6 +1,6 @@
 import {Uri} from "./http.ts";
 import type {Librarian} from "./Librarian.tsx";
-import type {CoverArtHandler} from "./CoverArtHandler.ts";
+import type {R2CachingHandler} from "./R2CachingHandler.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import type {ContentHandler} from "./ContentHandler.tsx";
@@ -9,7 +9,8 @@ import type {ContentHandler} from "./ContentHandler.tsx";
 export class Routing {
     constructor(private r2: R2Bucket,
                 private librarian: Librarian,
-                private coverArt: CoverArtHandler,
+                private coverArt: R2CachingHandler,
+                private story: R2CachingHandler,
                 private content: ContentHandler) {
     }
 
@@ -22,6 +23,10 @@ export class Routing {
 
         if (uri.path.endsWith('/cover-art')) {
             return this.coverArt.handler(request)
+        }
+
+        if (uri.path.endsWith('/story')) {
+            return this.story.handler(request)
         }
 
         if (uri.path.startsWith('/content/')) {
