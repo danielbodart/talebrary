@@ -23,7 +23,7 @@ export function render(games: GameInfo[]): string {
         <meta name="template" content="card"/>
         <title>Card</title>
     </head>
-    <body>
+    <body class="results">
     {games.map((game) =>
         <Fragment>
             <input class="orientation" type="checkbox" id={game.id}/>

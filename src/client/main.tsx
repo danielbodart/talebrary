@@ -20,16 +20,26 @@ import {fragment} from "../templates/Fragment.tsx";
     })
 })();
 
+const breakOn = new Set(['header', 'subheader']);
+
 export function render(update: UpdateMessage): string {
     const bufferId = update.windows.find(w => w.type === 'buffer')?.id;
     const bufferContent = update.content.filter(c => c.id === bufferId) as BufferContent[];
     return <div class="card">
-        <div class="author">
-            {bufferContent.flatMap(b =>
-                b.text.flatMap(t =>
-                    t.content?.map(c =>
-                        <p>{c.text}</p>))).join('')}
-        </div>
+        {bufferContent.flatMap(b => {
+            return b.text.flatMap(t => {
+                if (!t.content) {
+                    return <div class="softbreak"></div>;
+                } else if (t.content.length === 1) {
+                    return t.content.map(c => {
+                        return (breakOn.has(c.style) ? '</div><div class="card">' : '') +
+                            <div class={c.style}>{c.text}</div>;
+                    });
+                } else {
+                    return <div class="para">{t.content.map(c => <span class={c.style}>{c.text}</span>)}</div>
+                }
+            });
+        }).join('')}
     </div>
 }
 

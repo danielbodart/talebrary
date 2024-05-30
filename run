@@ -33,15 +33,20 @@ function dev() {
   test --watch
 }
 
+function build-client() {
+  bun build ./src/client/main.tsx --outdir ./www/client/
+}
+
 function build() {
   check
-  bun build ./src/client/main.tsx --outdir ./www/client/
+  build-client
   test
 }
 
 function start() {
   check
-  bun run src/local/app.ts
+  build-client
+  bun run --hot src/local/app.ts
 }
 
 function startw() {
@@ -68,7 +73,9 @@ function pull() {
 }
 
 function ci() {
-  build
+  check
+  build-client
+  coverage
   deploy
 }
 

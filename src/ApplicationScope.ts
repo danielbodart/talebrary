@@ -8,7 +8,7 @@ import {coverArt, R2CachingHandler, story} from "./R2CachingHandler.ts";
 import {etagHandler} from "./EtagHandler.ts";
 import {cacheHandler} from "./CacheControl.ts";
 import type {Digest} from "./digest.ts";
-import {ContentHandler} from "./ContentHandler.tsx";
+import {ClientHandler} from "./client/ClientHandler.tsx";
 
 export interface Env {
     db: D1Database;
@@ -33,7 +33,7 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
             coverArt: new R2CachingHandler(httpClient, r2, coverArt()),
             story: new R2CachingHandler(httpClient, r2, story(finder)),
         }))
-        .add(({finder}) => ({content: new ContentHandler(finder)}))
+        .add(({finder}) => ({content: new ClientHandler(finder)}))
         .add(({r2, librarian, coverArt, story, content}) => ({routing: new Routing(r2, librarian, coverArt, story, content)}))
         .add(({routing, digest}) => ({handler: etagHandler(digest, cacheHandler(templateHandler(request => routing.handle(request))))}))
 }

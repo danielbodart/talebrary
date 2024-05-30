@@ -3,9 +3,6 @@ body {
     font-weight: 400;
     font-style: normal;
     font-size: 13pt;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
     background-color: #f5f5f5;
     background-image: url('desk.jpeg');
     background-repeat: no-repeat;
@@ -16,7 +13,17 @@ body {
     padding: 0;
 }
 
-.card {
+body.results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+body.story {
+
+}
+
+.results .card {
     margin: 30px;
     width: 300px;
     height: 500px;
@@ -26,10 +33,23 @@ body {
     position: relative;
     color: #fff;
     font-family: Arial, sans-serif;
-    text-align: center;
     box-shadow: 0px 0px 20px #21211c;
     display: flex;
     flex-direction: column;
+}
+
+.story .card {
+    margin: 30px auto;
+    min-width: 300px;
+    max-width: 600px;
+    background: linear-gradient(to bottom, #c09a61, #4a2c16);
+    border-radius: 16px;
+    border: 16px ridge #F5D39D ;
+    position: relative;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: justify;
+    box-shadow: 0px 0px 20px #21211c;
 }
 
 .rating {
@@ -68,17 +88,19 @@ body {
     transform: rotateX(45deg) rotateZ(45deg);
 }
 
-
 .image {
     flex-shrink: 0;
     object-fit: contain;
     width: 100%;
-    min-height: 200px;
-    max-height: 330px;
     background-color: #000;
 }
 
-.title {
+.results .image {
+    min-height: 200px;
+    max-height: 330px;
+}
+
+.title, div.header, div.subheader {
     font-family: "League Spartan", sans-serif;
     font-optical-sizing: auto;
     font-weight: 700;
@@ -89,9 +111,22 @@ body {
     color: whitesmoke;
     border-top: 10px ridge #F5D39D;
     border-bottom: 10px ridge #F5D39D;
+    text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+}
+
+.title:first-child, div.header:first-child, div.subheader:first-child {
+    border-top: none;
+}
+
+.span.header, span.subheader {
+    font-weight: 700;
+}
+
+.normal, .alert {
+    margin: 10px 10px 10px 10px;
 }
 
 .author {
@@ -99,6 +134,7 @@ body {
     padding: 10px;
     font-size: 1em;
     overflow: hidden;
+    text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -107,16 +143,23 @@ body {
     scrollbar-width: thin;
 }
 
-.description {
-    padding: 10px 10px 10px 10px;
+.description, .normal {
     font-size: 1em;
-    position: absolute;
-    height: calc(100% - 20px);
-    transform: rotateY(180deg);
     text-align: justify;
-    overflow-y: auto;
     scrollbar-color: #A18B67 transparent;
     scrollbar-width: thin;
+}
+
+
+.description {
+    padding: 10px 10px 10px 10px;
+    position: absolute;
+    height: calc(100% - 20px);
+    overflow-y: auto;
+}
+
+.description {
+    transform: rotateY(180deg);
 }
 
 .play {
@@ -162,38 +205,38 @@ body {
     border-radius: 40px;
 }
 
-.card {
+.results .card {
     perspective: 1000px;
     transition: transform 0.5s;
     transform-style: preserve-3d;
     cursor: pointer;
 }
 
-.card:hover {
+.results .card:hover {
     transform: scale(1.03);
 }
 
-.card > *:not(.rating) {
+.results .card > *:not(.rating) {
     backface-visibility: hidden;
 }
 
-.orientation {
+.results .orientation {
     display: none;
 }
 
-.orientation:checked + .card {
+.results .orientation:checked + .card {
     transform: rotateY(180deg);
 }
 
-.orientation:checked + .card:hover {
+.results .orientation:checked + .card:hover {
     transform: rotateY(180deg) scale(1.03);
 }
 
-.rating {
+.results .rating {
     transition: 0s 0.15s;
 }
 
-.orientation:checked + .card > .rating  {
+.results .orientation:checked + .card > .rating  {
     color: transparent;
     z-index: 1;
 }
