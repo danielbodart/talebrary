@@ -32,7 +32,7 @@ body.story {
     border: 16px ridge #F5D39D ;
     position: relative;
     color: #fff;
-    font-family: Arial, sans-serif;
+    /*font-family: Arial, sans-serif;*/
     box-shadow: 0px 0px 20px #21211c;
     display: flex;
     flex-direction: column;
@@ -46,11 +46,69 @@ body.story {
     border-radius: 16px;
     border: 16px ridge #F5D39D ;
     position: relative;
-    color: #fff;
+    color: whitesmoke;
     font-family: Arial, sans-serif;
     text-align: justify;
     box-shadow: 0px 0px 20px #21211c;
 }
+
+.input {
+    display: flex;
+    align-items: center;
+    font-family: "League Spartan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+    background-color: #1D1C0E;
+    padding: 10px 0 10px 10px;
+}
+
+.input::before {
+    content: "";
+    display: block;
+    background-image: url('icons/dungeon-solid.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 1em;
+    height: 1em;
+    font-size: 2rem;
+    margin-left: 10px;
+}
+
+.input::after {
+    content: "";
+    display: block;
+    background-image: url('icons/microphone-solid.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 1em;
+    height: 1em;
+    font-size: 2rem;
+    margin-right: 10px;
+}
+
+
+.input input {
+    font-family: "League Spartan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+    padding: 10px;
+    font-size: 1.5em;
+    background-color: transparent;
+    color: whitesmoke;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    width: 100%;
+    border: none;
+    margin: 0;
+    outline-width: 0;
+    outline-style: none;
+}
+
+
 
 .rating {
     position: absolute;
@@ -132,7 +190,7 @@ div.normal, div.alert, .paragraph {
 .author {
     flex-grow: 1;
     padding: 10px;
-    font-size: 1em;
+    font-size: 1rem;
     overflow: hidden;
     text-align: center;
     display: flex;
