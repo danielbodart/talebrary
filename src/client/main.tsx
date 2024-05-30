@@ -36,7 +36,7 @@ export function render(update: UpdateMessage): string {
                             <div class={c.style}>{c.text}</div>;
                     });
                 } else {
-                    return <div class="para">{t.content.map(c => <span class={c.style}>{c.text}</span>)}</div>
+                    return <div class="paragraph">{t.content.map(c => <span class={c.style}>{c.text}</span>)}</div>
                 }
             });
         }).join('')}

@@ -125,7 +125,7 @@ body.story {
     font-weight: 700;
 }
 
-.normal, .alert {
+div.normal, div.alert, .paragraph {
     margin: 10px 10px 10px 10px;
 }
 
