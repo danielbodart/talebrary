@@ -1,9 +1,9 @@
-import {Uri} from "./http.ts";
-import type {D1GameFinder, GameStory} from "./D1GameFinder.ts";
+import {Uri} from "../http.ts";
+import type {D1GameFinder, GameStory} from "../D1GameFinder.ts";
 import * as elements from "typed-html";
-import {wellFormed} from "./misc.ts";
+import {wellFormed} from "../misc.ts";
 
-export class ContentHandler {
+export class ClientHandler {
     constructor(private gameFinder: D1GameFinder) {
     }
 
@@ -25,11 +25,11 @@ export function render(game: GameStory): string {
         <meta name="template" content="card"/>
         <link id="story" rel="preload" href={`/content/${game.id}/story`} as="fetch" data-type={game.type} crossorigin="crossorigin"/>
     </head>
-    <body>
+    <body class="story">
     <div class="card">
         <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy"></img>
         <div class="title">{wellFormed(game.title)}</div>
-        <div class="author">Loading...</div>
+        <div class="author">{wellFormed(game.author)}</div>
     </div>
 
     <script type="module" src="/client/main.js"></script>

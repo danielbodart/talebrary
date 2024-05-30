@@ -3,7 +3,7 @@ import type {Librarian} from "./Librarian.tsx";
 import type {R2CachingHandler} from "./R2CachingHandler.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
-import type {ContentHandler} from "./ContentHandler.tsx";
+import type {ClientHandler} from "./client/ClientHandler.tsx";
 
 
 export class Routing {
@@ -11,7 +11,7 @@ export class Routing {
                 private librarian: Librarian,
                 private coverArt: R2CachingHandler,
                 private story: R2CachingHandler,
-                private content: ContentHandler) {
+                private content: ClientHandler) {
     }
 
     async handle(request: Request): Promise<Response> {

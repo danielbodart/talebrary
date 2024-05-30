@@ -68,7 +68,7 @@ export interface BufferContent {
     "text": Partial<{
         "append": boolean
         "content": {
-            "style": "normal" | "subheader"
+            "style": "normal" | 'header' | "subheader" | "alert"
             "text": string
         }[]
     }>[]
