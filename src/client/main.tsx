@@ -1,6 +1,6 @@
 import {client, WindowMessageHandler} from "./client.ts";
 import type {SupportedGameType} from "../types.ts";
-import {UpdateRenderer} from "./updateRenderer.tsx";
+import {UpdateRenderer} from "./UpdateRenderer.tsx";
 
 (async () => {
     const story = document.querySelector<HTMLLinkElement>('#story');
