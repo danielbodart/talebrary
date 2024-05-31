@@ -29,7 +29,8 @@ export class UpdateRenderer {
             .map(update => {
                 const window = this.getWindow(update.id);
                 if (window) return window;
-                this.document.body.append(fragment(<div id={`windows-${update.id}`} class={`window ${update.type}`}></div>))
+                this.document.body.append(fragment(<div id={`windows-${update.id}`}
+                                                        class={`window ${update.type}`}></div>))
             });
     }
 
@@ -89,26 +90,36 @@ export class UpdateRenderer {
                     <div class="card input-control">
                         <form class="input">
                             <input type="text" maxlength={String(update.maxlen ?? 256)} autofocus="autofocus"
-                                   data-gen={update.gen} data-id={update.id}/>
+                                   data-gen={update.gen} data-id={update.id} data-type={update.type}/>
                         </form>
                     </div>));
+                const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
                 window.querySelector('.input-control form')!.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    const src = window.querySelector<HTMLInputElement>('.input-control form input')!
                     this.messageHandler.postMessage({
-                        type: "line",
-                        gen: Number(src.dataset.gen),
-                        window: Number(src.dataset.id),
-                        value: src.value
+                        type: htmlInput.dataset.type!,
+                        gen: Number(htmlInput.dataset.gen),
+                        window: Number(htmlInput.dataset.id),
+                        value: htmlInput.value
                     });
-                    src.value = ''
-
-                })
+                    htmlInput.value = ''
+                });
+                htmlInput.addEventListener('keydown', (e) => {
+                    if (htmlInput.dataset.type !== 'char') return;
+                    e.preventDefault();
+                    this.messageHandler.postMessage({
+                        type: htmlInput.dataset.type!,
+                        gen: Number(htmlInput.dataset.gen),
+                        window: Number(htmlInput.dataset.id),
+                        value: e.key
+                    });
+                });
             } else {
                 const textInput = input.querySelector('input')!;
-                textInput.maxLength = update.maxlen;
+                textInput.maxLength = update.maxlen ?? 0;
                 textInput.dataset.gen = String(update.gen);
                 textInput.dataset.id = String(update.id);
+                textInput.dataset.type = update.type;
             }
         })
     }
