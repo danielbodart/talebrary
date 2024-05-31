@@ -2,19 +2,25 @@
 <html lang="en">
 <head>
     <title>The Talebrary Athenaeum</title>
-    <meta name="template" content="library"/>
+    <meta name="template" content="card"/>
 </head>
-<body>
-    <section>
-        <h2>The Atrium</h2>
-        <p>You find your self standing in the atrium of a huge library, in front of you stands the librarian, ready to
-            help you find whatever adventure you require. To either side of him are row apon row of bookcases containing
-            stories, puzzles and narratives grouped by category</p>
-    </section>
-    <section>
-        <form action="/librarian">
-            <input type="text" name="search">
-        </form>
-    </section>
+<body class="story">
+<div class="card">
+    <img class="image" src="/library.jpeg" loading="lazy"></img>
+    <div class="title">The Talebrary Athenaeum</div>
+</div>
+<div class="card">
+    <div class="header">The Atrium</div>
+    <div class="normal">You find your self standing in the atrium of a huge library, in front of you stands the
+        librarian, ready to
+        help you find whatever adventure you require. To either side of him are row apon row of bookcases containing
+        stories, puzzles and narratives grouped by category
+    </div>
+</div>
+<div class="card input-control">
+    <form class="input" action="/librarian">
+        <input type="text" maxlength="256" autofocus="autofocus" name="search">
+    </form>
+</div>
 </body>
 </html>

@@ -14,7 +14,7 @@ import * as elements from "typed-html";
 
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler) {
-        messageHandler.postMessage({type: "init", gen: 0, metrics: {width: 80, height: 24}});
+        messageHandler.postMessage({type: "init", gen: 0});
         messageHandler.onMessage(message => {
             if (message.type !== 'update') return;
             this.handle(message as UpdateMessage);
