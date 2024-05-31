@@ -90,7 +90,7 @@ export interface GridContent {
 
 export function isGridContent(value: any): value is GridContent {
     return value && typeof value === "object"
-        && 'id' in value && typeof value.id === 'string'
+        && 'id' in value && typeof value.id === 'number'
         && 'lines' in value && Array.isArray(value.lines);
 }
 
@@ -110,7 +110,9 @@ export interface BufferContent {
 }
 
 export function isBufferContent(value: any): value is BufferContent {
-    return value && typeof value === "object" && 'id' in value && 'text' in value;
+    return value && typeof value === "object"
+        && 'id' in value && typeof value.id === 'number'
+        && 'text' in value && Array.isArray(value.text);
 }
 
 export interface GraphicImage {

@@ -116,11 +116,6 @@ body.story {
     outline-style: none;
 }
 
-.window.grid {
-    white-space: pre;
-
-}
-
 
 .rating {
     position: absolute;
@@ -286,6 +281,24 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
     border: 8px ridge #F5D39D;
     border-radius: 40px;
 }
+
+.window.grid {
+    white-space: pre;
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #6C3483;
+    background-color: #A9A9A9CC;
+    border-color: #9B59B6;
+    padding: 0 40px;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    z-index: 1;
+}
+
 
 .results .card {
     perspective: 1000px;

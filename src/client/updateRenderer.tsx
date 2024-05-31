@@ -7,7 +7,7 @@ import {
     type LineInput,
     isBufferContent,
     type MessageHandler,
-    type UpdateMessage, isLineData, type GraphicsWindow, type GraphicsContent
+    type UpdateMessage, isLineData, type GraphicsWindow, type GraphicsContent, isGridContent
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
@@ -30,13 +30,18 @@ export class UpdateRenderer {
             .map(update => {
                 const window = this.getWindow(update.id);
                 if (window) return window;
-                this.document.body.append(fragment(<div id={`windows-${update.id}`}
-                                                        class={`window ${update.type}`}></div>))
+                this.document.body.append(fragment(<div id={`window-${update.id}`}
+                                                        class={`window ${update.type}`}>
+                    { update.type === "grid" ?
+                        Array(update.gridheight).fill(1).map((_, i) => <div id={`grid-line-${i}`} class="line"></div>).join('') :
+                        ''
+                    }
+                </div>))
             });
     }
 
     getWindow(id: number) {
-        return this.document.querySelector<HTMLDivElement>(`#windows-${id}`);
+        return this.document.querySelector<HTMLDivElement>(`#window-${id}`);
     }
 
     private breakOn = new Set(['header', 'subheader']);
@@ -45,6 +50,13 @@ export class UpdateRenderer {
         return updates.map(update => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
+
+            if(isGridContent(update)){
+                update.lines.forEach(line => {
+                    const htmlLine = window.querySelector<HTMLDivElement>(`#grid-line-${line.line}`)!;
+                    htmlLine.innerHTML = line.content.map(c => <span class={c.style}>{c.text}</span>).join('');
+                })
+            }
 
             if (isBufferContent(update)) {
                 if (update.clear) window.innerHTML = '';
