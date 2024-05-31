@@ -28,67 +28,112 @@ export class NoLogger implements Logger {
     }
 }
 
-export interface GridWindow {
-    "id": number,
-    "type": "grid",
-    "rock": number,
-    "gridwidth": number,
-    "gridheight": number,
-    "styles": {},
-    "left": number,
-    "top": number,
-    "width": number,
-    "height": number
+export interface BaseWindow {
+    id: number,
+    type: string,
+    rock: number,
+    styles: {},
+    left: number,
+    top: number,
+    width: number,
+    height: number
 }
 
-export interface BufferWindow {
-    "id": number,
-    "type": "buffer",
-    "rock": number,
-    "styles": {},
-    "left": number,
-    "top": number,
-    "width": number,
-    "height": number
+export interface GridWindow extends BaseWindow {
+    type: 'grid'
+    gridwidth: number,
+    gridheight: number,
+}
+
+export interface BufferWindow extends BaseWindow {
+    type: "buffer",
+}
+
+export interface GraphicsWindow extends BaseWindow {
+    type: "graphics",
+    graphwidth: number,
+    graphheight: number,
+}
+
+export interface LineData {
+    style: 'normal' | 'header' | "subheader" | "alert"
+    text: string,
+    hyperlink?: string,
+}
+
+export function isLineData(value: any): value is LineData {
+    return value
+        && 'style' in value && typeof value.style === 'string'
+        && 'text' in value && typeof value.text === 'string';
+}
+
+export interface BufferImage {
+    special: 'image',
+    width: number,
+    height: number,
+    image?: number,
+    url?: string,
+    hyperlink?: string,
+    alignment?:  "inlineup" | "inlinedown" | "inlinecenter" | "marginleft" | "marginright",
+    alttext?: string
+}
+
+export interface GridLine {
+    line: number,
+    content: LineData[]
 }
 
 export interface GridContent {
-    "id": number,
-    "lines": {
-        "line": number,
-        "content": {
-            "style": "alert",
-            "text": string
-        }[]
-    }[]
+    id: number,
+    lines: GridLine[]
 }
 
-export function isGridContent(value: any): value is BufferContent {
-    return value && typeof value === "object" && 'id' in value && 'lines' in value;
+export function isGridContent(value: any): value is GridContent {
+    return value && typeof value === "object"
+        && 'id' in value && typeof value.id === 'string'
+        && 'lines' in value && Array.isArray(value.lines);
+}
+
+export interface EmptyText {
+}
+
+export interface BufferText {
+    append?: boolean,
+    flowbreak?: boolean,
+    content: (LineData| BufferImage)[]
 }
 
 export interface BufferContent {
-    "id": number,
-    "clear"?: boolean,
-    "text": Partial<{
-        "append": boolean
-        "content": {
-            "style": "normal" | 'header' | "subheader" | "alert"
-            "text": string
-        }[]
-    }>[]
+    id: number,
+    clear?: boolean,
+    text: (EmptyText| BufferText)[]
 }
 
 export function isBufferContent(value: any): value is BufferContent {
     return value && typeof value === "object" && 'id' in value && 'text' in value;
 }
 
-export interface InputContent {
-    "id": number,
-    "gen": number,
-    "type": "line" | 'char',
-    "maxlen"?: number
+export interface GraphicImage {
+    special: 'image',
+    image: number,
+    url: string
+    x: number,
+    y: number,
+    width: number,
+    height: number,
 }
+
+export interface GraphicsContent {
+    id: number,
+    draw: (
+        { special: 'setcolor', color: string } |
+        { special: 'fill' } |
+        { special: 'fill', color: string,
+            x: number, y: number, width: number, height: number } |
+        GraphicImage
+       )[]
+}
+
 
 
 export interface Metrics {
@@ -120,15 +165,44 @@ export interface InitMessage extends BaseMessage {
     "metrics": Partial<Metrics>
 }
 
-export interface UpdateMessage extends BaseMessage {
-    "type": "update",
-    "windows": (GridWindow | BufferWindow)[],
-    "content": (GridContent | BufferContent)[],
-    "input": InputContent[]
+export interface InputMessage extends BaseMessage {
+    id: number,
+    hyperlink?: boolean,
+    mouse?: boolean,
+    xpos?: number,
+    ypos?: number,
 }
 
-export interface InputMessage extends BaseMessage {
-    "type": "line" | 'char',
-    "window": number,
-    "value": string
+export interface CharInput extends InputMessage {
+    type: 'char'
+}
+
+export interface LineInput extends InputMessage {
+    type: 'line',
+    maxlen: number,
+    initial?: string,
+    terminators?: string[],
+}
+
+export interface UpdateMessage extends BaseMessage {
+    type: "update",
+    windows?: (GridWindow | BufferWindow | GraphicsWindow)[],
+    content?: (GridContent | BufferContent | GraphicsContent)[],
+    input?: (CharInput | LineInput)[],
+    timer?: number,
+    disable?: boolean,
+    specialinput?: FilePromptMessage
+}
+
+export interface FilePromptMessage extends BaseMessage {
+    type: 'fileref_prompt',
+    filemode: 'read' | 'write' | 'readwrite' | 'writeappend',
+    filetype: 'data' | 'save' | 'transcript' | 'command',
+    gameid: string
+}
+
+export interface FilePromptResponse extends BaseWindow {
+    type: 'specialresponse',
+    response: 'fileref_prompt',
+    value: any
 }

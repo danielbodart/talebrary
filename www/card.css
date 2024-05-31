@@ -13,7 +13,7 @@ body {
     padding: 0;
 }
 
-:root{
+:root {
     scroll-behavior: smooth;
     scroll-padding-bottom: 20px;
 }
@@ -34,7 +34,7 @@ body.story {
     height: 500px;
     background: linear-gradient(to bottom, #c09a61, #4a2c16);
     border-radius: 16px;
-    border: 16px ridge #F5D39D ;
+    border: 16px ridge #F5D39D;
     position: relative;
     color: #fff;
     /*font-family: Arial, sans-serif;*/
@@ -49,7 +49,7 @@ body.story {
     max-width: 600px;
     background: linear-gradient(to bottom, #c09a61, #4a2c16);
     border-radius: 16px;
-    border: 16px ridge #F5D39D ;
+    border: 16px ridge #F5D39D;
     position: relative;
     color: whitesmoke;
     font-family: Arial, sans-serif;
@@ -116,6 +116,10 @@ body.story {
     outline-style: none;
 }
 
+.window.grid {
+    white-space: pre;
+
+}
 
 
 .rating {
@@ -195,7 +199,7 @@ body.story {
     font-weight: 700;
 }
 
-.emphasized{
+.emphasized {
     font-style: italic;
 }
 
@@ -255,7 +259,7 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
     text-align: center;
     color: whitesmoke;
     background-color: #6C3483;
-    border: 2px solid  #9B59B6;
+    border: 2px solid #9B59B6;
     border-radius: 40px;
     width: 120px;
     text-transform: uppercase;
@@ -314,7 +318,7 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
     transition: 0s 0.15s;
 }
 
-.results .orientation:checked + .card > .rating  {
+.results .orientation:checked + .card > .rating {
     color: transparent;
     z-index: 1;
 }

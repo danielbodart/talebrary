@@ -3,10 +3,11 @@ import {
     type BufferWindow,
     type GridContent,
     type GridWindow,
-    type InputContent,
+    type CharInput,
+    type LineInput,
     isBufferContent,
     type MessageHandler,
-    type UpdateMessage
+    type UpdateMessage, isLineData, type GraphicsWindow, type GraphicsContent
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
@@ -24,7 +25,7 @@ export class UpdateRenderer {
         this.render(update);
     }
 
-    updateWindows(updates: (GridWindow | BufferWindow)[]) {
+    updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
         return updates
             .map(update => {
                 const window = this.getWindow(update.id);
@@ -40,7 +41,7 @@ export class UpdateRenderer {
 
     private breakOn = new Set(['header', 'subheader']);
 
-    updateContent(updates: (GridContent | BufferContent)[]) {
+    updateContent(updates: (GridContent | BufferContent | GraphicsContent)[]) {
         return updates.map(update => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
@@ -51,15 +52,15 @@ export class UpdateRenderer {
                 const html = fragment(<div class="card">
                         {
                             update.text.flatMap(t => {
-                                if (!t.content) {
+                                if (!('content' in t)) {
                                     return '';
                                 } else if (t.content.length === 1) {
-                                    return t.content.map(c => {
+                                    return t.content.filter(isLineData).map(c => {
                                         return (this.breakOn.has(c.style) ? '</div><div class="card">' : '') +
                                             (c.text === '>' ? '' : <div class={c.style}>{c.text}</div>)
                                     });
                                 } else {
-                                    return <div class="paragraph">{t.content.map(c => <span
+                                    return <div class="paragraph">{t.content.filter(isLineData).map(c => <span
                                         class={c.style}>{c.text}</span>)}</div>
                                 }
                             }).join('')
@@ -79,7 +80,7 @@ export class UpdateRenderer {
         })
     }
 
-    updateInput(updates: InputContent[]) {
+    updateInput(updates: (CharInput | LineInput)[]) {
         return updates.map(update => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
@@ -89,8 +90,8 @@ export class UpdateRenderer {
                 window.append(fragment(
                     <div class="card input-control">
                         <form class="input">
-                            <input type="text" maxlength={String(update.maxlen ?? 256)} autofocus="autofocus"
-                                   data-gen={update.gen} data-id={update.id} data-type={update.type}/>
+                            <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 0)} autofocus="autofocus"
+                                   data-gen={update.gen} data-id={update.id} data-type={update.type} value={'initial' in update ? update.initial : ''}/>
                         </form>
                     </div>));
                 const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
@@ -116,7 +117,7 @@ export class UpdateRenderer {
                 });
             } else {
                 const textInput = input.querySelector('input')!;
-                textInput.maxLength = update.maxlen ?? 0;
+                textInput.maxLength = 'maxlen' in update ? update.maxlen : 0;
                 textInput.dataset.gen = String(update.gen);
                 textInput.dataset.id = String(update.id);
                 textInput.dataset.type = update.type;
