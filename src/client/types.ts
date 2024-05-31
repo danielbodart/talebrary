@@ -15,7 +15,8 @@ export const engineMapping = new Map<SupportedGameType, SupportedEngines>([
 
 export interface MessageHandler {
     postMessage<T extends BaseMessage>(message: T): void;
-    onMessage<T extends BaseMessage>(fun:(message: T) => void): void
+
+    onMessage<T extends BaseMessage>(fun: (message: T) => void): void
 }
 
 export interface Logger {
@@ -62,9 +63,13 @@ export interface GridContent {
     }[]
 }
 
+export function isGridContent(value: any): value is BufferContent {
+    return value && typeof value === "object" && 'id' in value && 'lines' in value;
+}
+
 export interface BufferContent {
     "id": number,
-    "clear": boolean,
+    "clear"?: boolean,
     "text": Partial<{
         "append": boolean
         "content": {
@@ -74,12 +79,17 @@ export interface BufferContent {
     }>[]
 }
 
+export function isBufferContent(value: any): value is BufferContent {
+    return value && typeof value === "object" && 'id' in value && 'text' in value;
+}
+
 export interface InputContent {
     "id": number,
     "gen": number,
     "type": "line",
     "maxlen": number
 }
+
 
 export interface Metrics {
     width: number,
@@ -115,4 +125,10 @@ export interface UpdateMessage extends BaseMessage {
     "windows": (GridWindow | BufferWindow)[],
     "content": (GridContent | BufferContent)[],
     "input": InputContent[]
+}
+
+export interface InputMessage extends BaseMessage {
+    "type": "line",
+    "window": number,
+    "value": string
 }

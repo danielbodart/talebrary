@@ -53,6 +53,7 @@ body.story {
 }
 
 .input {
+    margin: 0;
     display: flex;
     align-items: center;
     font-family: "League Spartan", sans-serif;
@@ -60,22 +61,26 @@ body.story {
     font-weight: 700;
     font-style: normal;
     background-color: #1D1C0E;
-    padding: 10px 0 10px 10px;
+    padding: 10px;
+    font-size: 1.5rem;
+}
+
+.input + * {
+    border-top: 10px ridge #F5D39D;
 }
 
 .input::before {
     content: "";
     display: block;
-    background-image: url('icons/dungeon-solid.svg');
+    background-image: url('icons/chevron-right-solid.svg');
     background-size: contain;
     background-repeat: no-repeat;
     width: 1em;
     height: 1em;
     font-size: 2rem;
-    margin-left: 10px;
 }
 
-.input::after {
+.input-control form::after {
     content: "";
     display: block;
     background-image: url('icons/microphone-solid.svg');
@@ -84,17 +89,15 @@ body.story {
     width: 1em;
     height: 1em;
     font-size: 2rem;
-    margin-right: 10px;
+    margin-left: 10px;
 }
 
-
-.input input {
+.input-control form input {
     font-family: "League Spartan", sans-serif;
     font-optical-sizing: auto;
     font-weight: 700;
     font-style: normal;
-    padding: 10px;
-    font-size: 1.5em;
+    font-size: 1.5rem;
     background-color: transparent;
     color: whitesmoke;
     text-align: left;
@@ -179,13 +182,22 @@ body.story {
     border-top: none;
 }
 
+.title:last-child, div.header:last-child, div.subheader:last-child {
+    border-bottom: none;
+}
+
 .span.header, span.subheader {
     font-weight: 700;
 }
 
 div.normal, div.alert, .paragraph {
-    margin: 10px 10px 10px 10px;
+    padding: 10px 10px 0 10px;
 }
+
+div.normal:last-child, div.alert:last-child, .paragraph:last-child {
+    padding-bottom: 10px;
+}
+
 
 .author {
     flex-grow: 1;
