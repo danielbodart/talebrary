@@ -86,8 +86,8 @@ export function isBufferContent(value: any): value is BufferContent {
 export interface InputContent {
     "id": number,
     "gen": number,
-    "type": "line",
-    "maxlen": number
+    "type": "line" | 'char',
+    "maxlen"?: number
 }
 
 
@@ -128,7 +128,7 @@ export interface UpdateMessage extends BaseMessage {
 }
 
 export interface InputMessage extends BaseMessage {
-    "type": "line",
+    "type": "line" | 'char',
     "window": number,
     "value": string
 }
