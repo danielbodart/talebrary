@@ -190,14 +190,17 @@ body.story {
     font-weight: 700;
 }
 
-div.normal, div.alert, .paragraph {
+.emphasized{
+    font-style: italic;
+}
+
+div.normal, div.alert, div.emphasized, .paragraph {
     padding: 10px 10px 0 10px;
 }
 
-div.normal:last-child, div.alert:last-child, .paragraph:last-child {
+div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragraph:last-child {
     padding-bottom: 10px;
 }
-
 
 .author {
     flex-grow: 1;
