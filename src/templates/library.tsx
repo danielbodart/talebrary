@@ -1,15 +1,12 @@
 import * as elements from "typed-html";
+import {fonts} from "./fonts.tsx";
 
 export function library(document: Document) {
     return '<!DOCTYPE html>' +
         <html lang="en">
         <head>
             <meta charset="UTF-8"/>
-            <link rel="preconnect" href="https://fonts.googleapis.com"/>
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin"/>
-            <link
-                href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap"
-                rel="stylesheet"/>
+            {fonts()}
             <link rel="stylesheet" href="/style.css"/>
             {document.head.children}
         </head>
