@@ -1,20 +1,25 @@
 import {
     type BufferContent,
     type BufferWindow,
+    type CharInput,
+    type GraphicsContent,
+    type GraphicsWindow,
     type GridContent,
     type GridWindow,
-    type CharInput,
-    type LineInput,
+    type InitMessage,
     isBufferContent,
-    type MessageHandler,
-    type UpdateMessage, isLineData, type GraphicsWindow, type GraphicsContent, isGridContent
+    isGridContent,
+    isLineData,
+    type LineInput,
+    type MessageHandler, type Metrics,
+    type UpdateMessage
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
 
 export class UpdateRenderer {
-    constructor(private document: Document, private messageHandler: MessageHandler) {
-        messageHandler.postMessage({type: "init", gen: 0});
+    constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
+        messageHandler.postMessage({type: "init", gen: 0, metrics} as InitMessage);
         messageHandler.onMessage(message => {
             if (message.type !== 'update') return;
             this.handle(message as UpdateMessage);
@@ -29,15 +34,25 @@ export class UpdateRenderer {
         return updates
             .map(update => {
                 const window = this.getWindow(update.id);
-                if (window) return window;
-                this.document.body.append(fragment(<div id={`window-${update.id}`}
-                                                        class={`window ${update.type}`}>
-                    { update.type === "grid" ?
-                        Array(update.gridheight).fill(1).map((_, i) => <div id={`grid-line-${i}`} class="line"></div>).join('') :
-                        ''
+                if (window) {
+                    if (update.type === "grid") {
+                        window.innerHTML = this.createLines(update.gridheight);
                     }
-                </div>))
+                    return window;
+                } else {
+                    this.document.body.append(fragment(<div id={`window-${update.id}`}
+                                                            class={`window ${update.type}`}>
+                        {update.type === "grid" ?
+                            this.createLines(update.gridheight) :
+                            ''
+                        }
+                    </div>))
+                }
             });
+    }
+
+    private createLines(count: number) {
+        return Array(count).fill(1).map((_, i) => <div id={`grid-line-${i}`} class="line"></div>).join('');
     }
 
     getWindow(id: number) {
@@ -51,7 +66,7 @@ export class UpdateRenderer {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
 
-            if(isGridContent(update)){
+            if (isGridContent(update)) {
                 update.lines.forEach(line => {
                     const htmlLine = window.querySelector<HTMLDivElement>(`#grid-line-${line.line}`)!;
                     htmlLine.innerHTML = line.content.map(c => <span class={c.style}>{c.text}</span>).join('');
@@ -59,7 +74,11 @@ export class UpdateRenderer {
             }
 
             if (isBufferContent(update)) {
-                if (update.clear) window.innerHTML = '';
+                if (update.clear) {
+                    const introCard = this.document.querySelector('body > .card');
+                    if (introCard) introCard.parentElement!.removeChild(introCard);
+                    window.innerHTML = '';
+                }
 
                 const html = fragment(<div class="card">
                         {
@@ -102,8 +121,10 @@ export class UpdateRenderer {
                 window.append(fragment(
                     <div class="card input-control">
                         <form class="input">
-                            <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 0)} autofocus="autofocus"
-                                   data-gen={update.gen} data-id={update.id} data-type={update.type} value={'initial' in update ? update.initial : ''}/>
+                            <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 0)}
+                                   autofocus="autofocus"
+                                   data-gen={update.gen} data-id={update.id} data-type={update.type}
+                                   value={'initial' in update ? update.initial : ''}/>
                         </form>
                     </div>));
                 const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
@@ -117,14 +138,14 @@ export class UpdateRenderer {
                     });
                     htmlInput.value = ''
                 });
-                htmlInput.addEventListener('keydown', (e) => {
+                htmlInput.addEventListener('keypress', (e) => {
                     if (htmlInput.dataset.type !== 'char') return;
                     e.preventDefault();
                     this.messageHandler.postMessage({
                         type: htmlInput.dataset.type!,
                         gen: Number(htmlInput.dataset.gen),
                         window: Number(htmlInput.dataset.id),
-                        value: e.key
+                        value: SpecialKeys[e.key] ?? e.key
                     });
                 });
             } else {
@@ -142,4 +163,15 @@ export class UpdateRenderer {
         if (update.content) this.updateContent(update.content);
         if (update.input) this.updateInput(update.input);
     }
+}
+
+/*
+left, right, up, down, return, delete, escape, tab,
+    pageup, pagedown, home, end,
+    func1, func2, func3, func4, func5, func6,
+    func7, func8, func9, func10, func11, func12
+ */
+
+const SpecialKeys: { [key: string]: string } = {
+    'Enter': 'return'
 }

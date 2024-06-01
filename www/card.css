@@ -16,6 +16,7 @@ body {
 :root {
     scroll-behavior: smooth;
     scroll-padding-bottom: 20px;
+    scrollbar-color: #A18B67 transparent;
 }
 
 body.results {
@@ -55,6 +56,10 @@ body.story {
     font-family: Arial, sans-serif;
     text-align: justify;
     box-shadow: 0px 0px 20px #21211c;
+}
+
+.card:not(:has(*)) {
+    display: none;
 }
 
 .input {
@@ -216,7 +221,6 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
     flex-direction: column;
     justify-content: space-evenly;
     overflow-y: auto;
-    scrollbar-color: #A18B67 transparent;
     scrollbar-width: thin;
 }
 
@@ -284,8 +288,12 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
 
 .window.grid {
     white-space: pre;
-    font-family: "Cinzel", serif;
-    font-weight: 700;
+    font-family: "Inconsolata", monospace;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings: "wdth" 75;
+
     position: fixed;
     top: 0;
     left: 50%;
@@ -298,7 +306,6 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
     border-bottom-right-radius: 40px;
     z-index: 1;
 }
-
 
 .results .card {
     perspective: 1000px;
