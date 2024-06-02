@@ -34,6 +34,12 @@ export class UpdateRenderer {
     }
 
     updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
+        if (updates.length === 0) {
+            const inputs = Array.from(this.document.querySelectorAll('.window'));
+            inputs.map(i => i.parentElement!.removeChild(i));
+            return
+        }
+
         return updates
             .map(update => {
                 const window = this.getWindow(update.id);
@@ -116,6 +122,12 @@ export class UpdateRenderer {
     }
 
     updateInput(updates: (CharInput | LineInput)[]) {
+        if (updates.length === 0) {
+            const inputs = Array.from(this.document.querySelectorAll('.input-control'));
+            inputs.map(i => i.parentElement!.removeChild(i));
+            return
+        }
+
         return updates.map(update => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);

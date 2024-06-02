@@ -167,6 +167,12 @@ export interface InitMessage extends BaseMessage {
     "metrics": Partial<Metrics>
 }
 
+export interface SpecialResponseMessage extends BaseMessage {
+    type: 'specialresponse',
+    response: 'fileref_prompt',
+    value: FileRef
+}
+
 export interface InputMessage extends BaseMessage {
     id: number,
     hyperlink?: boolean,

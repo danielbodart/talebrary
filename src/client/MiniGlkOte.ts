@@ -1,7 +1,9 @@
-import type {Logger, MessageHandler, Metrics} from "./types.ts";
+import type {Logger, MessageHandler, Metrics, SpecialResponseMessage, UpdateMessage} from "./types.ts";
+import type {MiniDialog} from "./MiniDialog.ts";
 
 export class MiniGlkOte {
     private iface: any;
+    private dialog?: MiniDialog;
 
     constructor(private messageHandler: MessageHandler, private logger: Logger) {
     }
@@ -9,6 +11,7 @@ export class MiniGlkOte {
     init(iface: any) {
         this.logger.log('MiniGlkOte.init', iface);
         this.iface = iface;
+        this.dialog = iface.Dialog;
         this.messageHandler.onMessage(message => {
             if (message.type === 'update') return;
             this.accept(message)
@@ -31,9 +34,20 @@ export class MiniGlkOte {
         this.iface.accept(data)
     }
 
-    update(data: any) {
+    update(data: UpdateMessage) {
         this.logger.log('MiniGlkOte.update', data);
-        this.messageHandler.postMessage(data)
+        if (data.specialinput && data.specialinput.type === "fileref_prompt") {
+            const fileRef = this.dialog!.file_construct_ref(data.specialinput.filetype, data.specialinput.filemode, data.specialinput.gameid);
+            const response: SpecialResponseMessage = {
+                gen: data.gen,
+                type: "specialresponse",
+                response: "fileref_prompt",
+                value: fileRef
+            };
+            this.accept(response)
+        } else {
+            this.messageHandler.postMessage(data)
+        }
     }
 
     error(msg: any) {
@@ -43,7 +57,7 @@ export class MiniGlkOte {
 
 const default_metrics: Metrics = {
     width: 80,
-    height: 25,
+    height: 50,
     buffercharheight: 1,
     buffercharwidth: 1,
     gridcharheight: 1,
