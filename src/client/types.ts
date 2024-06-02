@@ -206,5 +206,13 @@ export interface FilePromptMessage extends BaseMessage {
 export interface FilePromptResponse extends BaseWindow {
     type: 'specialresponse',
     response: 'fileref_prompt',
-    value: any
+    value: FileRef | null
+}
+
+export type FileRef = {
+    content?: string,
+    dirent?: string,
+    filename: string,
+    gameid?: string,
+    usage?: string | null,
 }
