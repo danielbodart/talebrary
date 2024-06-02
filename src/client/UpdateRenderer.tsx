@@ -11,7 +11,8 @@ import {
     isGridContent,
     isLineData,
     type LineInput,
-    type MessageHandler, type Metrics,
+    type MessageHandler,
+    type Metrics,
     type UpdateMessage
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
@@ -27,7 +28,9 @@ export class UpdateRenderer {
     }
 
     handle(update: UpdateMessage): void {
-        this.render(update);
+        if (update.windows) this.updateWindows(update.windows);
+        if (update.content) this.updateContent(update.content, update.gen);
+        if (update.input) this.updateInput(update.input);
     }
 
     updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
@@ -61,7 +64,7 @@ export class UpdateRenderer {
 
     private breakOn = new Set(['header', 'subheader']);
 
-    updateContent(updates: (GridContent | BufferContent | GraphicsContent)[]) {
+    updateContent(updates: (GridContent | BufferContent | GraphicsContent)[], gen: number) {
         return updates.map(update => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
@@ -74,7 +77,7 @@ export class UpdateRenderer {
             }
 
             if (isBufferContent(update)) {
-                if (update.clear) {
+                if (update.clear && gen > 1) {
                     const introCard = this.document.querySelector('body > .card');
                     if (introCard) introCard.parentElement!.removeChild(introCard);
                     window.innerHTML = '';
@@ -104,6 +107,7 @@ export class UpdateRenderer {
                     window.insertBefore(html, input);
                     const htmlInputElement = input.querySelector('input')!;
                     htmlInputElement.scrollIntoView();
+                    htmlInputElement.focus();
                 } else {
                     window.append(html)
                 }
@@ -121,10 +125,11 @@ export class UpdateRenderer {
                 window.append(fragment(
                     <div class="card input-control">
                         <form class="input">
-                            <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 0)}
+                            <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 1)}
                                    autofocus="autofocus"
                                    data-gen={update.gen} data-id={update.id} data-type={update.type}
-                                   value={'initial' in update ? update.initial : ''}/>
+                                   value={'initial' in update ? update.initial : ''}
+                            />
                         </form>
                     </div>));
                 const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
@@ -138,40 +143,47 @@ export class UpdateRenderer {
                     });
                     htmlInput.value = ''
                 });
-                htmlInput.addEventListener('keypress', (e) => {
+                htmlInput.addEventListener('keydown', (e) => {
                     if (htmlInput.dataset.type !== 'char') return;
                     e.preventDefault();
                     this.messageHandler.postMessage({
                         type: htmlInput.dataset.type!,
                         gen: Number(htmlInput.dataset.gen),
                         window: Number(htmlInput.dataset.id),
-                        value: SpecialKeys[e.key] ?? e.key
+                        value: AdjustKeys[e.key] ?? e.key
                     });
                 });
+                htmlInput.scrollIntoView();
+                htmlInput.focus();
             } else {
                 const textInput = input.querySelector('input')!;
-                textInput.maxLength = 'maxlen' in update ? update.maxlen : 0;
+                textInput.maxLength = 'maxlen' in update ? update.maxlen : 1;
                 textInput.dataset.gen = String(update.gen);
                 textInput.dataset.id = String(update.id);
                 textInput.dataset.type = update.type;
+                textInput.scrollIntoView();
+                textInput.focus();
             }
         })
     }
-
-    render(update: UpdateMessage) {
-        if (update.windows) this.updateWindows(update.windows);
-        if (update.content) this.updateContent(update.content);
-        if (update.input) this.updateInput(update.input);
-    }
 }
 
-/*
-left, right, up, down, return, delete, escape, tab,
-    pageup, pagedown, home, end,
-    func1, func2, func3, func4, func5, func6,
-    func7, func8, func9, func10, func11, func12
- */
-
-const SpecialKeys: { [key: string]: string } = {
-    'Enter': 'return'
+const AdjustKeys: { [key: string]: string } = {
+    'ArrowLeft': 'left',
+    'ArrowRight': 'right',
+    'ArrowUp': 'up',
+    'ArrowDown': 'down',
+    'Enter': 'return',
+    'F1': 'func1',
+    'F2': 'func2',
+    'F3': 'func3',
+    'F4': 'func4',
+    'F5': 'func5',
+    'F6': 'func6',
+    'F7': 'func7',
+    'F8': 'func8',
+    'F9': 'func9',
+    'F10': 'func10',
+    'F11': 'func11',
+    'F12': 'func12',
 }
