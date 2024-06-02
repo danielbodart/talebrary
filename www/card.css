@@ -85,9 +85,15 @@ body.story {
     background-image: url('icons/chevron-right-solid.svg');
     background-size: contain;
     background-repeat: no-repeat;
+    background-position: center center;
     width: 1em;
     height: 1em;
     font-size: 2rem;
+    margin-right: 10px;
+}
+
+.input:has(input[data-type=char])::before {
+    background-image: url('icons/keyboard-solid.svg');
 }
 
 .input-control form::after {
@@ -96,6 +102,7 @@ body.story {
     background-image: url('icons/microphone-solid.svg');
     background-size: contain;
     background-repeat: no-repeat;
+    background-position: center center;
     width: 1em;
     height: 1em;
     font-size: 2rem;

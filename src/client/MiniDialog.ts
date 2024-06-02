@@ -1,4 +1,5 @@
 import {MiniGlkOte} from "./MiniGlkOte.ts";
+import type {FileRef} from "./types.ts";
 
 export class MiniDialog {
     streaming = false;
@@ -30,7 +31,7 @@ export class MiniDialog {
         console.log('MiniDialog.file_clean_fixed_name')
     }
 
-    file_construct_ref(filename: any = '', usage: any = '', gameid: any = '') {
+    file_construct_ref(filename: string = '', usage: string = '', gameid: string = ''): FileRef {
         console.log('MiniDialog.file_construct_ref', filename, usage, gameid);
         var key = `${usage}:${gameid}:${filename}`;
         return {
@@ -52,23 +53,60 @@ export class MiniDialog {
         console.log('MiniDialog.file_remove_ref')
     }
 
-    file_write() {
-        console.log('MiniDialog.file_write')
+    file_write(dirent: FileRef, content: any): boolean {
+        console.log('MiniDialog.file_write', dirent, content);
+        try {
+            if (dirent.content) this.storage.setItem(dirent.content, this.contentToString(content))
+            return true;
+        } catch (e) {
+            console.error('MiniDialog.file_write failed', e);
+            return false;
+        }
     }
 
-    file_read() {
-        console.log('MiniDialog.file_read')
+    private contentToString(content: any): string {
+        if (typeof content === 'string') return content;
+        if (content instanceof Uint8Array) return JSON.stringify(Array.from(content as any));
+        throw new Error("Unsupported content type.", content);
+    }
+
+    file_read(dirent: FileRef, raw: boolean): any {
+        console.log('MiniDialog.file_read', dirent, raw);
+        if (dirent.content) {
+            const result = this.storage.getItem(dirent.content);
+            return this.stringToContent(result, raw);
+        }
+    }
+
+    private stringToContent(result: string | null, raw: boolean): any {
+        if (!result) return null;
+        if (raw) return result;
+        const data = JSON.parse(result);
+        if (Array.isArray(data)) return new Uint8Array(data);
+        throw new Error("Unsupported content type.", data);
     }
 
     file_fopen() {
         console.log('MiniDialog.file_fopen')
     }
 
-    autosave_write() {
+    autosave_write(signature: string, snapshot?: object) {
         console.log('MiniDialog.autosave_write')
+        const key = MiniDialog.autosaveKey(signature);
+        if (!snapshot) return this.storage.removeItem(key);
+        this.storage.setItem(key, JSON.stringify(snapshot));
     }
 
-    autosave_read() {
-        console.log('MiniDialog.autosave_read')
+    static autosaveKey(signature: string) {
+        return 'autosave:' + signature;
     }
+
+    autosave_read(signature: string): object {
+        console.log('MiniDialog.autosave_read')
+        const key = MiniDialog.autosaveKey(signature);
+        const result = this.storage.getItem(key);
+        return result ? JSON.parse(result) : null;
+    }
+
+
 }
