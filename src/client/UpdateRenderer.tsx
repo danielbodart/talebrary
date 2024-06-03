@@ -151,6 +151,18 @@ export class UpdateRenderer {
                         type: htmlInput.dataset.type!,
                         gen: Number(htmlInput.dataset.gen),
                         window: Number(htmlInput.dataset.id),
+                        value: (htmlInput.dataset.type === 'char' && htmlInput.value === '') ? 'return' : htmlInput.value
+                    });
+                    htmlInput.value = ''
+                });
+                // This event is only used on mobile where keydown does not fire
+                htmlInput.addEventListener('input', (e) => {
+                    if (htmlInput.dataset.type !== 'char') return;
+                    e.preventDefault();
+                    this.messageHandler.postMessage({
+                        type: htmlInput.dataset.type!,
+                        gen: Number(htmlInput.dataset.gen),
+                        window: Number(htmlInput.dataset.id),
                         value: htmlInput.value
                     });
                     htmlInput.value = ''
@@ -180,6 +192,7 @@ export class UpdateRenderer {
     }
 }
 
+// @ts-ignore
 const AdjustKeys: { [key: string]: string } = {
     'ArrowLeft': 'left',
     'ArrowRight': 'right',
