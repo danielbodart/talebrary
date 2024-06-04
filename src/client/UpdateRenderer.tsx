@@ -151,11 +151,11 @@ export class UpdateRenderer {
                         type: htmlInput.dataset.type!,
                         gen: Number(htmlInput.dataset.gen),
                         window: Number(htmlInput.dataset.id),
-                        value: (htmlInput.dataset.type === 'char' && htmlInput.value === '') ? 'return' : htmlInput.value
+                        value: htmlInput.value
                     });
                     htmlInput.value = ''
                 });
-                // This event is only used on mobile where keydown does not fire
+                // This event is only used on android where keydown e.key returns 'Unidentified' (except for the enter key)
                 htmlInput.addEventListener('input', (e) => {
                     if (htmlInput.dataset.type !== 'char') return;
                     e.preventDefault();
@@ -168,7 +168,7 @@ export class UpdateRenderer {
                     htmlInput.value = ''
                 });
                 htmlInput.addEventListener('keydown', (e) => {
-                    if (htmlInput.dataset.type !== 'char') return;
+                    if (htmlInput.dataset.type !== 'char' || e.key === 'Unidentified') return;
                     e.preventDefault();
                     this.messageHandler.postMessage({
                         type: htmlInput.dataset.type!,

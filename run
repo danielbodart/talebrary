@@ -46,7 +46,7 @@ function build() {
 function start() {
   check
   build-client
-  bun run --hot src/local/app.ts
+  bun run --watch src/local/app.ts
 }
 
 function startw() {
