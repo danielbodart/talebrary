@@ -51,6 +51,7 @@ function start() {
 
 function startw() {
   check
+  build-client
   wrangler dev --remote
 }
 
