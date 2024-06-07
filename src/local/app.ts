@@ -7,7 +7,7 @@ import {md5} from "./digest.ts";
 
 const root = `${import.meta.dir}/../../www/`;
 const r2 = new FolderBucket(root);
-const app = applicationScope(talebrary(), localhostHandler(root), r2, md5);
+const app = applicationScope(talebrary(), localhostHandler(root), r2, md5, {} as any);
 
 const server = serve({
     async fetch(req) {
