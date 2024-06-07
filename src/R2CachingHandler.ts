@@ -25,7 +25,7 @@ export class R2CachingHandler {
     constructor(private http: HttpHandler, private r2: R2Bucket, private idToUrl: IdToUrl) {
     }
 
-    async handler(request: Request): Promise<Response> {
+    async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
         const {path} = uri;
         // Drop leading slash as R2 does not correctly handle them
