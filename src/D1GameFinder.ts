@@ -59,10 +59,11 @@ export class D1GameFinder {
                    fg.playable
             from filtered_games fg
                      join game_reviews gr using (id)
+            where fg.playable = 1
             order by score desc
             limit 20;
         `;
-        const statement = this.db.prepare(sql).bind(search);
+        const statement = this.db.prepare(sql).bind(search ?? '');
         return (await statement.all()).results as any;
     }
 
