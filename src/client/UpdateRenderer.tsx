@@ -100,7 +100,7 @@ export class UpdateRenderer {
                                             (c.text === '>' ? '' : <div class={c.style}>{c.text}</div>)
                                     });
                                 } else {
-                                    return <div class="paragraph">{t.content.filter(isLineData).map(c => <span
+                                    return <div class="normal">{t.content.filter(isLineData).map(c => <span
                                         class={c.style}>{c.text}</span>)}</div>
                                 }
                             }).join('')
@@ -116,6 +116,17 @@ export class UpdateRenderer {
                     htmlInputElement.focus();
                 } else {
                     window.append(html)
+                }
+
+                // Add image
+                let lastCard = window.querySelector(".card:last-child");
+                if (lastCard) {
+                    if (lastCard.classList.contains('input-control')) lastCard = lastCard.previousElementSibling!;
+
+                    if (!lastCard.matches(':has(.header):has(.normal):not(:has(.image)):not(:has(.input)), :has(.subheader):has(.normal):not(:has(.image)):not(:has(.input))')) return;
+                    // @ts-ignore
+                    const url = '/art?prompt=' + encodeURIComponent(lastCard['innerText']);
+                    lastCard.insertBefore(fragment(<img class="image" loading="lazy" src={url}/>), lastCard.firstChild);
                 }
             }
         })
