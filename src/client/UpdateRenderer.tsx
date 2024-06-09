@@ -119,9 +119,9 @@ export class UpdateRenderer {
                 }
 
                 // Add image
-                let lastCard = window.querySelector(".card:last-child");
+                let lastCard = window.querySelector<HTMLElement>(".card:last-child")!;
                 if (lastCard) {
-                    if (lastCard.classList.contains('input-control')) lastCard = lastCard.previousElementSibling!;
+                    if (lastCard.classList.contains('input-control')) lastCard = lastCard.previousElementSibling as HTMLElement;
 
                     if (!lastCard.matches(':has(.header):has(.normal):not(:has(.image)):not(:has(.input)), :has(.subheader):has(.normal):not(:has(.image)):not(:has(.input))')) return;
 
@@ -130,20 +130,14 @@ export class UpdateRenderer {
 
                     const title = document.title;
                     const author = document.querySelector<HTMLElement>('.author')!.innerText;
-                    const description = document.querySelector('meta[name="description"]')!.getAttribute('content');
-                    // @ts-ignore
-                    const sceneTitle = lastCard.querySelector('.header, .subheader').innerText;
-                    const sceneDescription = Array.from(lastCard.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ');
+                    const previous = window.querySelector<HTMLElement>(".scene:last-child");
                     const json = JSON.stringify({
                         story: {
                             title,
                             author,
-                            description,
                         },
-                        scene: {
-                            title: sceneTitle,
-                            description: sceneDescription
-                        }
+                        scene: scene(lastCard),
+                        previously: previous ? scene(previous) : undefined,
                     });
 
                     for (const model of this.models) {
@@ -153,8 +147,9 @@ export class UpdateRenderer {
                                 <img class="image" loading="lazy" src={image}/>
                             </Fragment>
                         ), lastCard.firstChild);
-
                     }
+
+                    lastCard.classList.add('scene')
                 }
             }
         })
@@ -255,4 +250,11 @@ const AdjustKeys: { [key: string]: string } = {
     'F10': 'func10',
     'F11': 'func11',
     'F12': 'func12',
+}
+
+export function scene(card: HTMLElement) {
+    return {
+        title: card.querySelector<HTMLElement>('.header, .subheader')!.innerText,
+        description: Array.from(card.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ')
+    };
 }
