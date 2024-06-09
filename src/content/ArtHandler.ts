@@ -16,8 +16,10 @@ export class ArtHandler {
         const data = JSON.parse(rawPrompt);
         const prompt = `
                     Create an illustration for the interactive fiction story "${data.story.title}" by "${data.story.author}". 
-                    The scene is titled "${data.scene.title}" and is described as follows: 
-                    ${data.scene.description}
+                    The scene is titled "${data.scene.title}" and is described as follows 
+                    "${data.scene.description.replace('"', '`')}"
+                    The scene should be consistent with the previous scene which was titled "${data.previous.title}" 
+                    and was described as follows "${data.previous.description.replace('"', '`')}"
 
                     `.replace(/\s+/g, ' ');
 
