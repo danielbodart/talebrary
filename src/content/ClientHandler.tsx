@@ -1,7 +1,7 @@
 import {Uri} from "../http.ts";
 import type {D1GameFinder, GameStory} from "../D1GameFinder.ts";
 import * as elements from "typed-html";
-import {wellFormed} from "../misc.ts";
+import {compactText, wellFormed} from "../misc.ts";
 
 export class ClientHandler {
     constructor(private gameFinder: D1GameFinder) {
@@ -23,6 +23,7 @@ export function render(game: GameStory): string {
     <head>
         <title>{game.title}</title>
         <meta name="template" content="card"/>
+        <meta name="description" content={compactText(game.description)}/>
         <link id="story" rel="preload" href={`/content/${game.id}/story`} as="fetch" data-type={game.type} crossorigin="crossorigin"/>
     </head>
     <body class="story">

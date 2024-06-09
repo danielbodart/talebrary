@@ -2,7 +2,6 @@ import {client, WindowMessageHandler} from "./client.ts";
 import type {SupportedGameType} from "../types.ts";
 import {UpdateRenderer} from "./UpdateRenderer.tsx";
 import {calculateMaxSize} from "./Measure.ts";
-import {HTMLImageElement} from "linkedom";
 
 (async () => {
     removeBrokenImages(document)
@@ -18,7 +17,7 @@ import {HTMLImageElement} from "linkedom";
 
 function removeBrokenImages(document:Document) {
     document.addEventListener('error', ev => {
-        if (ev.target instanceof HTMLImageElement) {
+        if (ev.target instanceof HTMLElement && ev.target.tagName === 'IMG') {
             ev.target.parentElement!.removeChild(ev.target);
         }
     }, true)

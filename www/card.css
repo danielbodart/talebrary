@@ -242,15 +242,21 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
     scrollbar-width: thin;
 }
 
-
 .description {
     padding: 10px 10px 10px 10px;
+}
+
+.story .description {
+    border-top: 10px ridge #F5D39D;
+}
+
+.results .description {
     position: absolute;
     height: calc(100% - 20px);
     overflow-y: auto;
 }
 
-.description {
+.results .description {
     transform: rotateY(180deg);
 }
 

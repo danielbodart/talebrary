@@ -124,9 +124,22 @@ export class UpdateRenderer {
                     if (lastCard.classList.contains('input-control')) lastCard = lastCard.previousElementSibling!;
 
                     if (!lastCard.matches(':has(.header):has(.normal):not(:has(.image)):not(:has(.input)), :has(.subheader):has(.normal):not(:has(.image)):not(:has(.input))')) return;
+
+                    const path = this.document.defaultView!.location.pathname;
+                    const [, , id] = path.split('/');
+
+                    const title = document.title;
+                    const description = document.querySelector('meta[name="description"]')!.getAttribute('content');
                     // @ts-ignore
-                    const url = '/art?prompt=' + encodeURIComponent(lastCard['innerText']);
-                    lastCard.insertBefore(fragment(<img class="image" loading="lazy" src={url}/>), lastCard.firstChild);
+                    const scene = lastCard['innerText'];
+                    const prompt = `
+                    You are an illustrator for the interactive fiction story called ${title} which is described as ${description}
+                    You need to create an image for the current scene which is ${scene} but making sure it is consistent with the overall story
+                    The artistic style should be for a graphic novel
+                    `.replace(/\s+/g, ' ')
+
+                    const image = `/content/${id}/art?prompt=${encodeURIComponent(prompt)}`;
+                    lastCard.insertBefore(fragment(<img class="image" loading="lazy" src={image}/>), lastCard.firstChild);
                 }
             }
         })
