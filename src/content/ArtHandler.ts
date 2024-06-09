@@ -14,8 +14,12 @@ export class ArtHandler {
 
         const model = params.get('model') ?? "@cf/bytedance/stable-diffusion-xl-lightning" as any;
         const data = JSON.parse(rawPrompt);
-        const prompt = ` Create an illustration for the scene "${data.scene.title}" and is described as follows: 
-                    ${data.story.description}`;
+        const prompt = `
+                    Create an illustration for the interactive fiction story "${data.story.title}" by "${data.story.author}". 
+                    The scene is titled "${data.scene.title}" and is described as follows: 
+                    ${data.scene.description}
+
+                    `.replace(/\s+/g, ' ');
 
         const response = await this.ai.run(model, {prompt});
 
