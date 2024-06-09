@@ -18,6 +18,7 @@ export class ArtHandler {
                     You are an illustrator for the interactive fiction story called ${data.story.title} by ${data.story.author}, ${data.story.description ? `which is described as ${data.story.description}` : ''}.
                     You need to create an image for the current scene who's title is ${data.scene.title} and described as ${data.scene.description}.
                     The image should have a strong connection with the scene title.
+                    The artistic style should be for high quality graphic novel
                     
                     `.replace(/\s+/g, ' ');
 
