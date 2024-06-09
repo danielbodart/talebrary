@@ -72,7 +72,7 @@ export class UpdateRenderer {
     private breakOn = new Set(['header', 'subheader']);
 
     updateContent(updates: (GridContent | BufferContent | GraphicsContent)[], gen: number) {
-        return updates.map(update => {
+        return updates.map((update, index) => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
 
@@ -90,7 +90,7 @@ export class UpdateRenderer {
                     window.innerHTML = '';
                 }
 
-                const html = fragment(<div class="card">
+                const html = fragment(<div class={`card ${index === 1 ? ' scroll' : ''}`}>
                         {
                             update.text.flatMap(t => {
                                 if (!('content' in t)) {
@@ -110,13 +110,10 @@ export class UpdateRenderer {
                 );
 
                 const input = window.querySelector<HTMLDivElement>('.input-control');
-                if (input) {
-                    window.insertBefore(html, input);
-                    const htmlInputElement = input.querySelector('input')!;
-                    htmlInputElement.scrollIntoView();
-                    htmlInputElement.focus();
-                } else {
-                    window.append(html)
+                input ? window.insertBefore(html, input) : window.appendChild(html);
+                if (index === 1 && gen > 1) {
+                    const scroll = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll')).reverse()[0];
+                    this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView(), 0);
                 }
 
                 // Add image
