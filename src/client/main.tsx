@@ -2,8 +2,10 @@ import {client, WindowMessageHandler} from "./client.ts";
 import type {SupportedGameType} from "../types.ts";
 import {UpdateRenderer} from "./UpdateRenderer.tsx";
 import {calculateMaxSize} from "./Measure.ts";
+import {HTMLImageElement} from "linkedom";
 
 (async () => {
+    removeBrokenImages(document)
     const story = document.querySelector<HTMLLinkElement>('#story');
     if (!story) throw new Error("Could not find story");
     const type = story.dataset.type;
@@ -14,4 +16,10 @@ import {calculateMaxSize} from "./Measure.ts";
 })();
 
 
-
+function removeBrokenImages(document:Document) {
+    document.addEventListener('error', ev => {
+        if (ev.target instanceof HTMLImageElement) {
+            ev.target.parentElement!.removeChild(ev.target);
+        }
+    }, true)
+}

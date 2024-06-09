@@ -1,0 +1,12 @@
+<!-- attribution: original icon by SVGBackgrounds.com -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <linearGradient id="a1">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <circle fill="none" stroke="url(#a1)" stroke-width="15" stroke-linecap="round"
+            stroke-dasharray="0 44 0 44 0 44 0 44 0 360" cx="100" cy="100" r="70" transform-origin="center">
+        <animateTransform type="rotate" attributeName="transform" calcMode="discrete" dur="2"
+                          values="36;72;108;144;180;216;252;288;324;360" repeatCount="indefinite"/>
+    </circle>
+</svg>
