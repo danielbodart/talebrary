@@ -166,62 +166,50 @@ export class UpdateRenderer {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
 
-            const input = window.querySelector('.input-control');
-            if (!input) {
-                window.append(fragment(
-                    <div class="card input-control">
-                        <form class="input">
-                            <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 1)}
-                                   autofocus="autofocus"
-                                   data-gen={update.gen} data-id={update.id} data-type={update.type}
-                                   value={'initial' in update ? update.initial : ''}
-                            />
-                        </form>
-                    </div>));
-                const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
-                window.querySelector('.input-control form')!.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.messageHandler.postMessage({
-                        type: htmlInput.dataset.type!,
-                        gen: Number(htmlInput.dataset.gen),
-                        window: Number(htmlInput.dataset.id),
-                        value: htmlInput.value
-                    });
-                    htmlInput.value = ''
+            window.append(fragment(
+                <div class="card input-control">
+                    <form class="input">
+                        <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 1)}
+                               data-gen={update.gen} data-id={update.id} data-type={update.type}
+                               value={'initial' in update ? update.initial : ''}
+                        />
+                    </form>
+                </div>));
+            const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
+            window.querySelector('.input-control form')!.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.messageHandler.postMessage({
+                    type: htmlInput.dataset.type!,
+                    gen: Number(htmlInput.dataset.gen),
+                    window: Number(htmlInput.dataset.id),
+                    value: htmlInput.value
                 });
-                // This event is only used on android where keydown e.key returns 'Unidentified' (except for the enter key)
-                htmlInput.addEventListener('input', (e) => {
-                    if (htmlInput.dataset.type !== 'char') return;
-                    e.preventDefault();
-                    this.messageHandler.postMessage({
-                        type: htmlInput.dataset.type!,
-                        gen: Number(htmlInput.dataset.gen),
-                        window: Number(htmlInput.dataset.id),
-                        value: htmlInput.value
-                    });
-                    htmlInput.value = ''
+                htmlInput.value = ''
+            });
+            // This event is only used on android where keydown e.key returns 'Unidentified' (except for the enter key)
+            htmlInput.addEventListener('input', (e) => {
+                if (htmlInput.dataset.type !== 'char') return;
+                e.preventDefault();
+                this.messageHandler.postMessage({
+                    type: htmlInput.dataset.type!,
+                    gen: Number(htmlInput.dataset.gen),
+                    window: Number(htmlInput.dataset.id),
+                    value: htmlInput.value
                 });
-                htmlInput.addEventListener('keydown', (e) => {
-                    if (htmlInput.dataset.type !== 'char' || e.key === 'Unidentified') return;
-                    e.preventDefault();
-                    this.messageHandler.postMessage({
-                        type: htmlInput.dataset.type!,
-                        gen: Number(htmlInput.dataset.gen),
-                        window: Number(htmlInput.dataset.id),
-                        value: AdjustKeys[e.key] ?? e.key
-                    });
+                htmlInput.value = ''
+            });
+            htmlInput.addEventListener('keydown', (e) => {
+                if (htmlInput.dataset.type !== 'char' || e.key === 'Unidentified') return;
+                e.preventDefault();
+                this.messageHandler.postMessage({
+                    type: htmlInput.dataset.type!,
+                    gen: Number(htmlInput.dataset.gen),
+                    window: Number(htmlInput.dataset.id),
+                    value: AdjustKeys[e.key] ?? e.key
                 });
-                htmlInput.scrollIntoView();
-                htmlInput.focus();
-            } else {
-                const textInput = input.querySelector('input')!;
-                textInput.maxLength = 'maxlen' in update ? update.maxlen : 1;
-                textInput.dataset.gen = String(update.gen);
-                textInput.dataset.id = String(update.id);
-                textInput.dataset.type = update.type;
-                textInput.scrollIntoView();
-                textInput.focus();
-            }
+            });
+
+            if (isVisible(htmlInput)) htmlInput.focus();
         })
     }
 }
@@ -252,4 +240,19 @@ export function scene(card: HTMLElement) {
         title: card.querySelector<HTMLElement>('.header, .subheader')!.innerText,
         description: Array.from(card.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ')
     };
+}
+
+function isVisible(element: HTMLElement): boolean {
+    if (element.offsetWidth <= 0 || element.offsetHeight <= 0) return false;
+
+    const rect = element.getBoundingClientRect();
+    const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+    const viewWidth = Math.max(document.documentElement.clientWidth, window.innerWidth);
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= viewHeight &&
+        rect.right <= viewWidth
+    );
 }
