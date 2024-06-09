@@ -15,7 +15,7 @@ import {
     type Metrics,
     type UpdateMessage
 } from "./types.ts";
-import {Fragment, fragment} from "../templates/Fragment.tsx";
+import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
 
 export class UpdateRenderer {
