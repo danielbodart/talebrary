@@ -15,7 +15,7 @@ import {
     type Metrics,
     type UpdateMessage
 } from "./types.ts";
-import {fragment} from "../templates/Fragment.tsx";
+import {Fragment, fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
 
 export class UpdateRenderer {
@@ -134,7 +134,7 @@ export class UpdateRenderer {
                     // @ts-ignore
                     const scenenTitle = lastCard.querySelector('.header, .subheader').innerText;
                     const sceneDescription = Array.from(lastCard.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ');
-                        const json = JSON.stringify({
+                    const json = JSON.stringify({
                         story: {
                             title,
                             author,
@@ -146,12 +146,21 @@ export class UpdateRenderer {
                         }
                     });
 
-                    const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}`;
-                    lastCard.insertBefore(fragment(<img class="image" loading="lazy" src={image}/>), lastCard.firstChild);
+                    for (const model of this.models) {
+                        const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}&model=${model}`;
+                        lastCard.insertBefore(fragment(<Fragment>
+                                <div class="normal">{model}</div>
+                                <img class="image" loading="lazy" src={image}/>
+                            </Fragment>
+                        ), lastCard.lastChild);
+
+                    }
                 }
             }
         })
     }
+
+    models: ['dreamshaper-8-lcm', 'stable-diffusion-v1-5-img2img', 'stable-diffusion-v1-5-inpainting', 'stable-diffusion-xl-base-1.0', 'stable-diffusion-xl-lightning'];
 
     updateInput(updates: (CharInput | LineInput)[]) {
         if (updates.length === 0) {
