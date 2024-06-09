@@ -45,14 +45,15 @@ export class UpdateRenderer {
                 const window = this.getWindow(update.id);
                 if (window) {
                     if (update.type === "grid") {
-                        window.innerHTML = this.createLines(update.gridheight);
+                        const card = window.querySelector<HTMLElement>('.card')!;
+                        card.innerHTML = this.createLines(update.gridheight);
                     }
                     return window;
                 } else {
                     this.document.body.append(fragment(<div id={`window-${update.id}`}
                                                             class={`window ${update.type}`}>
                         {update.type === "grid" ?
-                            this.createLines(update.gridheight) :
+                            <div class="card">{this.createLines(update.gridheight)}</div> :
                             ''
                         }
                     </div>))
@@ -129,7 +130,7 @@ export class UpdateRenderer {
                     const [, , id] = path.split('/');
 
                     const title = document.title;
-                    const author = document.querySelector<HTMLElement>('.author')!.innerText;
+                    const author = document.querySelector<HTMLElement>('.author')?.innerText;
                     const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
                     const json = JSON.stringify({
                         story: {
@@ -158,11 +159,8 @@ export class UpdateRenderer {
     ];
 
     updateInput(updates: (CharInput | LineInput)[]) {
-        if (updates.length === 0) {
-            const inputs = Array.from(this.document.querySelectorAll('.input-control'));
-            inputs.map(i => i.parentElement!.removeChild(i));
-            return
-        }
+        const inputs = Array.from(this.document.querySelectorAll('.input-control'));
+        inputs.map(i => i.parentElement!.removeChild(i));
 
         return updates.map(update => {
             const window = this.getWindow(update.id);

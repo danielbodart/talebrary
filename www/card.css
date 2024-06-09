@@ -26,7 +26,7 @@ body.results {
 }
 
 body.story {
-    padding: 0 20px;
+    padding: 20px;
 }
 
 .results .card {
@@ -304,24 +304,24 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
 }
 
 .window.grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.grid .card:first-child {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-top: -16px;
     white-space: pre;
     font-family: "Inconsolata", monospace;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
     font-variation-settings: "wdth" 75;
-
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #6C3483;
-    background-color: #A9A9A9CC;
-    border-color: #9B59B6;
-    padding: 0 40px;
-    border-bottom-left-radius: 40px;
-    border-bottom-right-radius: 40px;
-    z-index: 1;
 }
 
 .results .card {

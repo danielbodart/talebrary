@@ -15,7 +15,8 @@ export class ArtHandler {
         const model = params.get('model') ?? "@cf/bytedance/stable-diffusion-xl-lightning" as any;
         const data = JSON.parse(rawPrompt);
         const prompt = `
-                    Create an illustration for the interactive fiction story "${data.story.title}" by "${data.story.author}". 
+                    Create an illustration for the interactive fiction story "${data.story.title}" 
+                    "${data.story.author ? `by "${data.story.author}".` : ''}  
                     The scene is titled "${data.scene.title}" and is described as follows 
                     "${data.scene.description.replace('"', '`')}"
                     ${data.previous ? `The scene should be consistent with the previous scene as you have just which was titled "${data.previous.title}" 
