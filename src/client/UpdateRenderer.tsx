@@ -133,7 +133,7 @@ export class UpdateRenderer {
                     const description = document.querySelector('meta[name="description"]')!.getAttribute('content');
                     // @ts-ignore
                     const scenenTitle = lastCard.querySelector('.header, .subheader').innerText;
-                    const sceneDescription = Array.from(lastCard.querySelectorAll<HTMLElement>('> .normal')).map(e => e.innerText).join(' ');
+                    const sceneDescription = Array.from(lastCard.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ');
                     const prompt = `
                     You are an illustrator for the interactive fiction story called ${title} by ${author}, ${description ? `which is described as ${description}` : '' }.
                     You need to create an image for the current scene who's title is ${scenenTitle} and described as ${sceneDescription}.
