@@ -30,7 +30,7 @@ export class UpdateRenderer {
     handle(update: UpdateMessage): void {
         if (update.windows) this.updateWindows(update.windows);
         if (update.content) this.updateContent(update.content, update.gen);
-        if (update.input) this.updateInput(update.input);
+        if (update.input) this.updateInput(update.input, update.gen);
     }
 
     updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
@@ -157,7 +157,7 @@ export class UpdateRenderer {
         '@cf/bytedance/stable-diffusion-xl-lightning',
     ];
 
-    updateInput(updates: (CharInput | LineInput)[]) {
+    updateInput(updates: (CharInput | LineInput)[], gen: number) {
         const inputs = Array.from(this.document.querySelectorAll('.input-control'));
         inputs.map(i => i.parentElement!.removeChild(i));
 
@@ -208,7 +208,9 @@ export class UpdateRenderer {
                 });
             });
 
-            this.document.defaultView?.setTimeout(() => htmlInput.focus(), 1);
+            if (gen > 1) {
+                this.document.defaultView?.setTimeout(() => htmlInput.focus(), 1);
+            }
         })
     }
 }
