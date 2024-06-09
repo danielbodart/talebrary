@@ -161,11 +161,8 @@ export class UpdateRenderer {
     }
 
     models = [
-        '@cf/lykon/dreamshaper-8-lcm',
-        // '@cf/runwayml/stable-diffusion-v1-5-img2img',
-        // '@cf/runwayml/stable-diffusion-v1-5-inpainting',
-        '@cf/stabilityai/stable-diffusion-xl-base-1.0',
-        '@cf/bytedance/stable-diffusion-xl-lightning'
+        '@cf/bytedance/stable-diffusion-xl-lightning',
+        '@cf/lykon/dreamshaper-8-lcm'
     ];
 
     updateInput(updates: (CharInput | LineInput)[]) {
