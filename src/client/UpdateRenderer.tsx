@@ -109,8 +109,8 @@ export class UpdateRenderer {
                     </div>
                 );
 
-                const input = window.querySelector<HTMLDivElement>('.input-control');
-                input ? window.insertBefore(html, input) : window.appendChild(html);
+                window.appendChild(html);
+
                 if (index === 1 && gen > 1) {
                     const scroll = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll')).reverse()[0];
                     this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView(), 0);
@@ -208,7 +208,7 @@ export class UpdateRenderer {
                 });
             });
 
-            if (isVisible(htmlInput)) htmlInput.focus();
+            this.document.defaultView?.setTimeout(() => htmlInput.focus(), 1);
         })
     }
 }
@@ -241,6 +241,7 @@ export function scene(card: HTMLElement) {
     };
 }
 
+// @ts-ignore
 function isVisible(element: HTMLElement): boolean {
     if (element.offsetWidth <= 0 || element.offsetHeight <= 0) return false;
 
