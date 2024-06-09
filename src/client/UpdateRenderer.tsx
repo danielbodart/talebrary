@@ -131,11 +131,13 @@ export class UpdateRenderer {
 
                     const title = document.title;
                     const author = document.querySelector<HTMLElement>('.author')?.innerText;
+                    const description = document.querySelector('meta[name="description"]')?.getAttribute('content');
                     const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
                     const json = JSON.stringify({
                         story: {
                             title,
                             author,
+                            description
                         },
                         scene: scene(lastCard),
                         previous: previous ? scene(previous) : undefined,
