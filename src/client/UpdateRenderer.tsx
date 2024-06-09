@@ -129,12 +129,14 @@ export class UpdateRenderer {
                     const [, , id] = path.split('/');
 
                     const title = document.title;
+                    const author = document.querySelector<HTMLElement>('.author')!.innerText;
                     const description = document.querySelector('meta[name="description"]')!.getAttribute('content');
                     // @ts-ignore
-                    const scene = lastCard['innerText'];
+                    const scenenTitle = lastCard.querySelector('.header, .subheader').innerText;
+                    const sceneDescription = Array.from(lastCard.querySelectorAll<HTMLElement>('.normal')).map(e => e.innerText).join(' ');
                     const prompt = `
-                    You are an illustrator for the interactive fiction story called ${title} ${description ? `which is described as ${description}` : '' }
-                    You need to create an image for the current scene which is ${scene}
+                    You are an illustrator for the interactive fiction story called ${title} by ${author}, ${description ? `which is described as ${description}` : '' }.
+                    You need to create an image for the current scene which is called ${scenenTitle} and described as ${sceneDescription}.
                     `.replace(/\s+/g, ' ')
 
                     const image = `/content/${id}/art?prompt=${encodeURIComponent(prompt)}`;
