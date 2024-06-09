@@ -18,7 +18,7 @@ export class ArtHandler {
                     Create an illustration for the interactive fiction story "${data.story.title}" by "${data.story.author}". 
                     The scene is titled "${data.scene.title}" and is described as follows 
                     "${data.scene.description.replace('"', '`')}"
-                    ${data.previous ? `The scene should be consistent with the previous scene which was titled "${data.previous.title}" 
+                    ${data.previous ? `The scene should be consistent with the previous scene as you have just which was titled "${data.previous.title}" 
                     and was described as follows "${data.previous.description.replace('"', '`')}"` : ''
         }`.replace(/\s+/g, ' ');
 

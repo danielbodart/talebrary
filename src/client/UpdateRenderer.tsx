@@ -130,7 +130,7 @@ export class UpdateRenderer {
 
                     const title = document.title;
                     const author = document.querySelector<HTMLElement>('.author')!.innerText;
-                    const previous = window.querySelector<HTMLElement>(".scene:last-child");
+                    const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
                     const json = JSON.stringify({
                         story: {
                             title,
