@@ -15,11 +15,9 @@ export class ArtHandler {
         const model = params.get('model') ?? "@cf/bytedance/stable-diffusion-xl-lightning" as any;
         const data = JSON.parse(rawPrompt);
         const prompt = `
-                    You are an illustrator for the interactive fiction story called ${data.story.title} by ${data.story.author}, ${data.story.description ? `which is described as ${data.story.description}` : ''}.
-                    You need to create an image for the current scene who's title is ${data.scene.title} and described as ${data.scene.description}.
-                    The image should have a strong connection with the scene title.
-                    The artistic style should be for high quality graphic novel
-                    
+                    Create an illustration for the interactive fiction story "${data.story.title}" by "${data.story.author}". 
+                    The scene is titled "${data.scene.title}" and is described as follows: 
+                    ${data.story.description}
                     `.replace(/\s+/g, ' ');
 
         const response = await this.ai.run(model, {prompt});
