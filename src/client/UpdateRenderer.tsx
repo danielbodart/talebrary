@@ -137,6 +137,8 @@ export class UpdateRenderer {
                     const prompt = `
                     You are an illustrator for the interactive fiction story called ${title} by ${author}, ${description ? `which is described as ${description}` : '' }.
                     You need to create an image for the current scene which is called ${scenenTitle} and described as ${sceneDescription}.
+                    The scene name should be the focus of the image created. Any objects described should also be prominent in the image and try not to add to many
+                    other prominent objects not explicitly described
                     `.replace(/\s+/g, ' ')
 
                     const image = `/content/${id}/art?prompt=${encodeURIComponent(prompt)}`;
