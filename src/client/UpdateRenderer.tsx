@@ -143,7 +143,7 @@ export class UpdateRenderer {
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}&model=${model}`;
                         lastCard.insertBefore(fragment(<Fragment>
-                                <div class="header">{model}</div>
+                                <div class="normal">{model}</div>
                                 <img class="image" loading="lazy" src={image}/>
                             </Fragment>
                         ), lastCard.firstChild);
