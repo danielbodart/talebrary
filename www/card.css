@@ -171,9 +171,15 @@ body.story {
     width: 100%;
     background-color: #000;
     background-image: url("/icons/loader.svg");
-    background-size: 50px 50px;
+    background-size: 100px 100px;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+.scene .image {
+    width: 600px;
+    height: 600px;
+    display: block;
 }
 
 .results .image {
