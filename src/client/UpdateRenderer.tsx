@@ -137,7 +137,7 @@ export class UpdateRenderer {
                             author,
                         },
                         scene: scene(lastCard),
-                        previously: previous ? scene(previous) : undefined,
+                        previous: previous ? scene(previous) : undefined,
                     });
 
                     for (const model of this.models) {
