@@ -132,7 +132,7 @@ export class UpdateRenderer {
                     const author = document.querySelector<HTMLElement>('.author')!.innerText;
                     const description = document.querySelector('meta[name="description"]')!.getAttribute('content');
                     // @ts-ignore
-                    const scenenTitle = lastCard.querySelector('.header, .subheader').innerText;
+                    const sceneTitle = lastCard.querySelector('.header, .subheader').innerText;
                     const sceneDescription = Array.from(lastCard.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ');
                     const json = JSON.stringify({
                         story: {
@@ -141,7 +141,7 @@ export class UpdateRenderer {
                             description,
                         },
                         scene: {
-                            title: scenenTitle,
+                            title: sceneTitle,
                             description: sceneDescription
                         }
                     });
@@ -160,7 +160,7 @@ export class UpdateRenderer {
         })
     }
 
-    models: ['dreamshaper-8-lcm', 'stable-diffusion-v1-5-img2img', 'stable-diffusion-v1-5-inpainting', 'stable-diffusion-xl-base-1.0', 'stable-diffusion-xl-lightning'];
+    models = ['dreamshaper-8-lcm', 'stable-diffusion-v1-5-img2img', 'stable-diffusion-v1-5-inpainting', 'stable-diffusion-xl-base-1.0', 'stable-diffusion-xl-lightning'];
 
     updateInput(updates: (CharInput | LineInput)[]) {
         if (updates.length === 0) {
