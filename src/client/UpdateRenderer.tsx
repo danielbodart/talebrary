@@ -134,14 +134,19 @@ export class UpdateRenderer {
                     // @ts-ignore
                     const scenenTitle = lastCard.querySelector('.header, .subheader').innerText;
                     const sceneDescription = Array.from(lastCard.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ');
-                    const prompt = `
-                    You are an illustrator for the interactive fiction story called ${title} by ${author}, ${description ? `which is described as ${description}` : '' }.
-                    You need to create an image for the current scene who's title is ${scenenTitle} and described as ${sceneDescription}.
-                    The image should have a strong connection with the title
-                    
-                    `.replace(/\s+/g, ' ')
+                        const json = JSON.stringify({
+                        story: {
+                            title,
+                            author,
+                            description,
+                        },
+                        scene: {
+                            title: scenenTitle,
+                            description: sceneDescription
+                        }
+                    });
 
-                    const image = `/content/${id}/art?prompt=${encodeURIComponent(prompt)}`;
+                    const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}`;
                     lastCard.insertBefore(fragment(<img class="image" loading="lazy" src={image}/>), lastCard.firstChild);
                 }
             }
