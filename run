@@ -55,6 +55,10 @@ function startw() {
   wrangler dev --remote
 }
 
+function tail() {
+  wrangler tail
+}
+
 function check-rclone() {
     : "${RCLONE_CONFIG_CLOUDFLARE_ACCESS_KEY_ID?Required}"
     : "${RCLONE_CONFIG_CLOUDFLARE_SECRET_ACCESS_KEY?Required}"

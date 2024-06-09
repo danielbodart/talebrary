@@ -149,10 +149,10 @@ export class UpdateRenderer {
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}&model=${model}`;
                         lastCard.insertBefore(fragment(<Fragment>
-                                <div class="normal">{model}</div>
+                                <div class="header">{model}</div>
                                 <img class="image" loading="lazy" src={image}/>
                             </Fragment>
-                        ), lastCard.lastChild);
+                        ), lastCard.firstChild);
 
                     }
                 }
@@ -160,7 +160,11 @@ export class UpdateRenderer {
         })
     }
 
-    models = ['dreamshaper-8-lcm', 'stable-diffusion-v1-5-img2img', 'stable-diffusion-v1-5-inpainting', 'stable-diffusion-xl-base-1.0', 'stable-diffusion-xl-lightning'];
+    models = ['@cf/lykon/dreamshaper-8-lcm',
+        '@cf/runwayml/stable-diffusion-v1-5-img2img',
+        '@cf/runwayml/stable-diffusion-v1-5-inpainting',
+        '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+        '@cf/bytedance/stable-diffusion-xl-lightning'];
 
     updateInput(updates: (CharInput | LineInput)[]) {
         if (updates.length === 0) {
