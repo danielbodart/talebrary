@@ -142,11 +142,9 @@ export class UpdateRenderer {
 
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}&model=${model}`;
-                        lastCard.insertBefore(fragment(<Fragment>
-                                <div class="normal">{model}</div>
-                                <img class="image" loading="lazy" src={image}/>
-                            </Fragment>
-                        ), lastCard.firstChild);
+                        lastCard.insertBefore(
+                            fragment(<img class="image" loading="lazy" src={image} alt={`Generated with ${model}`}/>),
+                            lastCard.firstChild);
                     }
 
                     lastCard.classList.add('scene')
@@ -157,7 +155,6 @@ export class UpdateRenderer {
 
     models = [
         '@cf/bytedance/stable-diffusion-xl-lightning',
-        '@cf/lykon/dreamshaper-8-lcm'
     ];
 
     updateInput(updates: (CharInput | LineInput)[]) {
