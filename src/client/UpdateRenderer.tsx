@@ -208,8 +208,8 @@ export class UpdateRenderer {
                 });
             });
 
-            if (gen > 1) {
-                this.document.defaultView?.setTimeout(() => htmlInput.focus(), 1);
+            if (gen > 1 && isVisible(htmlInput)) {
+                this.document.defaultView?.setTimeout(() => htmlInput.focus(), 0);
             }
         })
     }
@@ -243,8 +243,7 @@ export function scene(card: HTMLElement) {
     };
 }
 
-// @ts-ignore
-function isVisible(element: HTMLElement): boolean {
+export function isVisible(element: HTMLElement): boolean {
     if (element.offsetWidth <= 0 || element.offsetHeight <= 0) return false;
 
     const rect = element.getBoundingClientRect();

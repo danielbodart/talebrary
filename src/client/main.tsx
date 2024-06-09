@@ -12,7 +12,6 @@ import {calculateMaxSize} from "./Measure.ts";
     const messageHandler = new WindowMessageHandler(window);
     await client(story.href, type as SupportedGameType, window.localStorage, messageHandler);
     new UpdateRenderer(document, messageHandler, calculateMaxSize(window));
-    routeKeys(document)
 })();
 
 
@@ -22,17 +21,5 @@ function removeBrokenImages(document:Document) {
             ev.target.parentElement!.removeChild(ev.target);
         }
     }, true)
-}
-
-export function routeKeys(document:Document) {
-    ['keydown' /*, 'keypress', 'keyup'*/].forEach(eventType => {
-        document.addEventListener(eventType, function (event) {
-            const input = document.querySelector<HTMLInputElement>('.input-control .input input');
-            if (input && event.target !== input) {
-                event.preventDefault();
-                document.defaultView?.setTimeout(() => input.focus(), 0);
-            }
-        }, true);
-    });
 }
 
