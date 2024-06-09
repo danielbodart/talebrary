@@ -133,9 +133,8 @@ export class UpdateRenderer {
                     // @ts-ignore
                     const scene = lastCard['innerText'];
                     const prompt = `
-                    You are an illustrator for the interactive fiction story called ${title} which is described as ${description}
-                    You need to create an image for the current scene which is ${scene} but making sure it is consistent with the overall story
-                    The artistic style should be for a graphic novel
+                    You are an illustrator for the interactive fiction story called ${title} ${description ? `which is described as ${description}` : '' }
+                    You need to create an image for the current scene which is ${scene}
                     `.replace(/\s+/g, ' ')
 
                     const image = `/content/${id}/art?prompt=${encodeURIComponent(prompt)}`;
