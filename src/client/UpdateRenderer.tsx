@@ -30,7 +30,7 @@ export class UpdateRenderer {
     handle(update: UpdateMessage): void {
         if (update.windows) this.updateWindows(update.windows);
         if (update.content) this.updateContent(update.content, update.gen);
-        if (update.input) this.updateInput(update.input, update.gen);
+        if (update.input) this.updateInput(update.input);
     }
 
     updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
@@ -157,7 +157,7 @@ export class UpdateRenderer {
         '@cf/bytedance/stable-diffusion-xl-lightning',
     ];
 
-    updateInput(updates: (CharInput | LineInput)[], gen: number) {
+    updateInput(updates: (CharInput | LineInput)[]) {
         const inputs = Array.from(this.document.querySelectorAll('.input-control'));
         inputs.map(i => i.parentElement!.removeChild(i));
 
@@ -208,9 +208,7 @@ export class UpdateRenderer {
                 });
             });
 
-            if (gen > 1 && isVisible(htmlInput)) {
-                this.document.defaultView?.setTimeout(() => htmlInput.focus(), 0);
-            }
+            htmlInput.focus({ preventScroll: true });
         })
     }
 }
@@ -241,19 +239,4 @@ export function scene(card: HTMLElement) {
         title: card.querySelector<HTMLElement>('.header, .subheader')!.innerText,
         description: Array.from(card.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ')
     };
-}
-
-export function isVisible(element: HTMLElement): boolean {
-    if (element.offsetWidth <= 0 || element.offsetHeight <= 0) return false;
-
-    const rect = element.getBoundingClientRect();
-    const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
-    const viewWidth = Math.max(document.documentElement.clientWidth, window.innerWidth);
-
-    return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= viewHeight &&
-        rect.right <= viewWidth
-    );
 }
