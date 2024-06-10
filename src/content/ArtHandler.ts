@@ -20,7 +20,7 @@ export class ArtHandler {
                     "${data.story.description ? `and described as follows "${data.story.description}".` : ''}
                     The scene is titled "${data.scene.title}" and is described as follows 
                     "${data.scene.description.replace('"', '`')}"
-                    ${data.previous ? `The scene should be consistent with the previous scene as you have just which was titled "${data.previous.title}" 
+                    ${data.previous ? `The scene should be consistent with the previous scene the player just left, it was titled "${data.previous.title}" 
                     and was described as follows "${data.previous.description.replace('"', '`')}"` : ''
         }`.replace(/\s+/g, ' ');
 
