@@ -166,6 +166,12 @@ export interface BaseMessage {
     "gen": number,
 }
 
+export function isBaseMessage(value: any): value is BaseMessage {
+    return value && typeof value === "object"
+        && 'type' in value && typeof value.type === 'string'
+        && 'gen' in value && typeof value.gen === 'number'
+}
+
 export interface InitMessage extends BaseMessage {
     "type": "init",
     "metrics": Partial<Metrics>
