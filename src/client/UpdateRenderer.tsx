@@ -113,7 +113,10 @@ export class UpdateRenderer {
 
                 if (index === 1 && gen > 1) {
                     const scroll = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll')).reverse()[0];
-                    this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView(), 0);
+                    scroll?.scrollIntoView({
+                        block: 'start',
+                        behavior: 'smooth'
+                    });
                 }
 
                 // Add image
@@ -208,7 +211,7 @@ export class UpdateRenderer {
                 });
             });
 
-            htmlInput.focus({ preventScroll: true });
+            htmlInput.focus({preventScroll: true});
         })
     }
 }

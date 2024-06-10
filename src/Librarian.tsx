@@ -26,7 +26,7 @@ export function render(search: string, games: GameInfo[]): string {
     <div class="window grid">
         <div class="card input-control">
             <form class="input">
-                <input name="search" type="text" maxlength="256" value={search}/>
+                <input name="search" type="text" maxlength="256" value={search} autofocus="autofocus"/>
             </form>
         </div>
     </div>
