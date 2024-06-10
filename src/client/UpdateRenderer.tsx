@@ -94,7 +94,7 @@ export class UpdateRenderer {
                         {
                             update.text.flatMap(t => {
                                 if (!('content' in t)) {
-                                    return '';
+                                    return [];
                                 } else if (t.content.length === 1) {
                                     return t.content.filter(isLineData).map(c => {
                                         return (this.breakOn.has(c.style) ? '</div><div class="card">' : '') +
