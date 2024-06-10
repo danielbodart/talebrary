@@ -2,7 +2,7 @@ import type {SupportedGameType} from "../types.ts";
 import {get, type HttpHandler} from "../http.ts";
 import {Buffer} from "buffer/";
 import {MiniDialog} from "./MiniDialog.ts";
-import {type BaseMessage, engineMapping, type Logger, type MessageHandler} from "./types.ts";
+import {type BaseMessage, engineMapping, isBaseMessage, type Logger, type MessageHandler} from "./types.ts";
 import {MiniGlkOte} from "./MiniGlkOte.ts";
 
 export class WindowMessageHandler implements MessageHandler {
@@ -14,7 +14,7 @@ export class WindowMessageHandler implements MessageHandler {
     }
 
     onMessage<T extends BaseMessage>(fun: (message: T) => void): void {
-        this.window.addEventListener('message', e => fun(e.data))
+        this.window.addEventListener('message', e => isBaseMessage(e.data) ? fun(e.data as T) : undefined);
     }
 
 }
