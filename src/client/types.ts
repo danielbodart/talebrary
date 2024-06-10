@@ -56,7 +56,7 @@ export interface GraphicsWindow extends BaseWindow {
 }
 
 export interface LineData {
-    style: 'normal' | 'header' | "subheader" | "alert"
+    style: 'input' | 'normal' | 'header' | "subheader" | "alert"
     text: string,
     hyperlink?: string,
 }
@@ -101,6 +101,10 @@ export interface BufferText {
     append?: boolean,
     flowbreak?: boolean,
     content: (LineData| BufferImage)[]
+}
+
+export function isBufferText(value: any): value is BufferText {
+    return value && typeof value === 'object' && 'content' in value && Array.isArray(value.content);
 }
 
 export interface BufferContent {
