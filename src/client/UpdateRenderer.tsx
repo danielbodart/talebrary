@@ -126,9 +126,9 @@ export class UpdateRenderer {
                     const path = this.document.defaultView!.location.pathname;
                     const [, , id] = path.split('/');
 
-                    const title = document.title;
-                    const author = document.querySelector<HTMLElement>('.author')?.innerText;
-                    const description = document.querySelector('meta[name="description"]')?.getAttribute('content');
+                    const title = this.document.title;
+                    const author = this.document.querySelector<HTMLElement>('.author')?.innerText;
+                    const description = this.document.querySelector('meta[name="description"]')?.getAttribute('content');
                     const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
                     const json = JSON.stringify({
                         story: {
