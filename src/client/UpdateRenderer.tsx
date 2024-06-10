@@ -113,10 +113,10 @@ export class UpdateRenderer {
 
                 if (index === 1 && gen > 1) {
                     const scroll = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll')).reverse()[0];
-                    scroll?.scrollIntoView({
+                    this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView({
                         block: 'start',
                         behavior: 'smooth'
-                    });
+                    }), 0);
                 }
 
                 // Add image
