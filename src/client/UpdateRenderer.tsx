@@ -168,13 +168,19 @@ export class UpdateRenderer {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
 
+            const history = Array.from(new Set(Array.from(window.querySelectorAll<HTMLElement>('div.input')).map(e => e.innerText)));
+
             window.append(fragment(
                 <div class="card input-control">
                     <form class="input">
                         <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 1)}
                                data-gen={update.gen} data-id={update.id} data-type={update.type}
                                value={'initial' in update ? update.initial : ''}
+                               list="input-history"
                         />
+                        <datalist id="input-history">
+                            {history.map(item => <option value={item}></option>)}
+                        </datalist>
                     </form>
                 </div>));
             const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
