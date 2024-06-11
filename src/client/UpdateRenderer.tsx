@@ -25,6 +25,13 @@ export class UpdateRenderer {
             if (message.type !== 'update') return;
             this.handle(message as UpdateMessage);
         })
+        document.addEventListener('click', ev => {
+            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.header, .window.buffer span.subheader')) {
+                const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
+                htmlInput.value = ev.target.innerText;
+                htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
+            }
+        }, true)
     }
 
     handle(update: UpdateMessage): void {
@@ -90,7 +97,7 @@ export class UpdateRenderer {
                     window.innerHTML = '';
                 }
 
-                const html = fragment(<div class={`card ${index === 1 ? ' scroll' : ''}`}>
+                const html = fragment(<div class={`card ${index < 2 ? ' scroll' : ''}`}>
                         {
                             update.text.flatMap(t => {
                                 if (!('content' in t)) {
@@ -111,7 +118,7 @@ export class UpdateRenderer {
 
                 window.appendChild(html);
 
-                if (index === 1 && gen > 1) {
+                if (index < 2 && gen > 1) {
                     const scroll = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll')).reverse()[0];
                     this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView({
                         block: 'start',
