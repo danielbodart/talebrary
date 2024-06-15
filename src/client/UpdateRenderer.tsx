@@ -97,7 +97,7 @@ export class UpdateRenderer {
                     window.innerHTML = '';
                 }
 
-                const html = fragment(<div class={`card ${index < 2 ? ' scroll' : ''}`}>
+                const html = fragment(<div class={`card${index < 2 ? ' scroll' : ''}`}>
                         {
                             update.text.flatMap(t => {
                                 if (!('content' in t)) {
@@ -183,6 +183,7 @@ export class UpdateRenderer {
                         <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 1)}
                                data-gen={update.gen} data-id={update.id} data-type={update.type}
                                value={'initial' in update ? update.initial : ''}
+                               placeholder={update.type === "char" ? 'press key' : ''}
                                list="input-history"
                         />
                         <datalist id="input-history">
