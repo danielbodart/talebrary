@@ -15,13 +15,13 @@ export class ArtHandler {
         const model = params.get('model') ?? "@cf/bytedance/stable-diffusion-xl-lightning" as any;
         const data = JSON.parse(rawPrompt);
         const prompt = `
-                    Create an illustration for the interactive fiction story "${data.story.title}" 
-                    "${data.story.author ? `by "${data.story.author}".` : ''}
-                    "${data.story.description ? `and described as follows "${data.story.description}".` : ''}
-                    The scene is titled "${data.scene.title}" and is described as follows 
+                    Create an illustration for a scene called "${data.scene.title}" and described  
                     "${data.scene.description.replace('"', '`')}"
-                    ${data.previous ? `The scene should be consistent with the previous scene the player just left, it was titled "${data.previous.title}" 
-                    and was described as follows "${data.previous.description.replace('"', '`')}"` : ''
+                    The scene is part of the interactive fiction called "${data.story.title}" 
+                    "${data.story.author ? `by "${data.story.author}".` : ''}
+                    "${data.story.description ? `and described as "${data.story.description}".` : ''}
+                    ${data.previous ? `The scene should be consistent with the previous scene, which was called "${data.previous.title}" 
+                    and described as "${data.previous.description.replace('"', '`')}"` : ''
         }`.replace(/\s+/g, ' ');
 
         const response = await this.ai.run(model, {prompt});
