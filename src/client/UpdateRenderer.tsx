@@ -1,5 +1,6 @@
 import {
     type BufferContent,
+    type BufferImage,
     type BufferWindow,
     type CharInput,
     type GraphicsContent,
@@ -10,6 +11,7 @@ import {
     isBufferContent,
     isGridContent,
     isLineData,
+    type LineData,
     type LineInput,
     type MessageHandler,
     type Metrics,
@@ -17,6 +19,15 @@ import {
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
+
+function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
+    return content.filter<LineData>(isLineData).map(line => {
+        return {
+            ...line,
+            text: line.text.trim()
+        }
+    }).filter(line => line.text !== '' && line.text !== '>');
+}
 
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
@@ -100,16 +111,16 @@ export class UpdateRenderer {
                 const html = fragment(<div class={`card${index < 2 ? ' scroll' : ''}`}>
                         {
                             update.text.flatMap(t => {
-                                if (!('content' in t)) {
-                                    return [];
-                                } else if (t.content.length === 1) {
-                                    return t.content.filter(isLineData).map(c => {
+                                if (!('content' in t)) return [];
+                                const lineData = cleanLineData(t.content);
+                                if (lineData.length === 1) {
+                                    return lineData.map(c => {
                                         return (this.breakOn.has(c.style) ? '</div><div class="card">' : '') +
                                             (c.text === '>' ? '' : <div class={c.style}>{c.text}</div>)
                                     });
                                 } else {
-                                    return <div class="normal">{t.content.filter(isLineData).map(c => <span
-                                        class={c.style}>{c.text}</span>)}</div>
+                                    return [<div class="normal">{lineData.map(c => <span
+                                        class={c.style}>{c.text}</span>)}</div>]
                                 }
                             }).join('')
                         }
@@ -153,7 +164,8 @@ export class UpdateRenderer {
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}&model=${model}`;
                         lastCard.insertBefore(
-                            fragment(<img class="image" loading="lazy" src={image} alt={`Generated with ${model}`} data-gen={gen}/>),
+                            fragment(<img class="image" loading="lazy" src={image} alt={`Generated with ${model}`}
+                                          data-gen={gen}/>),
                             lastCard.firstChild);
                     }
 
