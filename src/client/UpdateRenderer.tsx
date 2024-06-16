@@ -31,6 +31,11 @@ function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     });
 }
 
+const instructionPattern = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
+function instructions(value:string): string {
+    return  value.replace(instructionPattern, match => <span class="instruction">{match}</span>);
+}
+
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
         messageHandler.postMessage({type: "init", gen: 0, metrics} as InitMessage);
@@ -39,7 +44,7 @@ export class UpdateRenderer {
             this.handle(message as UpdateMessage);
         })
         document.addEventListener('click', ev => {
-            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.header, .window.buffer span.subheader, .window.buffer span.emphasized')) {
+            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.header, .window.buffer span.subheader, .window.buffer span.emphasized, .window.buffer span.instruction')) {
                 const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
                 htmlInput.value = `${htmlInput.value} ${ev.target.innerText}`.trim();
                 htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
@@ -118,12 +123,15 @@ export class UpdateRenderer {
                                 if (lineData.length === 0) return [];
                                 if (lineData.length === 1) {
                                     return lineData.map(c => {
-                                        return (this.breakOn.has(c.style) ? '</div><div class="card">' : '') +
-                                            <div class={c.style}>{c.text}</div>
+                                        if (this.breakOn.has(c.style)) {
+                                            return '</div><div class="card">' + <div class={c.style}>{c.text}</div>
+                                        } else {
+                                            return <div class={c.style}>{instructions(c.text)}</div>
+                                        }
                                     });
                                 } else {
                                     return [<div class="normal">{lineData.map(c => <span
-                                        class={c.style}>{c.text}</span>)}</div>]
+                                        class={c.style}>{instructions(c.text)}</span>)}</div>]
                                 }
                             }).join('')
                         }
