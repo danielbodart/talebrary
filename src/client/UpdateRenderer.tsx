@@ -10,7 +10,7 @@ import {
     type InitMessage,
     isBufferContent,
     isGridContent,
-    isLineData,
+    isLineData, isUpdateMessage,
     type LineData,
     type LineInput,
     type MessageHandler,
@@ -26,14 +26,16 @@ function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
             ...line,
             text: line.text.trim()
         }
-    }).filter(line => line.text !== '' && line.text !== '>');
+    }).filter(line => {
+        return line.text !== '' && line.text !== '>';
+    });
 }
 
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
         messageHandler.postMessage({type: "init", gen: 0, metrics} as InitMessage);
         messageHandler.onMessage(message => {
-            if (message.type !== 'update') return;
+            if (!isUpdateMessage(message)) return;
             this.handle(message as UpdateMessage);
         })
         document.addEventListener('click', ev => {
@@ -113,6 +115,7 @@ export class UpdateRenderer {
                             update.text.flatMap(t => {
                                 if (!('content' in t)) return [];
                                 const lineData = cleanLineData(t.content);
+                                if (lineData.length === 0) return [];
                                 if (lineData.length === 1) {
                                     return lineData.map(c => {
                                         return (this.breakOn.has(c.style) ? '</div><div class="card">' : '') +
