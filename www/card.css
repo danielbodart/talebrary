@@ -247,11 +247,11 @@ body.search {
     font-style: italic;
 }
 
-div.normal, div.alert, div.emphasized, .paragraph {
+div.normal, div.alert, div.emphasized, div.preformatted {
     padding: 10px 10px 0 10px;
 }
 
-div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragraph:last-child {
+div.normal:last-child, div.alert:last-child, div.emphasized:last-child, div.preformatted:last-child {
     padding-bottom: 10px;
 }
 
@@ -353,6 +353,9 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, .paragra
     align-items: center;
     flex-direction: column;
     margin-top: -16px;
+}
+
+.grid .card:first-child, .buffer div.preformatted {
     white-space: pre;
     font-family: "Inconsolata", monospace;
     font-optical-sizing: auto;
