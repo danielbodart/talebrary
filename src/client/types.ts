@@ -212,6 +212,10 @@ export interface UpdateMessage extends BaseMessage {
     specialinput?: FilePromptMessage
 }
 
+export function isUpdateMessage(value: any): value is UpdateMessage {
+    return isBaseMessage(value) && value.type === 'update';
+}
+
 export interface FilePromptMessage extends BaseMessage {
     type: 'fileref_prompt',
     filemode: 'read' | 'write' | 'readwrite' | 'writeappend',
