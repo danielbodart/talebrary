@@ -231,16 +231,12 @@ body.search {
     font-weight: 700;
 }
 
-.window.buffer span.header, .window.buffer span.subheader {
+.window.buffer span.header, .window.buffer span.subheader, .window.buffer span.emphasized {
     cursor: pointer;
-    display: inline-block;
-    height: 30px;
-    line-height: 30px;
-    border-radius: 10px;
-    padding: 0 5px;
-    color: whitesmoke;
-    border: 2px solid whitesmoke;
-    box-shadow: 0 0 2px #21211c;
+}
+
+.window.buffer span.header:hover, .window.buffer span.subheader:hover, .window.buffer span.emphasized:hover {
+    text-decoration: underline;
 }
 
 .emphasized {

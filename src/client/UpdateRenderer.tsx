@@ -37,9 +37,9 @@ export class UpdateRenderer {
             this.handle(message as UpdateMessage);
         })
         document.addEventListener('click', ev => {
-            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.header, .window.buffer span.subheader')) {
+            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.header, .window.buffer span.subheader, .window.buffer span.emphasized')) {
                 const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
-                htmlInput.value = ev.target.innerText;
+                htmlInput.value = `${htmlInput.value} ${ev.target.innerText}`.trim();
                 htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
             }
         }, true)
