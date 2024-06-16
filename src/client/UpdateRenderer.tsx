@@ -116,7 +116,7 @@ export class UpdateRenderer {
                                 if (lineData.length === 1) {
                                     return lineData.map(c => {
                                         return (this.breakOn.has(c.style) ? '</div><div class="card">' : '') +
-                                            (c.text === '>' ? '' : <div class={c.style}>{c.text}</div>)
+                                            <div class={c.style}>{c.text}</div>
                                     });
                                 } else {
                                     return [<div class="normal">{lineData.map(c => <span
