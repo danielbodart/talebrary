@@ -56,7 +56,7 @@ export interface GraphicsWindow extends BaseWindow {
 }
 
 export interface LineData {
-    style: 'input' | 'normal' | 'header' | "subheader" | "alert"
+    style: 'input' | 'normal' | 'header' | "subheader" | "alert" | 'preformatted' | 'emphasized'
     text: string,
     hyperlink?: string,
 }
