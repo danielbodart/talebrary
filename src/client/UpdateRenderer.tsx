@@ -10,7 +10,8 @@ import {
     type InitMessage,
     isBufferContent,
     isGridContent,
-    isLineData, isUpdateMessage,
+    isLineData,
+    isUpdateMessage,
     type LineData,
     type LineInput,
     type MessageHandler,
@@ -31,9 +32,23 @@ function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     });
 }
 
+
+const wordCountPattern = /(\p{L}+\p{M}*|\p{N}+)/gu;
+function wordCount(value: string): number {
+    return value.match(wordCountPattern)?.length ?? 0;
+}
+
 const instructionPattern = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
-function instructions(value:string): string {
-    return  value.replace(instructionPattern, match => <span class="instruction">{match}</span>);
+function instructions(line: LineData): string {
+    if (line.style === 'normal') {
+        return line.text.replace(instructionPattern, match => wordCount(match) <= 3  ? <span class="instruction">{match}</span> : '');
+    }
+    if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
+        if (wordCount(line.text) <= 3) {
+            return <span class="instruction">{line.text}</span>
+        }
+    }
+    return line.text;
 }
 
 export class UpdateRenderer {
@@ -44,7 +59,7 @@ export class UpdateRenderer {
             this.handle(message as UpdateMessage);
         })
         document.addEventListener('click', ev => {
-            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.header, .window.buffer span.subheader, .window.buffer span.emphasized, .window.buffer span.instruction')) {
+            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.instruction')) {
                 const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
                 htmlInput.value = `${htmlInput.value} ${ev.target.innerText}`.trim();
                 htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
@@ -126,12 +141,13 @@ export class UpdateRenderer {
                                         if (this.breakOn.has(c.style)) {
                                             return '</div><div class="card">' + <div class={c.style}>{c.text}</div>
                                         } else {
-                                            return <div class={c.style}>{instructions(c.text)}</div>
+                                            return <div
+                                                class={c.style}>{c.style === 'normal' ? instructions(c) : c.text}</div>
                                         }
                                     });
                                 } else {
                                     return [<div class="normal">{lineData.map(c => <span
-                                        class={c.style}>{instructions(c.text)}</span>)}</div>]
+                                        class={c.style}>{instructions(c)}</span>)}</div>]
                                 }
                             }).join('')
                         }

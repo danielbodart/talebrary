@@ -231,11 +231,11 @@ body.search {
     font-weight: 700;
 }
 
-.window.buffer span.header, .window.buffer span.subheader, .window.buffer span.emphasized, .window.buffer span.instruction {
+.window.buffer span.instruction {
     cursor: pointer;
 }
 
-.window.buffer span.header:hover, .window.buffer span.subheader:hover, .window.buffer span.emphasized:hover, .window.buffer span.instruction:hover {
+.window.buffer span.instruction:hover {
     text-decoration: underline;
 }
 
