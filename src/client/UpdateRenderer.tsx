@@ -38,10 +38,10 @@ function wordCount(value: string): number {
     return value.match(wordCountPattern)?.length ?? 0;
 }
 
-const instructionPattern = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
+const capitalWords = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
 function instructions(line: LineData): string {
     if (line.style === 'normal') {
-        return line.text.replace(instructionPattern, match => wordCount(match) <= 3  ? <span class="instruction">{match}</span> : '');
+        return line.text.replace(capitalWords, match => wordCount(match) <= 3  ? <span class="instruction">{match}</span> : '');
     }
     if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
         if (wordCount(line.text) <= 3) {
