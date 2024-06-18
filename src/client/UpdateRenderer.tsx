@@ -39,12 +39,12 @@ function wordCount(value: string): number {
 }
 
 const capitalWords = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
-function instructions(line: LineData): string {
+function instructions(line: LineData, maxLength: number = 3): string {
     if (line.style === 'normal') {
-        return line.text.replace(capitalWords, match => wordCount(match) <= 3  ? <span class="instruction">{match}</span> : '');
+        return line.text.replace(capitalWords, match => wordCount(match) <= maxLength  ? <span class="instruction">{match}</span> : '');
     }
     if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
-        if (wordCount(line.text) <= 3) {
+        if (wordCount(line.text) <= maxLength) {
             return <span class="instruction">{line.text}</span>
         }
     }
