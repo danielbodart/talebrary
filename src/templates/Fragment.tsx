@@ -4,6 +4,6 @@ export const Fragment: CustomElementHandler = (_attributes, contents: string[]) 
     return contents.join('');
 };
 
-export function fragment(html: string) {
-    return document.createRange().createContextualFragment(html);
+export function fragment(html: string, doc: Document = document) {
+    return doc.createRange().createContextualFragment(html);
 }
