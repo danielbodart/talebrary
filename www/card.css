@@ -375,6 +375,7 @@ div.normal:last-child, div.alert:last-child, div.emphasized:last-child, div.pref
 }
 
 .grid .card:first-child, .buffer div.preformatted {
+    text-align: center;
     white-space: pre;
     font-family: "Inconsolata", monospace;
     font-optical-sizing: auto;

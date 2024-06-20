@@ -1,17 +1,14 @@
 import {describe, expect, test} from "bun:test";
 import {parseHTML} from "linkedom";
-import {
-    instruction,
-    instructionClass,
-    type InstructionEvent,
-    InstructionEventName
-} from "../../../src/client/comonents/Instruction.tsx";
+import {Instruction} from "../../../src/client/comonents/Instruction.tsx";
+import * as elements from "typed-html";
+import {type InstructionEvent, InstructionEventName} from "../../../src/client/comonents/InstructionEvent.tsx";
 
 
 describe("Instruction", () => {
     test("when clicked fires an instruction event that bubbles up", async () => {
-        const window = parseHTML(`<body>${instruction('test')}</body>`);
-        window.customElements.define('instruction', instructionClass(window));
+        const window = parseHTML(<body><instruction>test</instruction></body>);
+        Instruction.register(window);
 
         const element = window.document.querySelector<HTMLElement>('instruction')!;
         const event = new Promise<InstructionEvent>(resolve => {
