@@ -17,25 +17,29 @@ export class Routing {
 
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
+        const [, section, id, subsection] = uri.path.split('/')
 
         if (uri.path === '/librarian') {
             return this.librarian.handle(request);
         }
 
-        if (uri.path.endsWith('/cover-art')) {
-            return this.coverArt.handle(request)
-        }
+        if (section === 'content') {
+            if (subsection === 'cover-art') {
+                return this.coverArt.handle(request);
+            }
 
-        if (uri.path.endsWith('/art')) {
-            return this.art.handle(request);
-        }
+            if (subsection === 'art') {
+                return this.art.handle(request);
+            }
 
-        if (uri.path.endsWith('/story')) {
-            return this.story.handle(request)
-        }
 
-        if (uri.path.startsWith('/content/')) {
-            return this.content.handle(request)
+            if (subsection === 'story') {
+                return this.story.handle(request)
+            }
+
+            if (id) {
+                return this.content.handle(request);
+            }
         }
 
         if (uri.path.endsWith('/')) {
