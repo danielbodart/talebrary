@@ -191,8 +191,7 @@ export class UpdateRenderer {
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}&model=${model}`;
                         lastCard.insertBefore(
-                            fragment(<img class="image" loading="lazy" src={image} alt={`Generated with ${model}`}
-                                          data-gen={gen}/>),
+                            fragment(<img class="image" loading="lazy" src={image} alt="" aria-hidden="true" data-gen={gen}/>),
                             lastCard.firstChild);
                     }
 
