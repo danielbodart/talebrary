@@ -53,7 +53,7 @@ function instructions(line: LineData, maxLength: number = 3): string {
 
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
-        messageHandler.postMessage({type: "init", gen: 0, metrics} as InitMessage);
+        messageHandler.postMessage({type: "init", gen: 0, metrics, supports: ["garglktext", "graphics", "graphicswin", "hyperlinks", "timer"]} as InitMessage);
         messageHandler.onMessage(message => {
             if (!isUpdateMessage(message)) return;
             this.handle(message as UpdateMessage);
