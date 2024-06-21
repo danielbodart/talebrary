@@ -1,10 +1,10 @@
-import {Uri} from "./http.ts";
 import type {Librarian} from "./Librarian.tsx";
 import type {R2CachingHandler} from "./R2CachingHandler.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import type {ClientHandler} from "./content/ClientHandler.tsx";
 import type {ArtHandler} from "./content/ArtHandler.ts";
+import {Uri} from "./http/Uri.ts";
 
 
 export class Routing {

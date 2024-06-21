@@ -1,7 +1,8 @@
-import {type HttpHandler, Uri} from "./http.ts";
+import {type HttpHandler} from "./http/mod.ts";
 import {parseHTML} from 'linkedom';
 import {library} from "./templates/library.tsx";
 import {card} from "./templates/card.tsx";
+import {Uri} from "./http/Uri.ts";
 
 type Template = (document:Document) => string;
 

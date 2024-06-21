@@ -1,4 +1,4 @@
-import type {HttpHandler} from "./http.ts";
+import type {HttpHandler} from "./http/mod.ts";
 import type {Digest} from "./digest.ts";
 
 const safeHeaders = [

@@ -1,8 +1,8 @@
-import {Uri} from "./http.ts";
 import {D1GameFinder, type GameInfo} from "./D1GameFinder.ts";
 import * as elements from 'typed-html';
 import {Fragment} from "./templates/Fragment.tsx";
 import {roundStep, wellFormed} from "./misc.ts";
+import {Uri} from "./http/Uri.ts";
 
 export class Librarian {
     constructor(private finder: D1GameFinder) {

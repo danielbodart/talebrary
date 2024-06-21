@@ -1,10 +1,11 @@
 import {applicationScope, type Env} from "./ApplicationScope.ts";
-import {client} from "./http.ts";
+import {client} from "./http/mod.ts";
 import {md5} from "./digest.ts";
 
 export default {
     fetch(request: Request, env: Env) {
-        const app = applicationScope(env.db, client, env.r2, md5, env.ai);
+        // @ts-ignore
+        const app = applicationScope(env.db, client, env.r2, md5, env.ai, caches.default);
         return app.handler(request);
     },
 }

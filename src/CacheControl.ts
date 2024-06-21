@@ -1,4 +1,4 @@
-import type {HttpHandler} from "./http.ts";
+import type {HttpHandler} from "./http/mod.ts";
 
 export class Seconds {
     static minutes(count: number) {
@@ -18,7 +18,7 @@ export class CacheControl {
     static Public = `public, max-age=${Seconds.minutes(1)}, stale-while-revalidate=${Seconds.minutes(10)}, stale-if-error=${Seconds.minutes(10)}`;
 }
 
-export function cacheHandler(http: HttpHandler) {
+export function cacheControlHandler(http: HttpHandler) {
     return async (request: Request) => {
         const response = await http(request);
         const cacheControl = response.headers.get('cache-control');
