@@ -1,7 +1,7 @@
 import {CryptoHasher} from "bun";
 
-export function md5(file: ArrayBuffer): string {
+export function md5(array: ArrayBufferLike): string {
     const hasher = new CryptoHasher("md5");
-    hasher.update(file);
+    hasher.update(array);
     return hasher.digest('hex');
 }

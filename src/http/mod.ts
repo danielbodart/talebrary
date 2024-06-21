@@ -1,3 +1,5 @@
+import type {Uri} from "./Uri.ts";
+
 export interface HttpHandler {
     (request: Request): Promise<Response>;
 }
@@ -12,7 +14,7 @@ export function request(method: HttpMethod, uri: string, headers: HttpHeader[]):
     return new Request(uri, {method, headers});
 }
 
-export function get(uri: string, ...headers: HttpHeader[]): Request {
-    return request('GET', uri, headers);
+export function get(uri: string | Uri, ...headers: HttpHeader[]): Request {
+    return request('GET', uri.toString(), headers);
 }
 
