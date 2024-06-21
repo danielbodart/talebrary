@@ -172,9 +172,12 @@ export function isBaseMessage(value: any): value is BaseMessage {
         && 'gen' in value && typeof value.gen === 'number'
 }
 
+export type Features = 'garglktext'| 'graphics' | 'graphicswin' | 'hyperlinks' | 'timer';
+
 export interface InitMessage extends BaseMessage {
     "type": "init",
     "metrics": Partial<Metrics>
+    "supports": Features[]
 }
 
 export interface SpecialResponseMessage extends BaseMessage {
