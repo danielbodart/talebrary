@@ -32,7 +32,6 @@ export class Routing {
                 return this.art.handle(request);
             }
 
-
             if (subsection === 'story') {
                 return this.story.handle(request)
             }

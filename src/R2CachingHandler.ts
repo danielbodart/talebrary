@@ -33,7 +33,6 @@ export class R2CachingHandler {
 
     async handle(request: Request): Promise<Response> {
         const key = await this.key(request);
-        console.log('KEY', key)
         try {
             const oldEtag = request.headers.get('if-none-match');
             const response = toResponse(await this.r2.get(key, oldEtag ? {onlyIf: {etagDoesNotMatch: unquote(oldEtag)}} : undefined));
@@ -48,9 +47,6 @@ export class R2CachingHandler {
         console.log('Not found in R2', key);
         const response = await this.http(request);
         if (!response.ok) return response;
-
-        const body = response.body;
-        if (!body) return new Response('Not Found', {status: 404});
 
         const buffer = await response.arrayBuffer();
         try {
