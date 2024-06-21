@@ -35,8 +35,8 @@ export function render(search: string, games: GameInfo[]): string {
             <Fragment>
                 <input class="orientation" type="checkbox" id={game.id}/>
                 <label for={game.id} class="card" tabindex="0">
-                    <div class="rating">{roundStep(game.rating, 0.5)}</div>
-                    <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy"></img>
+                    <div class="rating" aria-label="Rating" role="img">{roundStep(game.rating, 0.5)}</div>
+                    <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt="" aria-hidden="true"></img>
                     <div class="title">{wellFormed(game.title)}</div>
                     <div class="author">{wellFormed(game.author)}</div>
                     {game.description ? <div class="description">{wellFormed(game.description)}</div> : ''}
