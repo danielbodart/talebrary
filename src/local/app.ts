@@ -4,11 +4,10 @@ import {talebrary} from "./SqliteDatabase.ts";
 import {localhostHandler} from "./FileHandler.ts";
 import {FolderBucket} from "./buckets/FolderBucket.ts";
 import {md5} from "./digest.ts";
-import {NoCache} from "../http/CacheHandler.ts";
 
 const root = `${import.meta.dir}/../../www/`;
 const r2 = new FolderBucket(root);
-const app = applicationScope(talebrary(), localhostHandler(root), r2, md5, {} as any, new NoCache());
+const app = applicationScope(talebrary(), localhostHandler(root), r2, md5, {} as any);
 
 const server = serve({
     async fetch(req) {
