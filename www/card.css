@@ -211,7 +211,6 @@ body.search {
     flex-shrink: 0;
     object-fit: contain;
     width: 100%;
-    aspect-ratio: 1/1;
     background-color: #000;
     background-image: url("/icons/loader.svg");
     background-size: 100px 100px;
@@ -223,6 +222,7 @@ body.search {
     width: 100%;
     height: 50%;
     display: block;
+    aspect-ratio: 1/1;
 }
 
 
