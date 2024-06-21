@@ -1,4 +1,4 @@
-import {get, type HttpHandler} from "./http.ts";
+import {get, type HttpHandler} from "./http/mod.ts";
 import {XMLParser} from "fast-xml-parser";
 
 interface SearchResult {

@@ -1,5 +1,6 @@
-import {client, get, type HttpHandler, Uri} from "../http.ts";
+import {client, get, type HttpHandler} from "../http/mod.ts";
 import {file} from 'bun';
+import {Uri} from "../http/Uri.ts";
 
 
 export async function fileHandler(request: Request) {

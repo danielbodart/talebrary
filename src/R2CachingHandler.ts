@@ -1,7 +1,8 @@
-import {get, type HttpHandler, Uri} from "./http.ts";
+import {get, type HttpHandler} from "./http/mod.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import type {D1GameFinder} from "./D1GameFinder.ts";
+import {Uri} from "./http/Uri.ts";
 
 
 export function unquote(oldEtag: string) {

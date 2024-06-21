@@ -1,6 +1,6 @@
 import {test, expect, describe} from "bun:test";
 import {HttpGameFinder} from "../src/HttpGameFinder.ts";
-import {client} from "../src/http.ts";
+import {client} from "../src/http/mod.ts";
 
 
 describe("HttpGameFinder", () => {

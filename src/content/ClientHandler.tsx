@@ -1,7 +1,7 @@
-import {Uri} from "../http.ts";
 import type {D1GameFinder, GameStory} from "../D1GameFinder.ts";
 import * as elements from "typed-html";
 import {compactText, wellFormed} from "../misc.ts";
+import {Uri} from "../http/Uri.ts";
 
 export class ClientHandler {
     constructor(private gameFinder: D1GameFinder) {

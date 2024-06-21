@@ -1,5 +1,6 @@
 import type {Ai} from "@cloudflare/workers-types";
-import {Uri} from "../http.ts";
+
+import {Uri} from "../http/Uri.ts";
 
 export class ArtHandler {
     constructor(private ai: Ai) {
