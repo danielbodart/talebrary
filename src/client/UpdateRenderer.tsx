@@ -40,7 +40,7 @@ function wordCount(value: string): number {
 }
 
 const capitalWords = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
-function instructions(line: LineData, maxLength: number = 3): string {
+function instructions(line: LineData, maxLength: number = 5): string {
     if (line.style === 'normal') {
         return line.text.replace(capitalWords, match => wordCount(match) <= maxLength  ? <span class="instruction">{match}</span> : '');
     }
