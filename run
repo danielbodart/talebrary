@@ -69,12 +69,12 @@ function deploy() {
   check
   wrangler deploy
   check-rclone
-  rclone --config rclone.conf sync www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60"
+  rclone --config rclone.conf sync www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60" -v
 }
 
 function pull() {
   check-rclone
-  rclone --config rclone.conf sync cloudflare:talebrary www/ --metadata
+  rclone --config rclone.conf copy cloudflare:talebrary www/ --metadata -v
 }
 
 function ci() {

@@ -42,7 +42,11 @@ export class D1GameFinder {
                                             where l.gameid = g.id
                                               and f.externid IN
                                                   ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                                                   'tads2', 'tads3'))       as playable
+                                                   'tads2', 'tads3')
+                                              and (' ' || f.extension || ' ' LIKE
+                                                   '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 5),
+                                                                  INSTR(SUBSTR(l.url, LENGTH(l.url) - 5), '.')) ||
+                                                   ' %'))                   as playable
                                     from games_search s
                                              join games g on g.id = s.id
                                     where games_search MATCH ?1
@@ -51,11 +55,14 @@ export class D1GameFinder {
                                   from filtered_games g
                                            join reviews r on g.id = r.gameid
                                   group by g.id)
-            select fg.id, gr.rating, fg.rank, fg.boost, 
+            select fg.id,
+                   gr.rating,
+                   fg.rank,
+                   fg.boost,
                    fg.rank + fg.boost + gr.rating as score,
                    fg.title,
                    fg.author,
-                   fg.description, 
+                   fg.description,
                    fg.playable
             from filtered_games fg
                      join game_reviews gr using (id)
@@ -76,6 +83,9 @@ export class D1GameFinder {
             where g.id = ?
               and f.externid IN
                   ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift', 'tads2', 'tads3')
+              and (' ' || f.extension || ' ' LIKE
+                   '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 5), INSTR(SUBSTR(l.url, LENGTH(l.url) - 5), '.')) ||
+                   ' %')
             order by l.displayorder asc
             limit 1
         `;
