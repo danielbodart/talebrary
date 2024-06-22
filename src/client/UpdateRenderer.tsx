@@ -20,6 +20,7 @@ import {
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
+import type {Describable, SceneContext} from "../types.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -175,21 +176,18 @@ export class UpdateRenderer {
                     const [, , id] = path.split('/');
 
                     const title = this.document.title;
-                    const author = this.document.querySelector<HTMLElement>('.author')?.innerText;
-                    const description = this.document.querySelector('meta[name="description"]')?.getAttribute('content');
+                    const description = this.document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
                     const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
-                    const json = JSON.stringify({
+                    const data:SceneContext = {
                         story: {
                             title,
-                            author,
                             description
                         },
                         scene: scene(lastCard),
                         previous: previous ? scene(previous) : undefined,
-                    });
-
+                    };
                     for (const model of this.models) {
-                        const image = `/content/${id}/art?prompt=${encodeURIComponent(json)}&model=${model}`;
+                        const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${model}`;
                         lastCard.insertBefore(
                             fragment(<img class="image" loading="lazy" src={image} alt="" aria-hidden="true" data-gen={gen}/>),
                             lastCard.firstChild);
@@ -289,7 +287,7 @@ const AdjustKeys: { [key: string]: string } = {
     'F12': 'func12',
 }
 
-export function scene(card: HTMLElement) {
+export function scene(card: HTMLElement): Describable {
     return {
         title: card.querySelector<HTMLElement>('.header, .subheader')!.innerText,
         description: Array.from(card.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ')

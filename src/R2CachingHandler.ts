@@ -1,30 +1,12 @@
-import {get, type HttpHandler} from "./http/mod.ts";
+import {type HttpHandler} from "./http/mod.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
-import type {D1GameFinder} from "./D1GameFinder.ts";
 import {Uri} from "./http/Uri.ts";
 import type {Digest} from "./digest.ts";
 
 
 export function unquote(oldEtag: string) {
     return oldEtag.replace('"', '');
-}
-
-export function coverArt(http: HttpHandler): HttpHandler {
-    return async request => {
-        const uri = new Uri(request.url);
-        const [, , id] = uri.path.split('/');
-        return http(get(`https://ifdb.org/viewgame?coverart&id=${id}`));
-    }
-}
-
-export function story(http: HttpHandler, d1: D1GameFinder): HttpHandler {
-    return async request => {
-        const uri = new Uri(request.url);
-        const [, , id] = uri.path.split('/');
-        const game = await d1.get(id);
-        return game ? http(get(game.url)) : new Response('Not Found', {status: 404});
-    }
 }
 
 export class R2CachingHandler {

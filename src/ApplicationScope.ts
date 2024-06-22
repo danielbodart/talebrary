@@ -4,12 +4,14 @@ import {D1GameFinder} from "./D1GameFinder.ts";
 import {type HttpHandler} from "./http/mod.ts";
 import {Routing} from "./Routing.ts";
 import {templateHandler} from "./TemplateHandler.ts";
-import {coverArt, R2CachingHandler, story} from "./R2CachingHandler.ts";
+import {R2CachingHandler} from "./R2CachingHandler.ts";
 import {etagHandler} from "./EtagHandler.ts";
 import {cacheControlHandler} from "./CacheControl.ts";
 import type {Digest} from "./digest.ts";
 import {ContentHandler} from "./content/ContentHandler.tsx";
 import {IllustrationHandler} from "./content/IllustrationHandler.ts";
+import {coverArt} from "./content/CoverArt.ts";
+import {story} from "./content/Story.ts";
 
 export interface Env {
     db: D1Database;
@@ -31,11 +33,14 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
         .add({db, httpClient, r2, digest, ai})
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({librarian: new ContentSearch(finder)}))
-        .add(({httpClient, r2, finder, digest, ai}) => ({
-            coverArt: new R2CachingHandler(r2, digest, coverArt(httpClient)),
-            story: new R2CachingHandler(r2, digest, story(httpClient, finder)),
-            art: new R2CachingHandler(r2, digest, request => new IllustrationHandler(ai).handle(request)),
-        }))
+        .add(({httpClient, r2, finder, digest, ai}) => {
+            const illustration = new IllustrationHandler(ai);
+            return {
+                coverArt: new R2CachingHandler(r2, digest, coverArt(httpClient, finder, illustration)),
+                story: new R2CachingHandler(r2, digest, story(httpClient, finder)),
+                art: new R2CachingHandler(r2, digest, request => illustration.handle(request)),
+            };
+        })
         .add(({finder}) => ({content: new ContentHandler(finder)}))
         .add(({
                   r2,
