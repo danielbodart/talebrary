@@ -5,7 +5,7 @@ export interface GameBase {
     id: string;
     title: string;
     author: string;
-    description: string;
+    description?: string;
 }
 
 export interface GameInfo extends GameBase {
@@ -18,6 +18,7 @@ export interface GameInfo extends GameBase {
 
 export interface GameStory extends GameBase {
     url: string;
+    coverart: string;
     type: SupportedGameType
 }
 
@@ -54,11 +55,10 @@ export class D1GameFinder {
                                    ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
                                     'tads2', 'tads3')
                                AND (' ' || f.extension || ' ' LIKE
-                                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 5),
-                                                   INSTR(SUBSTR(l.url, LENGTH(l.url) - 5), '.')) ||
+                                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
+                                                   INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
                                     ' %')) AS playable
                      FROM ranks r JOIN games g ON g.id = r.id
-                     WHERE g.coverart IS NOT NULL
                  ),
                  game_reviews AS (
                      SELECT g.id, avg(r.rating) AS rating
@@ -80,7 +80,6 @@ export class D1GameFinder {
             WHERE fg.playable = 1
             ORDER BY score DESC
             LIMIT 20;
-
         `;
         const statement = this.db.prepare(sql).bind(search ?? '');
         return (await statement.all()).results as any;
@@ -88,7 +87,7 @@ export class D1GameFinder {
 
     async get(id: string): Promise<GameStory | null | undefined> {
         const sql = `
-            select g.id, g.title, g.author, g.desc as description, l.url, f.externid as type
+            select g.id, g.title, g.author, g.desc as description, l.url, f.externid as type, g.coverart
             from games g
                      join gamelinks l on g.id = l.gameid
                      join filetypes f on l.fmtid = f.id
@@ -96,7 +95,7 @@ export class D1GameFinder {
               and f.externid IN
                   ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift', 'tads2', 'tads3')
               and (' ' || f.extension || ' ' LIKE
-                   '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 5), INSTR(SUBSTR(l.url, LENGTH(l.url) - 5), '.')) ||
+                   '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7), INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
                    ' %')
             order by l.displayorder asc
             limit 1

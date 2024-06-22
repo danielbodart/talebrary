@@ -39,6 +39,7 @@ describe("D1GameFinder", () => {
             author: "William Crowther and Donald Woods",
             description: null,
             url: "http://www.ifarchive.org/if-archive/games/zcode/Advent.z5",
+            coverart: "https://ifdb.org/viewgame?coverart&id=fft6pu91j85y4acv",
             type: "zcode",
         } as any);
     });
@@ -52,6 +53,7 @@ describe("D1GameFinder", () => {
             author: "Eric Eve",
             description: "It was meant to be a routine visit on behalf of the imperial government, just to remind the settlers that the Empire hadn't forgotten them, and if you stick rigidly to the letter of your orders and refuse to use either your eyes or your initiative that's all it'll be. But with an interstellar war brewing in the background, you'd be wise not to take anything for granted.",
             url: "http://www.ifarchive.org/if-archive/games/competition2006/tads3/elysium/Elysium.t3",
+            coverart: "https://ifdb.org/viewgame?coverart&id=qpecxgjpxnvw50xq",
             type: "tads3",
         } as any);
     });
