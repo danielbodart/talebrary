@@ -27,48 +27,60 @@ export class D1GameFinder {
 
     async find(search: string): Promise<GameInfo[]> {
         const sql = `
-            with filtered_games as (select g.id,
-                                           abs(bm25(games_search, 1, 2, 2)) AS rank,
-                                           CASE
-                                               WHEN lower(g.title) = lower(?1) THEN 3
-                                               ELSE 0
-                                               END                          as boost,
-                                           g.title,
-                                           g.author,
-                                           g.desc                           as description,
-                                           (select CASE WHEN count(*) > 0 THEN 1 ELSE 0 END
-                                            from gamelinks l
-                                                     join filetypes f on l.fmtid = f.id
-                                            where l.gameid = g.id
-                                              and f.externid IN
-                                                  ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                                                   'tads2', 'tads3')
-                                              and (' ' || f.extension || ' ' LIKE
-                                                   '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 5),
-                                                                  INSTR(SUBSTR(l.url, LENGTH(l.url) - 5), '.')) ||
-                                                   ' %'))                   as playable
-                                    from games_search s
-                                             join games g on g.id = s.id
-                                    where games_search MATCH ?1
-                                      and g.coverart is not null),
-                 game_reviews as (select g.id, avg(r.rating) as rating
-                                  from filtered_games g
-                                           join reviews r on g.id = r.gameid
-                                  group by g.id)
-            select fg.id,
+            WITH ranks AS (
+                SELECT g.id, 0 as rank
+                FROM games g
+                WHERE ?1 = ''
+                UNION
+                SELECT s.id, abs(bm25(games_search, 1, 2, 2)) AS rank
+                FROM games_search s
+                WHERE ?1 <> '' AND games_search = ?1
+            ),
+                 filtered_games AS (
+                     SELECT g.id,
+                            r.rank,
+                            CASE
+                                WHEN lower(g.title) = lower(?1) THEN 3
+                                ELSE 0
+                                END AS boost,
+                            g.title,
+                            g.author,
+                            g.desc AS description,
+                            (SELECT CASE WHEN count(*) > 0 THEN 1 ELSE 0 END
+                             FROM gamelinks l
+                                      JOIN filetypes f ON l.fmtid = f.id
+                             WHERE l.gameid = g.id
+                               AND f.externid IN
+                                   ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
+                                    'tads2', 'tads3')
+                               AND (' ' || f.extension || ' ' LIKE
+                                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 5),
+                                                   INSTR(SUBSTR(l.url, LENGTH(l.url) - 5), '.')) ||
+                                    ' %')) AS playable
+                     FROM ranks r JOIN games g ON g.id = r.id
+                     WHERE g.coverart IS NOT NULL
+                 ),
+                 game_reviews AS (
+                     SELECT g.id, avg(r.rating) AS rating
+                     FROM filtered_games g
+                              JOIN reviews r ON g.id = r.gameid
+                     GROUP BY g.id
+                 )
+            SELECT fg.id,
                    gr.rating,
                    fg.rank,
                    fg.boost,
-                   fg.rank + fg.boost + gr.rating as score,
+                   fg.rank + fg.boost + gr.rating AS score,
                    fg.title,
                    fg.author,
                    fg.description,
                    fg.playable
-            from filtered_games fg
-                     join game_reviews gr using (id)
-            where fg.playable = 1
-            order by score desc
-            limit 20;
+            FROM filtered_games fg
+                     JOIN game_reviews gr USING (id)
+            WHERE fg.playable = 1
+            ORDER BY score DESC
+            LIMIT 20;
+
         `;
         const statement = this.db.prepare(sql).bind(search ?? '');
         return (await statement.all()).results as any;

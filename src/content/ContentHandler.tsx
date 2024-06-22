@@ -1,9 +1,9 @@
 import type {D1GameFinder, GameStory} from "../D1GameFinder.ts";
-import * as elements from "typed-html";
-import {compactText, wellFormed} from "../misc.ts";
 import {Uri} from "../http/Uri.ts";
+import {compactText, wellFormed} from "../misc.ts";
+import * as elements from 'typed-html';
 
-export class ClientHandler {
+export class ContentHandler {
     constructor(private gameFinder: D1GameFinder) {
     }
 
@@ -24,7 +24,8 @@ export function render(game: GameStory): string {
         <title>{game.title}</title>
         <meta name="template" content="card"/>
         <meta name="description" content={compactText(game.description)}/>
-        <link id="story" rel="preload" href={`/content/${game.id}/story`} as="fetch" data-type={game.type} crossorigin="crossorigin"/>
+        <link id="story" rel="preload" href={`/content/${game.id}/story`} as="fetch" data-type={game.type}
+              crossorigin="crossorigin"/>
     </head>
     <body class="story">
     <div class="card">

@@ -5,6 +5,13 @@ import {talebrary} from "../src/local/SqliteDatabase.ts";
 describe("D1GameFinder", () => {
     const db = talebrary();
 
+    test("if no search parameter is provided just return all", async () => {
+        const finder = new D1GameFinder(db);
+        const result = await finder.find('');
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20)
+    });
+
     test("can find by title name", async () => {
         const finder = new D1GameFinder(db);
         const result = await finder.find("Adventure");

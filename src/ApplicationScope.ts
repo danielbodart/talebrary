@@ -1,5 +1,5 @@
 import {Ai, D1Database, R2Bucket} from "@cloudflare/workers-types";
-import {Librarian} from "./Librarian.tsx";
+import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./D1GameFinder.ts";
 import {type HttpHandler} from "./http/mod.ts";
 import {Routing} from "./Routing.ts";
@@ -8,8 +8,8 @@ import {coverArt, R2CachingHandler, story} from "./R2CachingHandler.ts";
 import {etagHandler} from "./EtagHandler.ts";
 import {cacheControlHandler} from "./CacheControl.ts";
 import type {Digest} from "./digest.ts";
-import {ClientHandler} from "./content/ClientHandler.tsx";
-import {ArtHandler} from "./content/ArtHandler.ts";
+import {ContentHandler} from "./content/ContentHandler.tsx";
+import {IllustrationHandler} from "./content/IllustrationHandler.ts";
 
 export interface Env {
     db: D1Database;
@@ -30,13 +30,13 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
     return new ScopeBuilder()
         .add({db, httpClient, r2, digest, ai})
         .add(({db}) => ({finder: new D1GameFinder(db)}))
-        .add(({finder}) => ({librarian: new Librarian(finder)}))
+        .add(({finder}) => ({librarian: new ContentSearch(finder)}))
         .add(({httpClient, r2, finder, digest, ai}) => ({
             coverArt: new R2CachingHandler(r2, digest, coverArt(httpClient)),
             story: new R2CachingHandler(r2, digest, story(httpClient, finder)),
-            art: new R2CachingHandler(r2, digest, request => new ArtHandler(ai).handle(request)),
+            art: new R2CachingHandler(r2, digest, request => new IllustrationHandler(ai).handle(request)),
         }))
-        .add(({finder}) => ({content: new ClientHandler(finder)}))
+        .add(({finder}) => ({content: new ContentHandler(finder)}))
         .add(({
                   r2,
                   librarian,
