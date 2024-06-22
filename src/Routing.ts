@@ -1,27 +1,23 @@
-import type {Librarian} from "./Librarian.tsx";
+import type {ContentSearch} from "./content/ContentSearch.tsx";
 import type {R2CachingHandler} from "./R2CachingHandler.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
-import type {ClientHandler} from "./content/ClientHandler.tsx";
+import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 
 
 export class Routing {
     constructor(private r2: R2Bucket,
-                private librarian: Librarian,
+                private librarian: ContentSearch,
                 private coverArt: R2CachingHandler,
                 private story: R2CachingHandler,
-                private content: ClientHandler,
+                private content: ContentHandler,
                 private art: R2CachingHandler) {
     }
 
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
         const [, section, id, subsection] = uri.path.split('/')
-
-        if (uri.path === '/librarian') {
-            return this.librarian.handle(request);
-        }
 
         if (section === 'content') {
             if (subsection === 'cover-art') {
@@ -39,6 +35,8 @@ export class Routing {
             if (id) {
                 return this.content.handle(request);
             }
+
+            return this.librarian.handle(request);
         }
 
         if (uri.path.endsWith('/')) {
