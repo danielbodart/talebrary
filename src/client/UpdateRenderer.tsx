@@ -20,7 +20,7 @@ import {
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
-import {commonCommands, type Describable, type SceneContext} from "../types.ts";
+import {commonCommands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -207,7 +207,14 @@ export class UpdateRenderer {
                     lastCard.classList.add('scene');
 
                     fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
-                        if(response.ok) response.text().then(text => console.log('suggestions', text));
+                        if(response.ok) response.json().then((json:Suggestions) => {
+                            const reg = new RegExp('\\b(' + json.nouns.join('|') + ')\\b', 'gm');
+                            Array.from(lastCard.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => {
+                                const children = fragment(e.innerText.replace(reg, match => <span class="instruction">{match}</span>));
+                                e.innerHTML = '';
+                                e.append(children);
+                            })
+                        });
                     });
                 }
             }
