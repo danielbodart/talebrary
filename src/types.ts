@@ -32,6 +32,11 @@ export const commonCommands = ["about", "again", "all", "ask", "break", "burn", 
     "under", "undo", "unlock", "up", "wait", "wake", "wave", "wear", "west", "with"];
 
 
+export interface Suggestions {
+    actions: string[];
+    commands: string[];
+    nouns: string[];
+}
 
 export interface ScopedMessage {
     role: string;

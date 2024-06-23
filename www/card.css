@@ -259,6 +259,7 @@ body.search {
 
 .window.buffer span.instruction {
     cursor: pointer;
+    font-weight: 700;
 }
 
 .window.buffer span.instruction:hover {
