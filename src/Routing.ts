@@ -4,15 +4,17 @@ import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
+import type {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 
 
 export class Routing {
     constructor(private r2: R2Bucket,
-                private librarian: ContentSearch,
+                private search: ContentSearch,
                 private coverArt: R2CachingHandler,
                 private story: R2CachingHandler,
                 private content: ContentHandler,
-                private art: R2CachingHandler) {
+                private art: R2CachingHandler,
+                private suggestions: SuggestionsHandler ) {
     }
 
     async handle(request: Request): Promise<Response> {
@@ -32,11 +34,15 @@ export class Routing {
                 return this.story.handle(request)
             }
 
+            if (subsection === 'suggestions') {
+                return this.suggestions.handle(request)
+            }
+
             if (id) {
                 return this.content.handle(request);
             }
 
-            return this.librarian.handle(request);
+            return this.search.handle(request);
         }
 
         if (uri.path.endsWith('/')) {

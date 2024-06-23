@@ -12,6 +12,7 @@ import {ContentHandler} from "./content/ContentHandler.tsx";
 import {IllustrationHandler} from "./content/IllustrationHandler.ts";
 import {coverArt} from "./content/CoverArt.ts";
 import {story} from "./content/Story.ts";
+import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 
 export interface Env {
     db: D1Database;
@@ -32,24 +33,26 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
     return new ScopeBuilder()
         .add({db, httpClient, r2, digest, ai})
         .add(({db}) => ({finder: new D1GameFinder(db)}))
-        .add(({finder}) => ({librarian: new ContentSearch(finder)}))
+        .add(({finder}) => ({search: new ContentSearch(finder)}))
         .add(({httpClient, r2, finder, digest, ai}) => {
             const illustration = new IllustrationHandler(ai);
             return {
                 coverArt: new R2CachingHandler(r2, digest, coverArt(httpClient, finder, illustration)),
                 story: new R2CachingHandler(r2, digest, story(httpClient, finder)),
                 art: new R2CachingHandler(r2, digest, request => illustration.handle(request)),
+                suggestions: new SuggestionsHandler(ai)
             };
         })
         .add(({finder}) => ({content: new ContentHandler(finder)}))
         .add(({
                   r2,
-                  librarian,
+                  search,
                   coverArt,
                   story,
                   content,
-                  art
-              }) => ({routing: new Routing(r2, librarian, coverArt, story, content, art)}))
+                  art,
+                  suggestions
+              }) => ({routing: new Routing(r2, search, coverArt, story, content, art, suggestions)}))
         .add(({
                   routing,
                   digest

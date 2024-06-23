@@ -2,7 +2,7 @@ import type {Ai} from "@cloudflare/workers-types";
 
 import {Uri} from "../http/Uri.ts";
 import {type Describable, type SceneContext} from "../types.ts";
-import {generatePrompt} from "./Prompts.ts";
+import {illustrationPrompt} from "./Prompts.ts";
 
 export class IllustrationHandler {
     constructor(private ai: Ai) {
@@ -18,7 +18,7 @@ export class IllustrationHandler {
         if (!rawPrompt) return new Response('Not Found', {status: 404});
 
         const data: Describable | SceneContext = JSON.parse(rawPrompt);
-        const prompt = generatePrompt(data).replace(/\s+/g, ' ');
+        const prompt = illustrationPrompt(data).replace(/\s+/g, ' ');
 
         const response = await this.ai.run(model, {prompt});
 
