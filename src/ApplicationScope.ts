@@ -40,7 +40,7 @@ export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2
                 coverArt: new R2CachingHandler(r2, digest, coverArt(httpClient, finder, illustration)),
                 story: new R2CachingHandler(r2, digest, story(httpClient, finder)),
                 art: new R2CachingHandler(r2, digest, request => illustration.handle(request)),
-                suggestions: new SuggestionsHandler(ai)
+                suggestions: new R2CachingHandler(r2, digest, request => new SuggestionsHandler(ai).handle(request))
             };
         })
         .add(({finder}) => ({content: new ContentHandler(finder)}))
