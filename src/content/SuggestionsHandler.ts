@@ -22,11 +22,22 @@ export class SuggestionsHandler {
         const output: AiTextGenerationOutput = await this.ai.run(model, prompt);
         if (!('response' in output)) return new Response('Unsupported response', {status: 404});
 
-        return new Response(output.response, {
-            headers: {
-                "content-type": "application/json",
-            },
-        });
+        try {
+            const json = JSON.parse(output.response!);
+            return new Response(JSON.stringify(json), {
+                headers: {
+                    "content-type": "application/json",
+                },
+            });
+        } catch (e) {
+            return new Response(`Model failed to return JSON:
+${output.response!}`, {
+                status: 500,
+                headers: {
+                    "content-type": "plain/text",
+                },
+            });
+        }
     }
 }
 
