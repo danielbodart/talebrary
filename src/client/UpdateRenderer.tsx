@@ -20,7 +20,7 @@ import {
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
-import type {Describable, SceneContext} from "../types.ts";
+import {commonCommands, type Describable, type SceneContext} from "../types.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -186,14 +186,16 @@ export class UpdateRenderer {
                     const title = this.document.title;
                     const description = this.document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
                     const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
+                    const current = scene(lastCard);
                     const data: SceneContext = {
                         story: {
                             title,
                             description
                         },
-                        scene: scene(lastCard),
+                        scene: current,
                         previous: previous ? scene(previous) : undefined,
                     };
+
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${model}`;
                         lastCard.insertBefore(
@@ -202,7 +204,11 @@ export class UpdateRenderer {
                             lastCard.firstChild);
                     }
 
-                    lastCard.classList.add('scene')
+                    lastCard.classList.add('scene');
+
+                    fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
+                        if(response.ok) response.text().then(text => console.log('suggestions', text));
+                    });
                 }
             }
         })
@@ -212,11 +218,7 @@ export class UpdateRenderer {
         '@cf/bytedance/stable-diffusion-xl-lightning',
     ];
 
-    commonCommands = ["about", "again", "ask", "break", "burn", "climb", "curse", "dig", "down", "drink", "drop",
-        "east", "eat", "enter", "examine", "examine", "feel", "fill", "give", "go", "help", "in", "info", "inventory",
-        "jump", "listen", "look", "north", "off", "on", "open", "out", "pray", "pull", "push", "put", "restore", "save",
-        "search", "show", "sing", "sleep", "smell", "south", "take", "talk", "tell", "throw", "to", "turn", "turn",
-        "under", "undo", "unlock", "up", "wait", "wake", "wave", "wear", "west", "with"]
+
 
     updateInput(updates: (CharInput | LineInput)[]) {
         const inputs = Array.from(this.document.querySelectorAll('.input-control'));
@@ -227,7 +229,7 @@ export class UpdateRenderer {
             if (!window) throw new Error(`Could not find window ${update.id}`);
 
             const history = Array.from(window.querySelectorAll<HTMLElement>('div.input')).flatMap(e => e.innerText.split(/\s+/));
-            const auto = Array.from(new Set([...this.commonCommands, ...history])).sort();
+            const auto = Array.from(new Set([...commonCommands, ...history])).sort();
 
             window.append(fragment(
                 <div class="card input-control">
