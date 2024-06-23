@@ -34,6 +34,8 @@ body {
     background-position: center bottom;
     margin: 0;
     padding: 0;
+    hyphens: auto;
+    hyphenate-limit-chars: 6 3 2;
 }
 
 :root {
