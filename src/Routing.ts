@@ -14,7 +14,7 @@ export class Routing {
                 private story: R2CachingHandler,
                 private content: ContentHandler,
                 private art: R2CachingHandler,
-                private suggestions: SuggestionsHandler ) {
+                private suggestions: R2CachingHandler ) {
     }
 
     async handle(request: Request): Promise<Response> {
