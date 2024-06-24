@@ -208,12 +208,8 @@ export class UpdateRenderer {
 
                     fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
                         if(response.ok) response.json().then((json:Suggestions) => {
-                            const reg = new RegExp('\\b(' + json.nouns.join('|') + ')\\b', 'gm');
-                            Array.from(lastCard.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => {
-                                const children = fragment(e.innerText.replace(reg, match => <span class="instruction">{match}</span>));
-                                e.innerHTML = '';
-                                e.append(children);
-                            })
+                            lastCard.append(fragment(<div class="suggestions">{[...json.nouns, ...json.commands, ...json.actions].sort().map(action =>
+                                <span class="instruction">{action}</span> )}</div>))
                         });
                     });
                 }
