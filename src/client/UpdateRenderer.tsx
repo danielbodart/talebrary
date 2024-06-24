@@ -207,9 +207,14 @@ export class UpdateRenderer {
                     lastCard.classList.add('scene');
 
                     fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
-                        if(response.ok) response.json().then((json:Suggestions) => {
-                            lastCard.append(fragment(<div class="suggestions">{[...json.nouns, ...json.commands, ...json.actions].sort().map(action =>
-                                <span class="instruction">{action}</span> )}</div>))
+                        if (response.ok) response.json().then((json: Suggestions) => {
+                            const result = [json.commands, json.nouns, json.actions].reduce((acc, val) => {
+                                if (acc.length < 10) acc.push(...val);
+                                return acc;
+                            }, []).sort();
+
+                            lastCard.append(fragment(<div class="suggestions">{result.map(action =>
+                                <span class="instruction">{action}</span>)}</div>))
                         });
                     });
                 }
@@ -220,7 +225,6 @@ export class UpdateRenderer {
     models = [
         '@cf/bytedance/stable-diffusion-xl-lightning',
     ];
-
 
 
     updateInput(updates: (CharInput | LineInput)[]) {
