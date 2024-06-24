@@ -34,8 +34,6 @@ body {
     background-position: center bottom;
     margin: 0;
     padding: 0;
-    hyphens: auto;
-    hyphenate-limit-chars: 6 3 2;
 }
 
 :root {
@@ -227,34 +225,63 @@ body.search {
     aspect-ratio: 1/1;
 }
 
-
-.title, div.header, div.subheader {
+.title, div.header, div.subheader, div.suggestions {
     font-family: "League Spartan", sans-serif;
     font-optical-sizing: auto;
     font-weight: 700;
     font-style: normal;
     padding: 10px;
-    font-size: 1.5em;
     background-color: var(--eerie-black);
     color: var(--white-smoke);
     border-top: 10px ridge var(--sunset);
     border-bottom: 10px ridge var(--sunset);
+}
+
+.title, div.header, div.subheader {
+    font-size: 1.5rem;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
 }
 
-.title:first-child, div.header:first-child, div.subheader:first-child {
+.title:first-child, div.header:first-child, div.subheader:first-child, div.suggestions:first-child {
     border-top: none;
 }
 
-.title:last-child, div.header:last-child, div.subheader:last-child {
+.title:last-child, div.header:last-child, div.subheader:last-child, div.suggestions:last-child {
     border-bottom: none;
 }
 
 .span.header, span.subheader {
     font-weight: 700;
+}
+
+div.suggestions {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+div.suggestions span.instruction {
+    border: 2px solid var(--white-smoke);
+    border-radius: 2rem;
+    padding: 5px 10px;
+    margin: 5px;
+    display: inline-block;
+}
+
+div.suggestions::before {
+    content: "";
+    display: inline-block;
+    background-image: url('icons/lightbulb-regular.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 1em;
+    height: 1em;
+    font-size: 2rem;
+    margin-right: 10px;
 }
 
 .window.buffer span.instruction {
@@ -272,6 +299,8 @@ body.search {
 
 div.normal, div.alert, div.emphasized, div.preformatted {
     padding: 10px 10px 0 10px;
+    hyphens: auto;
+    hyphenate-limit-chars: 6 3 2;
 }
 
 div.normal:last-child, div.alert:last-child, div.emphasized:last-child, div.preformatted:last-child {
