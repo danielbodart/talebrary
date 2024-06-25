@@ -61,6 +61,7 @@ function instructions(line: LineData, maxLength: number = 4): string {
 
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
+        Instruction.register(document.defaultView!)
         messageHandler.postMessage({
             type: "init",
             gen: 0,
