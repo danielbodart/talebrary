@@ -5,7 +5,7 @@ import {md5} from "./digest.ts";
 export default {
     fetch(request: Request, env: Env) {
         // @ts-ignore
-        const app = applicationScope(env.db, client, env.r2, md5, env.ai);
+        const app = applicationScope(env.db, client, env.r2, md5, env.ai, env);
         return app.handler(request);
     },
 }

@@ -4,16 +4,21 @@ import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
+import type {DependsOn} from "./ApplicationScope.ts";
+import type {HoneycombSender} from "./events/HoneycombSender.ts";
 
+export interface RouterConfig extends 
+    DependsOn<'r2', R2Bucket>,
+    DependsOn<'search', ContentSearch>,
+    DependsOn<'coverArt', R2CachingHandler>,
+    DependsOn<'story', R2CachingHandler>,
+    DependsOn<'content', ContentHandler>,
+    DependsOn<'art', R2CachingHandler>,
+    DependsOn<'suggestions', R2CachingHandler>,
+    DependsOn<'events', HoneycombSender> {}
 
 export class Routing {
-    constructor(private r2: R2Bucket,
-                private search: ContentSearch,
-                private coverArt: R2CachingHandler,
-                private story: R2CachingHandler,
-                private content: ContentHandler,
-                private art: R2CachingHandler,
-                private suggestions: R2CachingHandler ) {
+    constructor(private deps: RouterConfig) {
     }
 
     async handle(request: Request): Promise<Response> {
@@ -22,32 +27,36 @@ export class Routing {
 
         if (section === 'content') {
             if (subsection === 'cover-art') {
-                return this.coverArt.handle(request);
+                return this.deps.coverArt.handle(request);
             }
 
             if (subsection === 'art') {
-                return this.art.handle(request);
+                return this.deps.art.handle(request);
             }
 
             if (subsection === 'story') {
-                return this.story.handle(request)
+                return this.deps.story.handle(request)
             }
 
             if (subsection === 'suggestions') {
-                return this.suggestions.handle(request)
+                return this.deps.suggestions.handle(request)
             }
 
             if (id) {
-                return this.content.handle(request);
+                return this.deps.content.handle(request);
             }
 
-            return this.search.handle(request);
+            return this.deps.search.handle(request);
+        }
+
+        if(section === 'events') {
+            return this.deps.events.handle(request);
         }
 
         if (uri.path.endsWith('/')) {
             uri.path += 'index.html';
         }
 
-        return toResponse(await this.r2.get(uri.path.slice(1)));
+        return toResponse(await this.deps.r2.get(uri.path.slice(1)));
     }
 }
