@@ -13,8 +13,20 @@ import {IllustrationHandler} from "./content/IllustrationHandler.ts";
 import {coverArt} from "./content/CoverArt.ts";
 import {story} from "./content/Story.ts";
 import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
+import {SystemTimers} from "./timers.ts";
+import {SystemClock} from "./clock.ts";
+import {HoneycombSender} from "./events/HoneycombSender.ts";
 
-export interface Env {
+export interface Config {
+    HONEYCOMB_API_KEY: string;
+    HONEYCOMB_BATCH_SIZE: number;
+}
+
+export const DEFAULT_CONFIG = {
+    HONEYCOMB_BATCH_SIZE: 50
+}
+
+export interface Env extends Config {
     db: D1Database;
     r2: R2Bucket;
     ai: Ai;
@@ -29,30 +41,29 @@ export class ScopeBuilder {
     }
 }
 
-export function applicationScope(db: D1Database, httpClient: HttpHandler, r2: R2Bucket, digest: Digest, ai: Ai) {
+export type DependsOn<K extends string, T> = {
+    [P in K]: T;
+}
+
+export function applicationScope(db: D1Database, http: HttpHandler, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
     return new ScopeBuilder()
-        .add({db, httpClient, r2, digest, ai})
+        .add({db, http, r2, digest, ai, ...config})
+        .add({clock: new SystemClock()})
+        .add(({clock}) => ({timers: new SystemTimers(clock)}))
+        .add((deps) => ({events: new HoneycombSender(deps)}))
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({search: new ContentSearch(finder)}))
-        .add(({httpClient, r2, finder, digest, ai}) => {
+        .add(({http, r2, finder, digest, ai}) => {
             const illustration = new IllustrationHandler(ai);
             return {
-                coverArt: new R2CachingHandler(r2, digest, coverArt(httpClient, finder, illustration)),
-                story: new R2CachingHandler(r2, digest, story(httpClient, finder)),
+                coverArt: new R2CachingHandler(r2, digest, coverArt(http, finder, illustration)),
+                story: new R2CachingHandler(r2, digest, story(http, finder)),
                 art: new R2CachingHandler(r2, digest, request => illustration.handle(request)),
                 suggestions: new R2CachingHandler(r2, digest, request => new SuggestionsHandler(ai).handle(request))
             };
         })
         .add(({finder}) => ({content: new ContentHandler(finder)}))
-        .add(({
-                  r2,
-                  search,
-                  coverArt,
-                  story,
-                  content,
-                  art,
-                  suggestions
-              }) => ({routing: new Routing(r2, search, coverArt, story, content, art, suggestions)}))
+        .add((deps) => ({routing: new Routing(deps)}))
         .add(({
                   routing,
                   digest

@@ -23,6 +23,8 @@ import * as elements from "typed-html";
 import {commonCommands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
 import {type InstructionEvent, InstructionEventName} from "./comonents/InstructionEvent.tsx";
 import {Instruction} from "./comonents/Instruction.tsx";
+import {EventBuilder} from "../events/EventBuilder.ts";
+import {SystemClock} from "../clock.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -59,7 +61,6 @@ function instructions(line: LineData, maxLength: number = 4): string {
 
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
-        Instruction.register(document.defaultView!)
         messageHandler.postMessage({
             type: "init",
             gen: 0,
@@ -218,6 +219,9 @@ export class UpdateRenderer {
                                 <an-instruction>{action}</an-instruction>)}</div>))
                         });
                     });
+
+                    const event = new EventBuilder(this.document.defaultView!, new SystemClock()).build(current);
+                    this.document.defaultView?.navigator.sendBeacon(`/events`, JSON.stringify(event));
                 }
             }
         })

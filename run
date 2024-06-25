@@ -67,6 +67,7 @@ function check-rclone() {
 
 function deploy() {
   check
+  echo ${HONEYCOMB_API_KEY?Required} | wrangler secret put HONEYCOMB_API_KEY
   wrangler deploy
   check-rclone
   rclone --config rclone.conf copy www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60" -v
