@@ -5,7 +5,7 @@ import {toResponse} from "./ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {DependsOn} from "./ApplicationScope.ts";
-import type {HoneycombSender} from "./events/HoneycombSender.ts";
+import type {EventBatcher} from "./events/EventBatcher.ts";
 
 export interface RouterConfig extends 
     DependsOn<'r2', R2Bucket>,
@@ -15,7 +15,7 @@ export interface RouterConfig extends
     DependsOn<'content', ContentHandler>,
     DependsOn<'art', R2CachingHandler>,
     DependsOn<'suggestions', R2CachingHandler>,
-    DependsOn<'events', HoneycombSender> {}
+    DependsOn<'events', EventBatcher> {}
 
 export class Routing {
     constructor(private deps: RouterConfig) {

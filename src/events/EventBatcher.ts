@@ -1,8 +1,13 @@
 import type {HttpHandler} from "../http/mod.ts";
 import type {Timers} from "../timers.ts";
 import type {DependsOn} from "../ApplicationScope.ts";
+import type {Clock} from "../clock.ts";
 
-export interface EventBatcherConfig extends DependsOn<'http', HttpHandler>, DependsOn<'timers', Timers> {
+export interface EventBatcherConfig extends
+    DependsOn<'http', HttpHandler>,
+    DependsOn<'timers', Timers>,
+    DependsOn<'clock', Clock>
+{
     HONEYCOMB_API_KEY: string
     HONEYCOMB_BATCH_SIZE: number
 }
@@ -10,7 +15,7 @@ export interface EventBatcherConfig extends DependsOn<'http', HttpHandler>, Depe
 export const DEFAULT_BATCH_SIZE = 50;
 
 export class EventBatcher {
-    readonly BASE_URL = `https://api.eu1.honeycomb.io/1/batch/`;
+    readonly BASE_URL = `https://api.honeycomb.io/1/batch/talebrary`;
     private queued: object[] = [];
 
     constructor(private deps: EventBatcherConfig) {
@@ -49,7 +54,11 @@ export class EventBatcher {
 
         const response = await this.deps.http(new Request(this.BASE_URL, {
             method: 'POST',
-            body: JSON.stringify(batch.map(data => ({data}))),
+            body: JSON.stringify(batch.map(data => ({
+                time: this.deps.clock.now(),
+                samplerate: 1,
+                data
+            }))),
             headers: {
                 'Content-Type': 'application/json',
                 'X-Honeycomb-Team': this.deps.HONEYCOMB_API_KEY,

@@ -11,11 +11,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@types/libhoney": "^4.1.1",
     "buffer": "^6.0.3",
     "emglken": "^0.6.0",
     "fast-xml-parser": "^4.3.6",
-    "libhoney": "^4.3.0",
     "linkedom": "^0.18.0",
     "mute-stream": "^1.0.0",
     "typed-html": "^3.0.1"
