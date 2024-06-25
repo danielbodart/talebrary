@@ -257,18 +257,33 @@ body.search {
     font-weight: 700;
 }
 
+.window.buffer an-instruction {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.buffer an-instruction:hover {
+    text-decoration: underline;
+}
+
 div.suggestions {
     margin-top: 10px;
     display: flex;
     flex-wrap: wrap;
+    gap: 6px;
 }
 
-div.suggestions span.instruction {
+div.suggestions an-instruction {
     border: 2px solid var(--white-smoke);
-    border-radius: 2rem;
-    padding: 5px 10px;
-    margin: 5px;
+    border-radius: 7px;
+    padding: 6px 7px 6px 6px;
     display: inline-block;
+}
+
+div.suggestions an-instruction:hover {
+    text-decoration: none;
+    background-color: var(--white-smoke);
+    color: var(--eerie-black);
 }
 
 div.suggestions::before {
@@ -278,21 +293,9 @@ div.suggestions::before {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center center;
-    width: 1em;
-    height: 1em;
-    font-size: 2rem;
-    margin-right: 10px;
+    height: 32px;
+    width: 24px;
 }
-
-.window.buffer span.instruction {
-    cursor: pointer;
-    font-weight: 700;
-}
-
-.window.buffer span.instruction:hover {
-    text-decoration: underline;
-}
-
 .emphasized {
     font-style: italic;
 }

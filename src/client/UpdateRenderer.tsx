@@ -21,6 +21,8 @@ import {
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
 import {commonCommands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
+import {type InstructionEvent, InstructionEventName} from "./comonents/InstructionEvent.tsx";
+import {Instruction} from "./comonents/Instruction.tsx";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -40,16 +42,16 @@ function wordCount(value: string): number {
     return value.match(wordCountPattern)?.length ?? 0;
 }
 
-const capitalWords = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
+const capitalWords = /\b\p{Lu}{3,}\b(?:\s+\b\p{Lu}{3,}\b)*/gu;
 
 function instructions(line: LineData, maxLength: number = 4): string {
     if (line.style === 'normal') {
         return line.text.replace(capitalWords, match => wordCount(match) <= maxLength ?
-            <span class="instruction">{match}</span> : '');
+            <an-instruction>{match}</an-instruction> : '');
     }
     if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
         if (wordCount(line.text) <= maxLength) {
-            return <span class="instruction">{line.text}</span>
+            return <an-instruction>{line.text}</an-instruction>
         }
     }
     return line.text;
@@ -57,6 +59,7 @@ function instructions(line: LineData, maxLength: number = 4): string {
 
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
+        Instruction.register(document.defaultView!)
         messageHandler.postMessage({
             type: "init",
             gen: 0,
@@ -67,13 +70,11 @@ export class UpdateRenderer {
             if (!isUpdateMessage(message)) return;
             this.handle(message as UpdateMessage);
         })
-        document.addEventListener('click', ev => {
-            if (ev.target instanceof HTMLElement && ev.target.matches('.window.buffer span.instruction')) {
-                const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
-                htmlInput.value = `${htmlInput.value} ${ev.target.innerText}`.trim();
-                htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
-            }
-        }, true)
+        document.addEventListener(InstructionEventName, (ev:CustomEvent<InstructionEvent>) => {
+            const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
+            htmlInput.value = `${htmlInput.value} ${ev.detail.text}`.trim();
+            htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
+        })
     }
 
     handle(update: UpdateMessage): void {
@@ -214,7 +215,7 @@ export class UpdateRenderer {
                             }, []).sort();
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
-                                <span class="instruction">{action}</span>)}</div>))
+                                <an-instruction>{action}</an-instruction>)}</div>))
                         });
                     });
                 }
