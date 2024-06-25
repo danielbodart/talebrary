@@ -15,7 +15,7 @@ import {story} from "./content/Story.ts";
 import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 import {SystemTimers} from "./timers.ts";
 import {SystemClock} from "./clock.ts";
-import {HoneycombSender} from "./events/HoneycombSender.ts";
+import {EventBatcher} from "./events/EventBatcher.ts";
 
 export interface Config {
     HONEYCOMB_API_KEY: string;
@@ -50,7 +50,7 @@ export function applicationScope(db: D1Database, http: HttpHandler, r2: R2Bucket
         .add({db, http, r2, digest, ai, ...config})
         .add({clock: new SystemClock()})
         .add(({clock}) => ({timers: new SystemTimers(clock)}))
-        .add((deps) => ({events: new HoneycombSender(deps)}))
+        .add((deps) => ({events: new EventBatcher(deps)}))
         .add(({db}) => ({finder: new D1GameFinder(db)}))
         .add(({finder}) => ({search: new ContentSearch(finder)}))
         .add(({http, r2, finder, digest, ai}) => {
