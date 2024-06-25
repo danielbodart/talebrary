@@ -1,9 +1,11 @@
 import {type InstructionEvent, InstructionEventName} from "./InstructionEvent.tsx";
 
+export const InstructionTagName = 'an-instruction'
+
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            "instruction": {};
+            [InstructionTagName]: {};
         }
     }
 }
@@ -27,7 +29,9 @@ export class Instruction {
     }
 
     static register(dep: { customElements: CustomElementRegistry } & InstructionDependencies) {
-        dep.customElements.define(InstructionEventName, this.create(dep))
+        if (!dep.customElements.get(InstructionTagName)) {
+            dep.customElements.define(InstructionTagName, this.create(dep))
+        }
     }
 
 }
