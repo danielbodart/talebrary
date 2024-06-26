@@ -3,21 +3,26 @@ import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import {Uri} from "./http/Uri.ts";
 import type {Digest} from "./digest.ts";
+import type {DependsOn} from "./ApplicationScope.ts";
 
 
 export function unquote(oldEtag: string) {
     return oldEtag.replace('"', '');
 }
 
+export interface R2CachingHandlerDeps extends DependsOn<'r2', R2Bucket>,
+    DependsOn<'digest', Digest> {
+}
+
 export class R2CachingHandler {
-    constructor(private r2: R2Bucket, private digest: Digest, private http: HttpHandler) {
+    constructor(private deps: R2CachingHandlerDeps, private http: HttpHandler) {
     }
 
     async handle(request: Request): Promise<Response> {
         const key = await this.key(request);
         try {
             const oldEtag = request.headers.get('if-none-match');
-            const response = toResponse(await this.r2.get(key, oldEtag ? {onlyIf: {etagDoesNotMatch: unquote(oldEtag)}} : undefined));
+            const response = toResponse(await this.deps.r2.get(key, oldEtag ? {onlyIf: {etagDoesNotMatch: unquote(oldEtag)}} : undefined));
             if (response.status !== 404) {
                 console.log('Found in R2', key, response.status);
                 return response;
@@ -32,7 +37,7 @@ export class R2CachingHandler {
 
         const buffer = await response.arrayBuffer();
         try {
-            const result = await this.r2.put(key, buffer, {
+            const result = await this.deps.r2.put(key, buffer, {
                 httpMetadata: {
                     contentType: response.headers.get('content-type') ?? "application/octet-stream",
                     cacheControl: 'public, max-age=60'
@@ -47,6 +52,6 @@ export class R2CachingHandler {
 
     private async key(request: Request) {
         const {path, query} = new Uri(request.url);
-        return path.substring(1) + (query ? `/${await this.digest(new TextEncoder().encode(query).buffer)}` : '')
+        return path.substring(1) + (query ? `/${await this.deps.digest(new TextEncoder().encode(query).buffer)}` : '')
     }
 }
