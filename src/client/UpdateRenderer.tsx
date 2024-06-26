@@ -221,7 +221,7 @@ export class UpdateRenderer {
                         });
                     });
 
-                    const event = new EventBuilder(this.document.defaultView!, new SystemClock()).build(current);
+                    const event = new EventBuilder(this.document.defaultView!, new SystemClock()).build([current, previous].filter(Boolean));
                     this.document.defaultView?.navigator.sendBeacon(`/events`, JSON.stringify(event));
                 }
             }
