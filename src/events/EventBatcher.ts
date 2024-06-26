@@ -12,8 +12,6 @@ export interface EventBatcherConfig extends
     HONEYCOMB_BATCH_SIZE: number
 }
 
-export const DEFAULT_BATCH_SIZE = 50;
-
 export class EventBatcher {
     readonly BASE_URL = `https://api.honeycomb.io/1/batch/talebrary`;
     private queued: object[] = [];
