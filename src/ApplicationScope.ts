@@ -32,42 +32,61 @@ export interface Env extends Config {
     ai: Ai;
 }
 
-export class ScopeBuilder {
-    add<R = object>(fun: (scope: this) => R): this & R ;
-    add<R = object>(instance: R): this & R ;
-    add<R = object>(value: any): this & R {
-        const result = typeof value === 'function' ? value(this) : value;
-        return Object.assign(this, result);
+export type DependsOn<K extends string | number | symbol, V> = {
+    [P in K]: V;
+}
+
+export class LazyMap {
+    set<K extends string, V>(key: K, fun: (deps: this) => V): this & DependsOn<K, V> {
+        return Object.defineProperty(this, key, {
+            get: () => {
+                const value = fun(this);
+                this.setInstance(key, value)
+                return value;
+            },
+            configurable: true
+        }) as any;
+    }
+
+    setInstance<K extends string, V>(key: K, value: V): this & DependsOn<K, V> {
+        return Object.defineProperty(this, key, {value, configurable: true}) as any;
+    }
+
+    decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): /* Omit<this, K> */this & DependsOn<K, V> {
+        const p = Object.getOwnPropertyDescriptor(this, key);
+        if (!p) throw new Error(`No previous key for '${String(key)}' found`);
+        delete this[key];
+        return this.set(String(key), deps => {
+            Object.defineProperty(deps, key, p);
+            return fun(deps)
+        }) as any;
     }
 }
 
-export type DependsOn<K extends string, T> = {
-    [P in K]: T;
+export function applicationScope(http: HttpHandler, db: D1Database, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
+    return new LazyMap()
+        .setInstance('HONEYCOMB_API_KEY', config.HONEYCOMB_API_KEY)
+        .setInstance('HONEYCOMB_BATCH_SIZE', config.HONEYCOMB_BATCH_SIZE)
+        .setInstance('db', db)
+        .setInstance('http', http)
+        .setInstance('r2', r2)
+        .setInstance('digest', digest)
+        .setInstance('ai', ai)
+        .setInstance('clock', new SystemClock())
+        .set('timers', ({clock}) => new SystemTimers(clock))
+        .set('events', deps => new EventBatcher(deps))
+        .set('finder', ({db}) => new D1GameFinder(db))
+        .set('search', ({finder}) => new ContentSearch(finder))
+        .set('illustration', ({ai}) => new IllustrationHandler(ai))
+        .set('coverArt', deps => new R2CachingHandler(deps, coverArt(deps)))
+        .set('story', deps => new R2CachingHandler(deps, story(deps)))
+        .set('art', deps =>
+            new R2CachingHandler(deps, request => deps.illustration.handle(request)))
+        .set('suggestions', deps =>
+            new R2CachingHandler(deps, request => new SuggestionsHandler(ai).handle(request)))
+        .set('content', ({finder}) => new ContentHandler(finder))
+        .set('handler', deps => new Routing(deps))
+        .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request)))
+        .decorate('handler', ({handler}) => cacheControlHandler(handler))
+        .decorate('handler', ({handler, digest}) => etagHandler(digest, handler))
 }
-
-export function applicationScope(db: D1Database, http: HttpHandler, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
-    return new ScopeBuilder()
-        .add({db, http, r2, digest, ai, ...config})
-        .add({clock: new SystemClock()})
-        .add(({clock}) => ({timers: new SystemTimers(clock)}))
-        .add((deps) => ({events: new EventBatcher(deps)}))
-        .add(({db}) => ({finder: new D1GameFinder(db)}))
-        .add(({finder}) => ({search: new ContentSearch(finder)}))
-        .add(({http, r2, finder, digest, ai}) => {
-            const illustration = new IllustrationHandler(ai);
-            return {
-                coverArt: new R2CachingHandler(r2, digest, coverArt(http, finder, illustration)),
-                story: new R2CachingHandler(r2, digest, story(http, finder)),
-                art: new R2CachingHandler(r2, digest, request => illustration.handle(request)),
-                suggestions: new R2CachingHandler(r2, digest, request => new SuggestionsHandler(ai).handle(request))
-            };
-        })
-        .add(({finder}) => ({content: new ContentHandler(finder)}))
-        .add((deps) => ({routing: new Routing(deps)}))
-        .add(({
-                  routing,
-                  digest
-              }) => ({handler: etagHandler(digest, cacheControlHandler(templateHandler(request => routing.handle(request))))}))
-}
-
-export type ApplicationScope = Omit<ReturnType<typeof applicationScope>, keyof ScopeBuilder>

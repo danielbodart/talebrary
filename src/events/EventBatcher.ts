@@ -3,11 +3,9 @@ import type {Timers} from "../timers.ts";
 import type {DependsOn} from "../ApplicationScope.ts";
 import type {Clock} from "../clock.ts";
 
-export interface EventBatcherConfig extends
-    DependsOn<'http', HttpHandler>,
+export interface EventBatcherConfig extends DependsOn<'http', HttpHandler>,
     DependsOn<'timers', Timers>,
-    DependsOn<'clock', Clock>
-{
+    DependsOn<'clock', Clock> {
     HONEYCOMB_API_KEY: string
     HONEYCOMB_BATCH_SIZE: number
 }
@@ -49,7 +47,10 @@ export class EventBatcher {
         if (this.queued.length === 0) return;
         const batch = this.queued.splice(0, this.batchSize);
         console.log(`Flushing batch of ${batch.length}, remaining in queue ${this.queued.length}`);
+        await this.sendBatch(batch);
+    }
 
+    async sendBatch(batch: object[]) {
         const response = await this.deps.http(new Request(this.BASE_URL, {
             method: 'POST',
             body: JSON.stringify(batch.map(data => ({
@@ -65,9 +66,11 @@ export class EventBatcher {
 
         if (response.ok) {
             console.log('Honeycomb accepted', batch.length);
+            return true;
         } else {
             const responseBody = await response.text();
             console.error('Honeycomb rejected', response.status, responseBody, batch.length);
+            return false;
         }
     }
 }
