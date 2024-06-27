@@ -3,15 +3,15 @@ import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import {Uri} from "./http/Uri.ts";
 import type {Digest} from "./digest.ts";
-import type {DependsOn} from "./ApplicationScope.ts";
+import type {Dependency} from "./ApplicationScope.ts";
 
 
 export function unquote(oldEtag: string) {
     return oldEtag.replace('"', '');
 }
 
-export interface R2CachingHandlerDeps extends DependsOn<'r2', R2Bucket>,
-    DependsOn<'digest', Digest> {
+export interface R2CachingHandlerDeps extends Dependency<'r2', R2Bucket>,
+    Dependency<'digest', Digest> {
 }
 
 export class R2CachingHandler {

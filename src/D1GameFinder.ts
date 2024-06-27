@@ -1,5 +1,6 @@
 import type {D1Database} from "@cloudflare/workers-types";
 import type {SupportedGameType} from "./types.ts";
+import type {Dependency} from "./ApplicationScope.ts";
 
 export interface GameBase {
     id: string;
@@ -23,7 +24,7 @@ export interface GameStory extends GameBase {
 }
 
 export class D1GameFinder {
-    constructor(private db: D1Database) {
+    constructor(deps: Dependency<'db', D1Database>, private db = deps.db) {
     }
 
     async find(search: string): Promise<GameInfo[]> {

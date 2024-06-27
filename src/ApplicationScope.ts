@@ -32,12 +32,27 @@ export interface Env extends Config {
     ai: Ai;
 }
 
-export type DependsOn<K extends string | number | symbol, V> = {
+export type Key = string | number | symbol;
+
+export type Dependency<K extends Key, V> = {
     [P in K]: V;
 }
 
+export interface AutoConstructor<D, T> {
+    new(deps: D): T
+}
+
+export interface Constructor<T> {
+    new(): T
+}
+
+export function isConstructor(func: Function): boolean {
+    return !!func.prototype && func.prototype.constructor === func;
+}
+
+
 export class LazyMap {
-    set<K extends string, V>(key: K, fun: (deps: this) => V): this & DependsOn<K, V> {
+    set<K extends Key, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
         return Object.defineProperty(this, key, {
             get: () => {
                 const value = fun(this);
@@ -48,11 +63,20 @@ export class LazyMap {
         }) as any;
     }
 
-    setInstance<K extends string, V>(key: K, value: V): this & DependsOn<K, V> {
+    setInstance<K extends Key, V>(key: K, value: V): this & Dependency<K, V> {
         return Object.defineProperty(this, key, {value, configurable: true}) as any;
     }
 
-    decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): /* Omit<this, K> */this & DependsOn<K, V> {
+    setConstructor<K extends string, V>(key: K, valueConstructor: Constructor<V> | AutoConstructor<this, V>): this & Dependency<K, V> {
+        if (!isConstructor(valueConstructor)) throw new Error(`${valueConstructor.name} is not a constructor`);
+        if (valueConstructor.length === 0) { // @ts-ignore
+            return this.set(key, () => new valueConstructor());
+        }
+        if (valueConstructor.length === 1) return this.set(key, deps => new valueConstructor(deps));
+        throw new Error(`${valueConstructor.name} must take either no arguments or a dependency object. Use set() with function for other use cases`);
+    }
+
+    decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): /* Omit<this, K> */this & Dependency<K, V> {
         const p = Object.getOwnPropertyDescriptor(this, key);
         if (!p) throw new Error(`No previous key for '${String(key)}' found`);
         delete this[key];
@@ -72,12 +96,13 @@ export function applicationScope(http: HttpHandler, db: D1Database, r2: R2Bucket
         .setInstance('r2', r2)
         .setInstance('digest', digest)
         .setInstance('ai', ai)
-        .setInstance('clock', new SystemClock())
-        .set('timers', ({clock}) => new SystemTimers(clock))
-        .set('events', deps => new EventBatcher(deps))
-        .set('finder', ({db}) => new D1GameFinder(db))
-        .set('search', ({finder}) => new ContentSearch(finder))
-        .set('illustration', ({ai}) => new IllustrationHandler(ai))
+        .setConstructor('clock', SystemClock)
+        .setConstructor('timers', SystemTimers)
+        .setConstructor('eventBatcher', EventBatcher)
+        .set('events', deps => deps.eventBatcher)
+        .setConstructor('finder', D1GameFinder)
+        .setConstructor('search', ContentSearch)
+        .setConstructor('illustration', IllustrationHandler)
         .set('coverArt', deps => new R2CachingHandler(deps, coverArt(deps)))
         .set('story', deps => new R2CachingHandler(deps, story(deps)))
         .set('art', deps =>
@@ -85,7 +110,7 @@ export function applicationScope(http: HttpHandler, db: D1Database, r2: R2Bucket
         .set('suggestions', deps =>
             new R2CachingHandler(deps, request => new SuggestionsHandler(ai).handle(request)))
         .set('content', ({finder}) => new ContentHandler(finder))
-        .set('handler', deps => new Routing(deps))
+        .setConstructor('handler', Routing)
         .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request)))
         .decorate('handler', ({handler}) => cacheControlHandler(handler))
         .decorate('handler', ({handler, digest}) => etagHandler(digest, handler))

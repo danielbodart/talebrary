@@ -3,9 +3,10 @@ import type {Ai} from "@cloudflare/workers-types";
 import {Uri} from "../http/Uri.ts";
 import {type Describable, type SceneContext} from "../types.ts";
 import {illustrationPrompt} from "./Prompts.ts";
+import type {Dependency} from "../ApplicationScope.ts";
 
 export class IllustrationHandler {
-    constructor(private ai: Ai) {
+    constructor(deps: Dependency<'ai', Ai>, private ai: Ai = deps.ai) {
     }
 
     async handle(request: Request): Promise<Response> {
