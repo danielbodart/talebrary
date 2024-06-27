@@ -1,7 +1,8 @@
 import {get, type HttpHandler} from "../http/mod.ts";
-import type {D1GameFinder} from "../D1GameFinder.ts";
+import type {D1GameFinder} from "../cloudflare/D1GameFinder.ts";
 import {Uri} from "../http/Uri.ts";
-import type {Dependency} from "../ApplicationScope.ts";
+
+import type {Dependency} from "../yadic/mod.ts";
 
 export function story(deps: Dependency<'http', HttpHandler> & Dependency<'finder', D1GameFinder>): HttpHandler {
     return async request => {

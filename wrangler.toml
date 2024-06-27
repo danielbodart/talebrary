@@ -1,6 +1,6 @@
 compatibility_date = "2024-05-08"
 name = "talebrary"
-main = "src/app.ts"
+main = "src/cloudflare/app.ts"
 
 [[d1_databases]]
 binding = "db"
@@ -15,11 +15,11 @@ preview_bucket_name = 'talebrary'
 [ai]
 binding = "ai"
 
-#[[queues.producers]]
-#queue = "events"
-#binding = "events"
-#
-#[[queues.consumers]]
-#queue = "events"
-#max_batch_size = 50
-#max_batch_timeout = 1
+[[queues.producers]]
+queue = "events"
+binding = "events"
+
+[[queues.consumers]]
+queue = "events"
+max_batch_size = 50
+max_batch_timeout = 1

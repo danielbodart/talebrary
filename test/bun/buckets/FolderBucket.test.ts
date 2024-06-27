@@ -1,6 +1,6 @@
 import {describe, expect, test} from "bun:test";
 import {env} from 'bun';
-import {FolderBucket} from "../../../src/local/buckets/FolderBucket.ts";
+import {FolderBucket} from "../../../src/bun/buckets/FolderBucket.ts";
 
 describe("FolderBucket", () => {
     const tmpdir = env.TMP_DIR ?? '/tmp/';

@@ -1,6 +1,6 @@
-import type {D1GameFinder, GameStory} from "../D1GameFinder.ts";
+import type {D1GameFinder, GameStory} from "../cloudflare/D1GameFinder.ts";
 import {Uri} from "../http/Uri.ts";
-import {compactText, wellFormed} from "../misc.ts";
+import {compactText, wellFormed} from "../templates/misc.ts";
 import * as elements from 'typed-html';
 
 export class ContentHandler {

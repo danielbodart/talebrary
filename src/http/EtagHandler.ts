@@ -1,5 +1,5 @@
-import type {HttpHandler} from "./http/mod.ts";
-import type {Digest} from "./digest.ts";
+import type {HttpHandler} from "./mod.ts";
+import type {Digest} from "../system/digest.ts";
 
 const safeHeaders = [
     'date',

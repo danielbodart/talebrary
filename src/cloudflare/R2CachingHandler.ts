@@ -1,9 +1,10 @@
-import {type HttpHandler} from "./http/mod.ts";
+import {type HttpHandler} from "../http/mod.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
-import {toResponse} from "./ToResponse.ts";
-import {Uri} from "./http/Uri.ts";
-import type {Digest} from "./digest.ts";
-import type {Dependency} from "./ApplicationScope.ts";
+import {toResponse} from "../http/ToResponse.ts";
+import {Uri} from "../http/Uri.ts";
+import type {Digest} from "../system/digest.ts";
+
+import type {Dependency} from "../yadic/mod.ts";
 
 
 export function unquote(oldEtag: string) {

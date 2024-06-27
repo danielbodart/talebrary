@@ -1,5 +1,6 @@
-import {type Clock, SystemClock} from './clock';
-import type {Dependency} from "./ApplicationScope.ts";
+import {type Clock, SystemClock} from './clock.ts';
+
+import type {Dependency} from "../yadic/mod.ts";
 
 export interface Deadline {
     didTimeout: boolean;

@@ -3,7 +3,8 @@ import type {Ai} from "@cloudflare/workers-types";
 import {Uri} from "../http/Uri.ts";
 import {type Describable, type SceneContext} from "../types.ts";
 import {illustrationPrompt} from "./Prompts.ts";
-import type {Dependency} from "../ApplicationScope.ts";
+
+import type {Dependency} from "../yadic/mod.ts";
 
 export class IllustrationHandler {
     constructor(deps: Dependency<'ai', Ai>, private ai: Ai = deps.ai) {

@@ -1,4 +1,4 @@
-import type {HttpHandler} from "./http/mod.ts";
+import type {HttpHandler} from "./mod.ts";
 
 export class Seconds {
     static minutes(count: number) {
