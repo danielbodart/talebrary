@@ -1,13 +1,13 @@
 import type {ContentSearch} from "./content/ContentSearch.tsx";
-import type {R2CachingHandler} from "./R2CachingHandler.ts";
+import type {R2CachingHandler} from "./cloudflare/R2CachingHandler.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
-import {toResponse} from "./ToResponse.ts";
+import {toResponse} from "./http/ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
-import type {Dependency} from "./ApplicationScope.ts";
-import type {EventBatcher} from "./events/EventBatcher.ts";
+import type {EventHandler} from "./events/EventHandler.ts";
+import type {Dependency} from "./yadic/mod.ts";
 
-export interface RouterConfig extends 
+export interface RouterDependencies extends
     Dependency<'r2', R2Bucket>,
     Dependency<'search', ContentSearch>,
     Dependency<'coverArt', R2CachingHandler>,
@@ -15,10 +15,10 @@ export interface RouterConfig extends
     Dependency<'content', ContentHandler>,
     Dependency<'art', R2CachingHandler>,
     Dependency<'suggestions', R2CachingHandler>,
-    Dependency<'events', EventBatcher> {}
+    Dependency<'events', EventHandler> {}
 
 export class Routing {
-    constructor(private deps: RouterConfig) {
+    constructor(private deps: RouterDependencies) {
     }
 
     async handle(request: Request): Promise<Response> {

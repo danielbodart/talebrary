@@ -1,9 +1,10 @@
-import {D1GameFinder, type GameInfo} from "../D1GameFinder.ts";
+import {D1GameFinder, type GameInfo} from "../cloudflare/D1GameFinder.ts";
 import * as elements from 'typed-html';
 import {Fragment} from "../templates/Fragment.tsx";
-import {roundStep, wellFormed} from "../misc.ts";
+import {roundStep, wellFormed} from "../templates/misc.ts";
 import {Uri} from "../http/Uri.ts";
-import type {Dependency} from "../ApplicationScope.ts";
+
+import type {Dependency} from "../yadic/mod.ts";
 
 export class ContentSearch {
     constructor(deps: Dependency<'finder', D1GameFinder>, private finder = deps.finder) {

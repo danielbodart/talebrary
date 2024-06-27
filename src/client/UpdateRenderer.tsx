@@ -24,7 +24,7 @@ import {commonCommands, type Describable, type SceneContext, type Suggestions} f
 import {type InstructionEvent, InstructionEventName} from "./comonents/InstructionEvent.tsx";
 import {Instruction} from "./comonents/Instruction.tsx";
 import {EventBuilder} from "../events/EventBuilder.ts";
-import {SystemClock} from "../clock.ts";
+import {SystemClock} from "../system/clock.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {

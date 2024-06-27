@@ -1,6 +1,6 @@
 import {describe, expect, test} from "bun:test";
-import {D1GameFinder} from "../src/D1GameFinder.ts";
-import {talebrary} from "../src/local/SqliteDatabase.ts";
+import {D1GameFinder} from "../../src/cloudflare/D1GameFinder.ts";
+import {talebrary} from "../../src/bun/SqliteDatabase.ts";
 
 describe("D1GameFinder", () => {
     const db = talebrary();

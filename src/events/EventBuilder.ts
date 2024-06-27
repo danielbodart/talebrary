@@ -1,5 +1,5 @@
-import type {Clock} from "../clock.ts";
-import {Objects} from "../Objects.ts";
+import type {Clock} from "../system/clock.ts";
+import {Objects} from "../system/Objects.ts";
 import {Uri} from "../http/Uri.ts";
 
 export class EventBuilder {

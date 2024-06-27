@@ -1,8 +1,8 @@
 import type {HttpHandler} from "../http/mod.ts";
-import type {Timers} from "../timers.ts";
-import type {Dependency} from "../ApplicationScope.ts";
-import type {Clock} from "../clock.ts";
+import type {Timers} from "../system/timers.ts";
+import type {Clock} from "../system/clock.ts";
 import type {EventSender} from "./EventSender.ts";
+import type {Dependency} from "../yadic/mod.ts";
 
 export interface EventBatcherConfig extends Dependency<'http', HttpHandler>,
     Dependency<'timers', Timers>,
@@ -11,7 +11,7 @@ export interface EventBatcherConfig extends Dependency<'http', HttpHandler>,
     HONEYCOMB_BATCH_SIZE: number
 }
 
-export class EventBatcher implements EventSender {
+export class HoneycombSender implements EventSender {
     readonly BASE_URL = `https://api.honeycomb.io/1/batch/talebrary`;
     private queued: object[] = [];
 
@@ -27,15 +27,6 @@ export class EventBatcher implements EventSender {
 
     get batchSize() {
         return this.deps.HONEYCOMB_BATCH_SIZE;
-    }
-
-    public async handle(request: Request): Promise<Response> {
-        if (request.method !== 'POST') {
-            return new Response('Method Not Allowed', {status: 405});
-        }
-
-        await this.send(await request.json());
-        return new Response('Accepted', {status: 202});
     }
 
     public async send(event: object) {

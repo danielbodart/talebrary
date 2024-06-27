@@ -1,9 +1,10 @@
 import {get, type HttpHandler} from "../http/mod.ts";
 import {Uri} from "../http/Uri.ts";
-import type {D1GameFinder} from "../D1GameFinder.ts";
+import type {D1GameFinder} from "../cloudflare/D1GameFinder.ts";
 import {IllustrationHandler} from "./IllustrationHandler.ts";
 import type {Describable} from "../types.ts";
-import type {Dependency} from "../ApplicationScope.ts";
+
+import type {Dependency} from "../yadic/mod.ts";
 
 
 export interface CoverArtDeps extends Dependency<'http', HttpHandler>,
