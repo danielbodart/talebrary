@@ -15,11 +15,11 @@ preview_bucket_name = 'talebrary'
 [ai]
 binding = "ai"
 
-[[queues.producers]]
-queue = "events"
-binding = "events"
-
-[[queues.consumers]]
-queue = "events"
-max_batch_size = 50
-max_batch_timeout = 1
+#[[queues.producers]]
+#queue = "events"
+#binding = "events"
+#
+#[[queues.consumers]]
+#queue = "events"
+#max_batch_size = 50
+#max_batch_timeout = 1
