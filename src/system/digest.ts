@@ -7,4 +7,4 @@ export async function md5(value: ArrayBuffer) {
     return hex(await crypto.subtle.digest('MD5', value));
 }
 
-export type Digest = (a:ArrayBufferLike) => Promise<string> | string;
+export type Digest = (a:ArrayBuffer) => Promise<string> | string;

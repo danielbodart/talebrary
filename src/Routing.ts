@@ -1,7 +1,7 @@
 import type {ContentSearch} from "./content/ContentSearch.tsx";
 import type {R2CachingHandler} from "./cloudflare/R2CachingHandler.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
-import {toResponse} from "./http/ToResponse.ts";
+import {toResponse} from "./cloudflare/ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {EventHandler} from "./events/EventHandler.ts";
