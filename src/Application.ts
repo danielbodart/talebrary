@@ -1,4 +1,4 @@
-import {Ai, D1Database, R2Bucket} from "@cloudflare/workers-types";
+import {Ai, D1Database, R2Bucket, type Queue} from "@cloudflare/workers-types";
 import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
 import {type HttpHandler} from "./http/mod.ts";
@@ -32,6 +32,7 @@ export interface Env extends Config {
     db: D1Database;
     r2: R2Bucket;
     ai: Ai;
+    events: Queue
 }
 
 

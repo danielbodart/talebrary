@@ -6,3 +6,4 @@ www/client
 db/full.sql
 .idea/inspectionProfiles/
 games
+wrangler-local.toml
