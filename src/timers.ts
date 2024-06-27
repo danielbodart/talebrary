@@ -1,4 +1,5 @@
 import {type Clock, SystemClock} from './clock';
+import type {Dependency} from "./ApplicationScope.ts";
 
 export interface Deadline {
     didTimeout: boolean;
@@ -27,7 +28,7 @@ export interface Timers {
 }
 
 export class SystemTimers implements Timers {
-    constructor(private clock: Clock = new SystemClock()) {
+    constructor(private deps: Dependency<'clock', Clock>) {
     }
 
     async task<R>(fun: () => Promise<R>): Promise<R> {
@@ -63,14 +64,14 @@ export class SystemTimers implements Timers {
 
     requestIdleCallback(handler: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void, options?: { timeout: number }): number {
         const timeout = options ? options.timeout : 1;
-        let start = this.clock.now().getTime() + timeout;
+        let start = this.deps.clock.now().getTime() + timeout;
         const self = this;
 
         return this.setTimeout(() => {
             handler({
                 didTimeout: false,
                 timeRemaining() {
-                    return Math.max(0, 50.0 - (self.clock.now().getTime() - start));
+                    return Math.max(0, 50.0 - (self.deps.clock.now().getTime() - start));
                 },
             });
         }, timeout);

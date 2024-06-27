@@ -1,16 +1,17 @@
 import type {HttpHandler} from "../http/mod.ts";
 import type {Timers} from "../timers.ts";
-import type {DependsOn} from "../ApplicationScope.ts";
+import type {Dependency} from "../ApplicationScope.ts";
 import type {Clock} from "../clock.ts";
+import type {EventSender} from "./EventSender.ts";
 
-export interface EventBatcherConfig extends DependsOn<'http', HttpHandler>,
-    DependsOn<'timers', Timers>,
-    DependsOn<'clock', Clock> {
+export interface EventBatcherConfig extends Dependency<'http', HttpHandler>,
+    Dependency<'timers', Timers>,
+    Dependency<'clock', Clock> {
     HONEYCOMB_API_KEY: string
     HONEYCOMB_BATCH_SIZE: number
 }
 
-export class EventBatcher {
+export class EventBatcher implements EventSender {
     readonly BASE_URL = `https://api.honeycomb.io/1/batch/talebrary`;
     private queued: object[] = [];
 

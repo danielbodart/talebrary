@@ -6,14 +6,14 @@ describe("D1GameFinder", () => {
     const db = talebrary();
 
     test("if no search parameter is provided just return all", async () => {
-        const finder = new D1GameFinder(db);
+        const finder = new D1GameFinder({db});
         const result = await finder.find('');
         expect(result).toBeArray();
         expect(result.length).toEqual(20)
     });
 
     test("can find by title name", async () => {
-        const finder = new D1GameFinder(db);
+        const finder = new D1GameFinder({db});
         const result = await finder.find("Adventure");
         expect(result).toBeArray();
         const adventure = result.find(g => g.id = 'fft6pu91j85y4acv');
@@ -31,7 +31,7 @@ describe("D1GameFinder", () => {
     });
 
     test("can get story by game id", async () => {
-        const finder = new D1GameFinder(db);
+        const finder = new D1GameFinder({db});
         const result = await finder.get('fft6pu91j85y4acv');
         expect(result).toEqual( {
             id: "fft6pu91j85y4acv",
@@ -45,7 +45,7 @@ describe("D1GameFinder", () => {
     });
 
     test("ignores zip files and instead returns links to raw game file", async () => {
-        const finder = new D1GameFinder(db);
+        const finder = new D1GameFinder({db});
         const result = await finder.get('qpecxgjpxnvw50xq');
         expect(result).toEqual( {
             id: "qpecxgjpxnvw50xq",

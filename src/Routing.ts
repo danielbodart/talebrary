@@ -4,18 +4,18 @@ import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
-import type {DependsOn} from "./ApplicationScope.ts";
+import type {Dependency} from "./ApplicationScope.ts";
 import type {EventBatcher} from "./events/EventBatcher.ts";
 
 export interface RouterConfig extends 
-    DependsOn<'r2', R2Bucket>,
-    DependsOn<'search', ContentSearch>,
-    DependsOn<'coverArt', R2CachingHandler>,
-    DependsOn<'story', R2CachingHandler>,
-    DependsOn<'content', ContentHandler>,
-    DependsOn<'art', R2CachingHandler>,
-    DependsOn<'suggestions', R2CachingHandler>,
-    DependsOn<'events', EventBatcher> {}
+    Dependency<'r2', R2Bucket>,
+    Dependency<'search', ContentSearch>,
+    Dependency<'coverArt', R2CachingHandler>,
+    Dependency<'story', R2CachingHandler>,
+    Dependency<'content', ContentHandler>,
+    Dependency<'art', R2CachingHandler>,
+    Dependency<'suggestions', R2CachingHandler>,
+    Dependency<'events', EventBatcher> {}
 
 export class Routing {
     constructor(private deps: RouterConfig) {

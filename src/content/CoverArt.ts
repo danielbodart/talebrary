@@ -3,12 +3,12 @@ import {Uri} from "../http/Uri.ts";
 import type {D1GameFinder} from "../D1GameFinder.ts";
 import {IllustrationHandler} from "./IllustrationHandler.ts";
 import type {Describable} from "../types.ts";
-import type {DependsOn} from "../ApplicationScope.ts";
+import type {Dependency} from "../ApplicationScope.ts";
 
 
-export interface CoverArtDeps extends DependsOn<'http', HttpHandler>,
-    DependsOn<'finder', D1GameFinder>,
-    DependsOn<'illustration', IllustrationHandler> {
+export interface CoverArtDeps extends Dependency<'http', HttpHandler>,
+    Dependency<'finder', D1GameFinder>,
+    Dependency<'illustration', IllustrationHandler> {
 }
 
 export function coverArt(deps: CoverArtDeps): HttpHandler {

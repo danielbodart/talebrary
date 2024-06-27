@@ -3,9 +3,10 @@ import * as elements from 'typed-html';
 import {Fragment} from "../templates/Fragment.tsx";
 import {roundStep, wellFormed} from "../misc.ts";
 import {Uri} from "../http/Uri.ts";
+import type {Dependency} from "../ApplicationScope.ts";
 
 export class ContentSearch {
-    constructor(private finder: D1GameFinder) {
+    constructor(deps: Dependency<'finder', D1GameFinder>, private finder = deps.finder) {
     }
 
     async handle(request: Request): Promise<Response> {
