@@ -1,6 +1,6 @@
 import {type HttpHandler} from "../http/mod.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
-import {toResponse} from "../http/ToResponse.ts";
+import {toResponse} from "./ToResponse.ts";
 import {Uri} from "../http/Uri.ts";
 import type {Digest} from "../system/digest.ts";
 
