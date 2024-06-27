@@ -52,7 +52,8 @@ function start() {
 function startw() {
   check
   build-client
-  wrangler dev --remote --port 3000
+  sed -n '/# CUT HERE/q;p' wrangler.toml > wrangler-local.toml
+  wrangler -c wrangler-local.toml dev --remote --port 3000
 }
 
 function tail() {
