@@ -23,7 +23,7 @@ import * as elements from "typed-html";
 import {commonCommands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
 import {type InstructionEvent, InstructionEventName} from "./comonents/InstructionEvent.tsx";
 import {Instruction} from "./comonents/Instruction.tsx";
-import {EventBuilder} from "../events/EventBuilder.ts";
+import {EventBuilder} from "./EventBuilder.ts";
 import {SystemClock} from "../system/clock.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
