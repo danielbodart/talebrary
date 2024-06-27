@@ -18,9 +18,9 @@ export class EventBuilder {
                     title: this.window.document.title,
                     locale: this.window.document.documentElement.lang || this.window.document.documentElement.getAttribute('xml:lang') || '',
                     url: this.window.location.href,
-                    urlParsed: new Uri(this.window.location.href),
+                    urlParsed: {...new Uri(this.window.location.href)},
                     referrer: this.window.document.referrer,
-                    referrerParsed: new Uri(this.window.document.referrer),
+                    referrerParsed: {...new Uri(this.window.document.referrer)},
                     characterSet: this.window.document.characterSet,
                 },
                 screen: {
