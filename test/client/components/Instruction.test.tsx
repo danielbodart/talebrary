@@ -7,10 +7,10 @@ import {type InstructionEvent, InstructionEventName} from "../../../src/client/c
 
 describe("Instruction", () => {
     test("when clicked fires an instruction event that bubbles up", async () => {
-        const window = parseHTML(<body><an-instruction>test</an-instruction></body>);
+        const window = parseHTML(<body><x-instruction>test</x-instruction></body>);
         Instruction.register(window);
 
-        const element = window.document.querySelector<HTMLElement>('an-instruction')!;
+        const element = window.document.querySelector<HTMLElement>('x-instruction')!;
         const event = new Promise<InstructionEvent>(resolve => {
             // @ts-ignore
             element.parentElement.addEventListener(InstructionEventName, (e: CustomEvent<InstructionEvent>) => resolve(e.detail));

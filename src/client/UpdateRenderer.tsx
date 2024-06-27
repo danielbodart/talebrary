@@ -49,11 +49,11 @@ const capitalWords = /\b\p{Lu}{3,}\b(?:\s+\b\p{Lu}{3,}\b)*/gu;
 function instructions(line: LineData, maxLength: number = 4): string {
     if (line.style === 'normal') {
         return line.text.replace(capitalWords, match => wordCount(match) <= maxLength ?
-            <an-instruction>{match}</an-instruction> : '');
+            <x-instruction>{match}</x-instruction> : '');
     }
     if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
         if (wordCount(line.text) <= maxLength) {
-            return <an-instruction>{line.text}</an-instruction>
+            return <x-instruction>{line.text}</x-instruction>
         }
     }
     return line.text;
@@ -217,7 +217,7 @@ export class UpdateRenderer {
                             }, []).sort();
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
-                                <an-instruction>{action}</an-instruction>)}</div>))
+                                <x-instruction>{action}</x-instruction>)}</div>))
                         });
                     });
 
