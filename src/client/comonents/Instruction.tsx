@@ -1,6 +1,6 @@
 import {type InstructionEvent, InstructionEventName} from "./InstructionEvent.tsx";
 
-export const InstructionTagName = 'an-instruction'
+export const InstructionTagName = 'x-instruction'
 
 declare global {
     namespace JSX {

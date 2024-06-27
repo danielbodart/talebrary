@@ -257,12 +257,12 @@ body.search {
     font-weight: 700;
 }
 
-.window.buffer an-instruction {
+.window.buffer x-instruction {
     cursor: pointer;
     font-weight: 700;
 }
 
-.buffer an-instruction:hover {
+.buffer x-instruction:hover {
     text-decoration: underline;
 }
 
@@ -273,14 +273,14 @@ div.suggestions {
     gap: 6px;
 }
 
-div.suggestions an-instruction {
+div.suggestions x-instruction {
     border: 2px solid var(--white-smoke);
     border-radius: 7px;
     padding: 6px 7px 6px 6px;
     display: inline-block;
 }
 
-div.suggestions an-instruction:hover {
+div.suggestions x-instruction:hover {
     text-decoration: none;
     background-color: var(--white-smoke);
     color: var(--eerie-black);
