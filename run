@@ -34,8 +34,16 @@ function dev() {
 }
 
 function build-client() {
-  bunx lightningcss --minify --bundle ./src/client/main.css --output-dir ./www/client/
-  bun build ./src/client/main.ts --outdir ./www/client/
+  local option=${1}
+
+  if [[ "$option" = "--watch" && $(command -v inotifywait) ]]; then
+    while inotifywait -r -e modify,move,create,delete ./src/client/; do
+        build-client
+    done
+  else
+    bunx lightningcss --minify --bundle ./src/client/main.css --output-dir ./www/client/
+    bun build ./src/client/main.ts --outdir ./www/client/
+  fi
 }
 
 function build() {
@@ -46,7 +54,7 @@ function build() {
 
 function start() {
   check
-  build-client
+  build-client --watch &
   bun run --watch src/bun/app.ts
 }
 
