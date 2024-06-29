@@ -22,9 +22,10 @@ export function render(search: string, games: GameInfo[]): string {
     return <html lang="en">
     <head>
         <meta name="template" content="card"/>
-        <title>Card</title>
+        <title>Search results</title>
     </head>
-    <body class="search">
+    <body>
+    <main class="search">
     <div class="window grid">
         <div class="card input-control">
             <form class="input">
@@ -45,7 +46,7 @@ export function render(search: string, games: GameInfo[]): string {
                     {
                         // TODO Submit bug fix for typed-html to handle undefined attributes (should ignore)
                         game.playable ?
-                            <a class="play" href={`/content/${game.id}/`}>Play</a> :
+                            <a class="play" href={`/content/${game.id}/`} hx-boost="false">Play</a> :
                             <a class="play">Play</a>
                     }
 
@@ -53,6 +54,7 @@ export function render(search: string, games: GameInfo[]): string {
             </Fragment>
         )}
     </div>
+    </main>
     </body>
     </html>
 }
