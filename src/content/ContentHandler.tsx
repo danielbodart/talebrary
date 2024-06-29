@@ -27,13 +27,14 @@ export function render(game: GameStory): string {
         <link id="story" rel="preload" href={`/content/${game.id}/story`} as="fetch" data-type={game.type}
               crossorigin="crossorigin"/>
     </head>
-    <body class="story">
-    <div class="card">
-        <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy"></img>
-        <div class="title">{wellFormed(game.title)}</div>
-        <div class="author">{wellFormed(game.author)}</div>
-    </div>
-
+    <body>
+    <main class="story">
+        <div class="card">
+            <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy"></img>
+            <div class="title">{wellFormed(game.title)}</div>
+            <div class="author">{wellFormed(game.author)}</div>
+        </div>
+    </main>
     <script type="module" src="/client/main.js"></script>
     </body>
     </html>

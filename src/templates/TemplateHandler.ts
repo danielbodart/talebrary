@@ -1,13 +1,11 @@
 import {type HttpHandler} from "../http/mod.ts";
 import {parseHTML} from 'linkedom';
-import {library} from "./library.tsx";
 import {card} from "./card.tsx";
 import {Uri} from "../http/Uri.ts";
 
-type Template = (document:Document) => string;
+type Template = (document: Document) => string;
 
-const templates: {[key: string]: Template} = {
-    'library': library,
+const templates: { [key: string]: Template } = {
     'card': card
 }
 
@@ -15,6 +13,7 @@ export function templateHandler(http: HttpHandler): HttpHandler {
     return async (request) => {
         const response = await http(request);
         if (!response.ok) return response;
+        if (request.headers.get('Hx-Boosted') === 'true') return response;
 
         const contentType = response.headers.get('content-type');
         if ((contentType && contentType.includes('html')) || new Uri(request.url).path.endsWith('.html')) {
