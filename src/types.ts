@@ -26,7 +26,7 @@ export interface SceneContext {
 }
 
 export const commonCommands = ["about", "again", "all", "ask", "break", "burn", "climb", "curse", "dig", "down", "drink", "drop",
-    "east", "eat", "enter", "examine", "examine", "feel", "fill", "give", "go", "help", "in", "info", "inventory",
+    "east", "eat", "enter", "examine", "feel", "fill", "give", "go", "help", "in", "info", "inventory",
     "jump", "listen", "look", "north", "off", "on", "open", "out", "pray", "pull", "push", "put", "restore", "save",
     "search", "show", "sing", "sleep", "smell", "south", "take", "talk", "tell", "throw", "to", "turn", "turn",
     "under", "undo", "unlock", "up", "wait", "wake", "wave", "wear", "west", "with"];
