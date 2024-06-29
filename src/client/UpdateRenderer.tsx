@@ -214,7 +214,10 @@ export class UpdateRenderer {
                             const result = [json.commands, json.nouns, json.actions].reduce((acc, val) => {
                                 if (acc.length < 10) acc.push(...val);
                                 return acc;
-                            }, []).sort();
+                            }, []).sort((a, b) => b.length - a.length);
+
+                            if(result.length === 0) return;
+                            result.length = Math.min(15, result.length);
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
                                 <x-instruction>{action}</x-instruction>)}</div>))

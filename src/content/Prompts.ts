@@ -18,7 +18,20 @@ export function illustrationPrompt(data: Describable | SceneContext): string {
     return isDescribable(data) ? storyPrompt(data) : scenePrompt(data);
 }
 
+export interface SuggestionedActions {
+    nouns: string[];
+    commands: string[];
+    actions: string[];
+}
+
+export const SuggestedActionsExample: SuggestionedActions = {
+    nouns: ['atrium', 'library', 'librarian', 'bookcases', "desk", "sandwich", "room"],
+    commands: ["examine", "talk to", "take", "eat", "east"],
+    actions: ["examine atrium", "examine library", "talk to librarian", "examine bookcases", "examine desk", "open draw", "go east"]
+};
+
 export function actionsPrompt(data: Describable): ScopedPrompt {
+
     const systemPrompt = `You are a interactive fiction copilot API. You must follow the following steps:
 1. Identity nouns in the input text
 2. Filter the commands list to actions that might be helpful give the nouns identified in 1
@@ -36,11 +49,7 @@ ${JSON.stringify({
 
 Example response 
 
-${JSON.stringify({
-        nouns: ['atrium', 'library', 'librarian', 'bookcases', "desk", "sandwich", "room"],
-        commands: ["examine", "talk to", "take", "eat", "east"],
-        actions: ["examine atrium", "examine library", "talk to librarian", "examine bookcases", "examine desk", "open draw", "go east"]
-    })}
+${JSON.stringify(SuggestedActionsExample)}
 
 Do not use commands not in the list, do not use nouns not identified from the input. Do not add extra human readable comments before or after the JSON response`
     const userPrompt = JSON.stringify(data);
