@@ -34,7 +34,8 @@ function dev() {
 }
 
 function build-client() {
-  bun build ./src/client/main.tsx --outdir ./www/client/
+  bunx lightningcss --minify --bundle ./src/client/main.css --output-dir ./www/client/
+  bun build ./src/client/main.ts --outdir ./www/client/
 }
 
 function build() {
