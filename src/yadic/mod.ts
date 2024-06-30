@@ -21,7 +21,7 @@ export class LazyMap {
         return Object.preventExtensions(Object.defineProperty(self, key, {
             get: () => {
                 const value = fun(this);
-                Object.freeze(Object.defineProperty(self, key, {value, configurable: false}));
+                this.setInstance(key, value)
                 return value;
             },
             configurable: true,
@@ -33,7 +33,7 @@ export class LazyMap {
     }
 
     setInstance<K extends PropertyKey, V>(key: K, value: V): this & Dependency<K, V> {
-        return this.set(key, () => value);
+        return Object.freeze(Object.defineProperty(this.self(), key, {value})) as any;
     }
 
     setConstructor<K extends string, V>(key: K, valueConstructor: Constructor<V> | AutoConstructor<this, V>): this & Dependency<K, V> {
