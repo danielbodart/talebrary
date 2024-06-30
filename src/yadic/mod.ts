@@ -14,13 +14,18 @@ export function isConstructor(func: Function): boolean {
     return !!func.prototype && func.prototype.constructor === func;
 }
 
+
 export class LazyMap {
-    constructor(parent?: object) {
+    private constructor(parent?: object) {
         if (parent) Object.setPrototypeOf(this, parent);
         Object.freeze(this);
     }
 
-    set<K extends PropertyKey, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
+    static create<P extends LazyMap>(parent?: P): LazyMap & P {
+        return new LazyMap(parent as any) as any;
+    }
+
+    set<K extends PropertyKey, V>(key: K, fun: (deps: Readonly<this>) => V): this & Dependency<K, V> {
         const parent = this;
         const self = this.clone();
         return Object.preventExtensions(Object.defineProperty(self, key, {
@@ -50,7 +55,7 @@ export class LazyMap {
         throw new Error(`${valueConstructor.name} must take either no arguments or a dependency object. Use set() with function for other use cases`);
     }
 
-    decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): /* Omit<this, K> */this & Dependency<K, V> {
+    decorate<K extends keyof this, V>(key: K, fun: (deps: Readonly<this>) => V): /* Omit<this, K> */this & Dependency<K, V> {
         if (!(key in this)) throw new Error(`No previous key for '${String(key)}' found`);
         return this.set(key, fun);
     }
