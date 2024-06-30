@@ -11,9 +11,8 @@ export function card(document: Document) {
             <link rel="stylesheet" href="/card.css"/>
             {document.head.children}
         </head>
-        <body hx-boost="true">
+        <body>
         {document.body.innerHTML}
-        <script src="https://unpkg.com/htmx.org@2.0.0"></script>
         </body>
         </html>;
 }

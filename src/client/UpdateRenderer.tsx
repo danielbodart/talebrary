@@ -44,12 +44,12 @@ function wordCount(value: string): number {
     return value.match(wordCountPattern)?.length ?? 0;
 }
 
-const capitalWords = /\b\p{Lu}{3,}\b(?:\s+\b\p{Lu}{3,}\b)*/gu;
+const capitalWords = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
 
 function instructions(line: LineData, maxLength: number = 4): string {
     if (line.style === 'normal') {
-        return line.text.replace(capitalWords, match => wordCount(match) <= maxLength ?
-            <x-instruction>{match}</x-instruction> : '');
+        return line.text.replace(capitalWords, match => match.length >= 3 && wordCount(match) <= maxLength ?
+            <x-instruction>{match}</x-instruction> : match);
     }
     if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
         if (wordCount(line.text) <= maxLength) {
