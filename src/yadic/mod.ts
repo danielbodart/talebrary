@@ -21,7 +21,7 @@ export class LazyMap {
         return Object.preventExtensions(Object.defineProperty(self, key, {
             get: () => {
                 const value = fun(this);
-                this.setInstance(key, value)
+                Object.freeze(Object.defineProperty(this, key, {value}));
                 return value;
             },
             configurable: true,
