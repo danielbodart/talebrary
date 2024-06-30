@@ -1,4 +1,3 @@
-
 export type Dependency<K extends PropertyKey, V> = {
     [P in K]: V;
 }
@@ -16,6 +15,11 @@ export function isConstructor(func: Function): boolean {
 }
 
 export class LazyMap {
+    constructor(parent?: object) {
+        if (parent) Object.setPrototypeOf(this, parent);
+        Object.freeze(this);
+    }
+
     set<K extends PropertyKey, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
         const parent = this;
         const self = this.clone();
@@ -47,19 +51,7 @@ export class LazyMap {
     }
 
     decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): /* Omit<this, K> */this & Dependency<K, V> {
-        const p = getPropertyDescriptor(this, key);
-        if (!p) throw new Error(`No previous key for '${String(key)}' found`);
+        if (!(key in this)) throw new Error(`No previous key for '${String(key)}' found`);
         return this.set(key, fun);
     }
-}
-
-function getPropertyDescriptor<T, K extends keyof T>(obj:T, prop: K) {
-    while (obj) {
-        const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-        if (descriptor) {
-            return descriptor;
-        }
-        obj = Object.getPrototypeOf(obj);
-    }
-    return undefined;
 }
