@@ -17,10 +17,11 @@ export function isConstructor(func: Function): boolean {
 
 export class LazyMap {
     set<K extends PropertyKey, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
-        const self = this.self();
+        const parent = this;
+        const self = this.clone();
         return Object.preventExtensions(Object.defineProperty(self, key, {
             get: () => {
-                const value = fun(this);
+                const value = fun(parent);
                 Object.freeze(Object.defineProperty(self, key, {value}));
                 return value;
             },
@@ -28,12 +29,12 @@ export class LazyMap {
         })) as any;
     }
 
-    private self(): this {
+    clone(): this {
         return Object.setPrototypeOf({}, this);
     }
 
     setInstance<K extends PropertyKey, V>(key: K, value: V): this & Dependency<K, V> {
-        return Object.freeze(Object.defineProperty(this.self(), key, {value})) as any;
+        return Object.freeze(Object.defineProperty(this.clone(), key, {value})) as any;
     }
 
     setConstructor<K extends string, V>(key: K, valueConstructor: Constructor<V> | AutoConstructor<this, V>): this & Dependency<K, V> {
