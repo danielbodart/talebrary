@@ -37,7 +37,7 @@ export interface Env extends Config {
 
 
 export function application(http: HttpHandler, db: D1Database, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
-    return new LazyMap()
+    return LazyMap.create()
         .setInstance('HONEYCOMB_API_KEY', config.HONEYCOMB_API_KEY)
         .setInstance('HONEYCOMB_BATCH_SIZE', config.HONEYCOMB_BATCH_SIZE)
         .setInstance('db', db)
