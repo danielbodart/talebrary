@@ -1,5 +1,5 @@
-export type Key = string | number | symbol;
-export type Dependency<K extends Key, V> = {
+
+export type Dependency<K extends PropertyKey, V> = {
     [P in K]: V;
 }
 
@@ -16,19 +16,24 @@ export function isConstructor(func: Function): boolean {
 }
 
 export class LazyMap {
-    set<K extends Key, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
-        return Object.defineProperty(this, key, {
+    set<K extends PropertyKey, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
+        const self = this.self();
+        return Object.preventExtensions(Object.defineProperty(self, key, {
             get: () => {
                 const value = fun(this);
-                this.setInstance(key, value)
+                Object.freeze(Object.defineProperty(self, key, {value, configurable: false}));
                 return value;
             },
-            configurable: true
-        }) as any;
+            configurable: true,
+        })) as any;
     }
 
-    setInstance<K extends Key, V>(key: K, value: V): this & Dependency<K, V> {
-        return Object.defineProperty(this, key, {value, configurable: true}) as any;
+    private self(): this {
+        return Object.setPrototypeOf({}, this);
+    }
+
+    setInstance<K extends PropertyKey, V>(key: K, value: V): this & Dependency<K, V> {
+        return this.set(key, () => value);
     }
 
     setConstructor<K extends string, V>(key: K, valueConstructor: Constructor<V> | AutoConstructor<this, V>): this & Dependency<K, V> {
@@ -41,12 +46,19 @@ export class LazyMap {
     }
 
     decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): /* Omit<this, K> */this & Dependency<K, V> {
-        const p = Object.getOwnPropertyDescriptor(this, key);
+        const p = getPropertyDescriptor(this, key);
         if (!p) throw new Error(`No previous key for '${String(key)}' found`);
-        delete this[key];
-        return this.set(String(key), deps => {
-            Object.defineProperty(deps, key, p);
-            return fun(deps)
-        }) as any;
+        return this.set(key, fun);
     }
+}
+
+function getPropertyDescriptor<T, K extends keyof T>(obj:T, prop: K) {
+    while (obj) {
+        const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+        if (descriptor) {
+            return descriptor;
+        }
+        obj = Object.getPrototypeOf(obj);
+    }
+    return undefined;
 }
