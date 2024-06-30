@@ -46,7 +46,7 @@ export function render(search: string, games: GameInfo[]): string {
                     {
                         // TODO Submit bug fix for typed-html to handle undefined attributes (should ignore)
                         game.playable ?
-                            <a class="play" href={`/content/${game.id}/`} hx-boost="false">Play</a> :
+                            <a class="play" href={`/content/${game.id}/`}>Play</a> :
                             <a class="play">Play</a>
                     }
 
