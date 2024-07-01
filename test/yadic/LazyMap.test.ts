@@ -2,16 +2,6 @@ import {describe, expect, test} from "bun:test";
 import {type Dependency, LazyMap} from "../../src/yadic/mod.ts";
 
 describe("LazyMap", () => {
-    test("is immutable from the start", async () => {
-        try {
-            // @ts-ignore
-            LazyMap.create()['should'] = 'not work';
-            expect(false).toBeTruthy();
-        } catch (e) {
-            expect(e).toBeInstanceOf(TypeError);
-        }
-    });
-
     test("can set using a function", async () => {
         const map = LazyMap.create().set('should', () => 'work');
         expect(map.should).toEqual('work');
@@ -75,5 +65,28 @@ describe("LazyMap", () => {
 
         expect(parent.a).toEqual(1);
         expect(child.b).toEqual(2);
+    });
+
+    test("can override a dependency as long as it has not been used", async () => {
+        const map = LazyMap.create()
+            .setInstance('a', 1)
+            .set('b', deps => deps.a + 1)
+            .setInstance('a', 2);
+
+        expect(map.b).toEqual(3);
+        expect(map.a).toEqual(2);
+    });
+
+    test("once a dependency has been used it can't be changed", async () => {
+        const map = LazyMap.create().setInstance('a', 1);
+        expect(map.a).toEqual(1);
+
+        try {
+            map.setInstance('a', 2);
+            expect(map.a).toEqual(1);
+        } catch (e) {
+            expect(e).toBeInstanceOf(TypeError);
+            expect(map.a).toEqual(1);
+        }
     });
 })
