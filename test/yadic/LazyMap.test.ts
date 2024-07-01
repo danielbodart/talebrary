@@ -67,6 +67,17 @@ describe("LazyMap", () => {
         expect(child.b).toEqual(2);
     });
 
+    test("when the dependency is in the parent map, it should be created only once at the parent", () => {
+        let count = 0;
+        const parent = LazyMap.create().set('a', () => ++count);
+
+        const child = LazyMap.create(parent)
+            .set('b', deps => deps.a + 1);
+
+        expect(child.b).toEqual(2);
+        expect(parent.a).toEqual(1);
+    });
+
     test("can override a dependency as long as it has not been used", () => {
         const map = LazyMap.create()
             .setInstance('a', 1)

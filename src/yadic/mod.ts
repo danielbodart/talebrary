@@ -14,10 +14,22 @@ export function isConstructor(func: Function): boolean {
     return !!func.prototype && func.prototype.constructor === func;
 }
 
+export class Forwarder<T extends object> implements ProxyHandler<T>{
+    constructor(private delegate: T) {
+    }
+
+    get(target: T, prop: PropertyKey, receiver: any): any {
+        if (prop in target) return Reflect.get(target, prop, receiver);
+        return Reflect.get(this.delegate, prop, this.delegate);
+    }
+}
+
 
 export class LazyMap {
-    private constructor(parent?: object) {
-        if (parent) Object.setPrototypeOf(this, parent);
+    private deps: this;
+
+    private constructor(parent?: LazyMap) {
+        this.deps = parent? new Proxy(this, new Forwarder(parent)) as this : this;
     }
 
     static create<P extends LazyMap>(parent?: P): LazyMap & P {
@@ -25,13 +37,15 @@ export class LazyMap {
     }
 
     set<K extends PropertyKey, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
+        const self = this;
         return Object.defineProperty(this, key, {
             get: function () {
-                const value = fun(this);
+                const value = fun(self.deps);
                 Object.defineProperty(this, key, {value, configurable: false});
                 return value;
             },
             configurable: true,
+            enumerable: true
         }) as any;
     }
 
