@@ -2,24 +2,24 @@ import {describe, expect, test} from "bun:test";
 import {type Dependency, LazyMap} from "../../src/yadic/mod.ts";
 
 describe("LazyMap", () => {
-    test("can set using a function", async () => {
+    test("can set using a function", () => {
         const map = LazyMap.create().set('should', () => 'work');
         expect(map.should).toEqual('work');
     });
 
-    test("is lazy and function is only called once", async () => {
+    test("is lazy and function is only called once", () => {
         let count = 0
         const map = LazyMap.create().set('should', () => ++count);
         expect(map.should).toEqual(1);
         expect(map.should).toEqual(1);
     });
 
-    test("can set with an instance", async () => {
+    test("can set with an instance", () => {
         const map = LazyMap.create().setInstance('should', 'work');
         expect(map.should).toEqual('work');
     });
 
-    test("can set with a constructor", async () => {
+    test("can set with a constructor", () => {
         class Foo {
         }
 
@@ -27,7 +27,7 @@ describe("LazyMap", () => {
         expect(map.should).toBeInstanceOf(Foo);
     });
 
-    test("can set with a constructor that depends on another type", async () => {
+    test("can set with a constructor that depends on another type", () => {
         class Foo {
             constructor(deps: Dependency<'aDependency', number>,
                         public aDependency = deps.aDependency ) {
@@ -41,7 +41,7 @@ describe("LazyMap", () => {
         expect(map.should.aDependency).toEqual(1);
     });
 
-    test("can decorate a dependency", async () => {
+    test("can decorate a dependency", () => {
         class A {
         }
 
@@ -57,7 +57,7 @@ describe("LazyMap", () => {
         expect(map.object.a).toBeInstanceOf(A);
     });
 
-    test("can create a map from another map", async () => {
+    test("can create a map from another map", () => {
         const parent = LazyMap.create().setInstance('a', 1)
 
         const child = LazyMap.create(parent)
@@ -67,7 +67,7 @@ describe("LazyMap", () => {
         expect(child.b).toEqual(2);
     });
 
-    test("can override a dependency as long as it has not been used", async () => {
+    test("can override a dependency as long as it has not been used", () => {
         const map = LazyMap.create()
             .setInstance('a', 1)
             .set('b', deps => deps.a + 1)
@@ -77,7 +77,7 @@ describe("LazyMap", () => {
         expect(map.a).toEqual(2);
     });
 
-    test("once a dependency has been used it can't be changed", async () => {
+    test("once a dependency has been used it can't be changed", () => {
         const map = LazyMap.create().setInstance('a', 1);
         expect(map.a).toEqual(1);
 

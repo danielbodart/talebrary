@@ -57,7 +57,7 @@ export class LazyMap {
         if (!p) throw new Error(`No previous key for '${String(key)}' found`);
         delete this[key];
         return this.set(String(key), deps => {
-            const newDeps = Object.setPrototypeOf({}, deps);
+            const newDeps = deps.clone();
             Object.defineProperty(newDeps, key, p);
             return fun(newDeps);
         }) as any;

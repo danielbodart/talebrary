@@ -12,9 +12,8 @@ const libc = dlopen(`libc.so.6`, {
 });
 
 export function getAttribute(path: string, name: string): string | undefined {
-    const encoder = new TextEncoder();
     const buffer = new Uint8Array(1024);
-    const length = Number(libc.symbols.getxattr(encoder.encode(path), encoder.encode(name), buffer, buffer.length));
+    const length = Number(libc.symbols.getxattr(toCString(path), toCString(name), buffer, buffer.length));
     if (length === -1) return;
     return new TextDecoder().decode(buffer).slice(0, length);
 }
@@ -32,10 +31,13 @@ export enum SetAttributeOptions {
 }
 
 export function setAttribute(path: string, name: string, value: string, options: SetAttributeOptions = SetAttributeOptions.None): void {
-    const encoder = new TextEncoder();
-    const buffer = encoder.encode(value);
-    const result = libc.symbols.setxattr(encoder.encode(path), encoder.encode(name), buffer, buffer.length, options);
+    const buffer = new TextEncoder().encode(value);
+    const result = libc.symbols.setxattr(toCString(path), toCString(name), buffer, buffer.length, options);
     if (result === -1) {
         throw new Error("Failed to set extended attribute");
     }
+}
+
+export function toCString(value: string): Uint8Array {
+    return new TextEncoder().encode(value + '\0');
 }

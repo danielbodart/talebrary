@@ -37,7 +37,7 @@ export class FolderBucket implements R2Bucket {
     async get(key: string, _options?: any): Promise<any> {
         const data = file(`${this.root}${key}`);
         if (!await data.exists()) return null;
-        return new FileObject(key, data, getHttpMetadata(data), await md5(await data.arrayBuffer()));
+        return new FileObject(key, data, getHttpMetadata(data), md5(await data.arrayBuffer()));
     }
 
     put(key: string, value: string | ReadableStream<any> | ArrayBuffer | ArrayBufferView | Blob | null, options?: (R2PutOptions & {
@@ -59,6 +59,7 @@ export class FolderBucket implements R2Bucket {
         } else {
             writer.write(value as any);
         }
+        await writer.flush();
 
         if (options && typeof options === 'object' && 'httpMetadata' in options) {
             for (const [key, value] of Object.entries(options.httpMetadata)) {
