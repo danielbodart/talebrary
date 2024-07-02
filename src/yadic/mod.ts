@@ -30,9 +30,7 @@ export function chain<T extends object[]>(...objects: T): Chain<T> {
     }) as Chain<T>
 }
 
-// noinspection JSPotentiallyInvalidUsageOfClassThis
 export class LazyMap {
-    // @ts-ignore
     private deps: this;
 
     private constructor(parent?: LazyMap) {
@@ -44,10 +42,10 @@ export class LazyMap {
     }
 
     set<K extends PropertyKey, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
+        const self = this;
         return Object.defineProperty(this, key, {
-            // Do not use arrow function here as it will bind this to the wrong object
             get: function () {
-                const value = fun(this.deps);
+                const value = fun(self.deps);
                 Object.defineProperty(this, key, {value, configurable: false});
                 return value;
             },
