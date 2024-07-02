@@ -13,6 +13,8 @@ export function card(document: Document) {
         </head>
         <body>
         {document.body.innerHTML}
+        <script defer="defer" src='https://static.cloudflareinsights.com/beacon.min.js'
+                data-cf-beacon='{"token": "0318e83ff0164f35bdddaae3db8ec304"}'></script>
         </body>
         </html>;
 }
