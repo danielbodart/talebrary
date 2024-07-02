@@ -14,22 +14,27 @@ export function isConstructor(func: Function): boolean {
     return !!func.prototype && func.prototype.constructor === func;
 }
 
-export class Forwarder<T extends object> implements ProxyHandler<T>{
-    constructor(private delegate: T) {
-    }
+export type Overwrite<T, U> = Omit<T, keyof U> & U;
 
-    get(target: T, prop: PropertyKey, receiver: any): any {
-        if (prop in target) return Reflect.get(target, prop, receiver);
-        return Reflect.get(this.delegate, prop, this.delegate);
-    }
+export type Chain<T extends any[]> = T extends [infer First, ...infer Rest]
+    ? Overwrite<Chain<Rest>, First>
+    : {};
+
+export function chain<T extends object[]>(...objects: T): Chain<T> {
+    return new Proxy({}, {
+        get(_target, prop, _receiver) {
+            for (const obj of objects) {
+                if (prop in obj) return Reflect.get(obj, prop, obj);
+            }
+        }
+    }) as Chain<T>
 }
-
 
 export class LazyMap {
     private deps: this;
 
     private constructor(parent?: LazyMap) {
-        this.deps = parent? new Proxy(this, new Forwarder(parent)) as this : this;
+        this.deps = parent? chain(this, parent) as this : this;
     }
 
     static create<P extends LazyMap>(parent?: P): LazyMap & P {
@@ -49,10 +54,6 @@ export class LazyMap {
         }) as any;
     }
 
-    clone(): this {
-        return Object.setPrototypeOf({}, this);
-    }
-
     setInstance<K extends PropertyKey, V>(key: K, value: V): this & Dependency<K, V> {
         return this.set(key, () => value);
     }
@@ -66,14 +67,12 @@ export class LazyMap {
         throw new Error(`${valueConstructor.name} must take either no arguments or a dependency object. Use set() with function for other use cases`);
     }
 
-    decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): /* Omit<this, K> */this & Dependency<K, V> {
+    decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
         const p = Object.getOwnPropertyDescriptor(this, key);
         if (!p) throw new Error(`No previous key for '${String(key)}' found`);
         delete this[key];
         return this.set(String(key), deps => {
-            const newDeps = deps.clone();
-            Object.defineProperty(newDeps, key, p);
-            return fun(newDeps);
+            return fun(chain(Object.defineProperty({}, key, p), deps));
         }) as any;
     }
 }
