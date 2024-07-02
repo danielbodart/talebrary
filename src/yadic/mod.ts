@@ -41,7 +41,7 @@ export class LazyMap {
         return new LazyMap(parent as any) as any;
     }
 
-    set<K extends PropertyKey, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
+    set<K extends PropertyKey, V>(key: K, fun: (deps: Omit<this, K>) => V): this & Dependency<K, V> {
         const self = this;
         return Object.defineProperty(this, key, {
             get: function () {
@@ -59,7 +59,7 @@ export class LazyMap {
         if (!p) throw new Error(`No previous key for '${String(key)}' found`);
         delete this[key];
         return this.set(String(key), deps => {
-            return fun(chain(Object.defineProperty({}, key, p), deps));
+            return fun(chain(Object.defineProperty({}, key, p), deps) as this);
         }) as any;
     }
 }
