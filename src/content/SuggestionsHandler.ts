@@ -2,9 +2,10 @@ import type {Ai, AiTextGenerationOutput} from "@cloudflare/workers-types";
 
 import {Uri} from "../http/Uri.ts";
 import {actionsPrompt} from "./Prompts.ts";
+import type {Dependency} from "../yadic/mod.ts";
 
 export class SuggestionsHandler {
-    constructor(private ai: Ai) {
+    constructor(deps: Dependency<'ai', Ai>, private ai: Ai = deps.ai) {
     }
 
     async handle(request: Request): Promise<Response> {

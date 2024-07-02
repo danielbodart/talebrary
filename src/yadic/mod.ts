@@ -56,14 +56,6 @@ export class LazyMap {
         }) as any;
     }
 
-    setInstance<K extends PropertyKey, V>(key: K, value: V): this & Dependency<K, V> {
-        return this.set(key, constant(value));
-    }
-
-    setConstructor<K extends string, V>(key: K, valueConstructor: Constructor<V> | AutoConstructor<this, V>): this & Dependency<K, V> {
-        return this.set(key, constructor(valueConstructor));
-    }
-
     decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
         const p = Object.getOwnPropertyDescriptor(this, key);
         if (!p) throw new Error(`No previous key for '${String(key)}' found`);
@@ -72,6 +64,10 @@ export class LazyMap {
             return fun(chain(Object.defineProperty({}, key, p), deps));
         }) as any;
     }
+}
+
+export function alias<T extends object, K extends keyof T>(key: K) {
+    return (deps: T) => Reflect.get(deps, key);
 }
 
 export function constant<T>(value: T) {
