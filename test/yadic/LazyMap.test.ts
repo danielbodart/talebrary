@@ -101,7 +101,7 @@ describe("LazyMap", () => {
 
         try {
             map.set('a', instance(2));
-            expect(map.a).toEqual(1);
+            expect('').toEqual('should not get here');
         } catch (e) {
             expect(e).toBeInstanceOf(TypeError);
             expect(map.a).toEqual(1);
@@ -118,12 +118,12 @@ describe("chain", () => {
     });
 
     test("earlier objects take precedence", () => {
-        const result: {a: number} = chain({a: 1}, {a: 'two'});
+        const result = chain({a: 1}, {a: 2});
         expect(result.a).toEqual(1);
     });
 
-    test("earlier objects take precedence", () => {
-        const result = chain({a: 1}, {a: 2});
+    test("earlier objects take precedence and type is correct", () => {
+        const result: {a: number} = chain({a: 1}, {a: 'two'});
         expect(result.a).toEqual(1);
     });
 });
