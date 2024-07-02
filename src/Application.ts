@@ -1,4 +1,4 @@
-import {Ai, D1Database, R2Bucket, type Queue} from "@cloudflare/workers-types";
+import {Ai, D1Database, type Queue, R2Bucket} from "@cloudflare/workers-types";
 import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
 import {type HttpHandler} from "./http/mod.ts";
@@ -17,7 +17,7 @@ import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {HoneycombSender} from "./events/HoneycombSender.ts";
 import {EventHandler} from "./events/EventHandler.ts";
-import {LazyMap} from "./yadic/mod.ts";
+import {alias, constant, constructor, LazyMap} from "./yadic/mod.ts";
 
 export interface Config {
     HONEYCOMB_API_KEY: string;
@@ -38,29 +38,28 @@ export interface Env extends Config {
 
 export function application(http: HttpHandler, db: D1Database, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
     return LazyMap.create()
-        .setInstance('HONEYCOMB_API_KEY', config.HONEYCOMB_API_KEY)
-        .setInstance('HONEYCOMB_BATCH_SIZE', config.HONEYCOMB_BATCH_SIZE)
-        .setInstance('db', db)
-        .setInstance('http', http)
-        .setInstance('r2', r2)
-        .setInstance('digest', digest)
-        .setInstance('ai', ai)
-        .setConstructor('clock', SystemClock)
-        .setConstructor('timers', SystemTimers)
-        .setConstructor('honeycomb', HoneycombSender)
-        .set('eventSender', deps => deps.honeycomb)
-        .setConstructor('events', EventHandler)
-        .setConstructor('finder', D1GameFinder)
-        .setConstructor('search', ContentSearch)
-        .setConstructor('illustration', IllustrationHandler)
+        .set('HONEYCOMB_API_KEY', constant(config.HONEYCOMB_API_KEY))
+        .set('HONEYCOMB_BATCH_SIZE', constant(config.HONEYCOMB_BATCH_SIZE))
+        .set('db', constant(db))
+        .set('http', constant(http))
+        .set('r2', constant(r2))
+        .set('digest', constant(digest))
+        .set('ai', constant(ai))
+        .set('clock', constructor(SystemClock))
+        .set('timers', constructor(SystemTimers))
+        .set('honeycomb', constructor(HoneycombSender))
+        .set('eventSender', alias('honeycomb'))
+        .set('events', constructor(EventHandler))
+        .set('finder', constructor(D1GameFinder))
+        .set('search', constructor(ContentSearch))
+        .set('illustration', constructor(IllustrationHandler))
+        .set('suggestions', constructor(SuggestionsHandler))
         .set('coverArt', deps => new R2CachingHandler(deps, coverArt(deps)))
         .set('story', deps => new R2CachingHandler(deps, story(deps)))
-        .set('art', deps =>
-            new R2CachingHandler(deps, request => deps.illustration.handle(request)))
-        .set('suggestions', deps =>
-            new R2CachingHandler(deps, request => new SuggestionsHandler(ai).handle(request)))
-        .set('content', ({finder}) => new ContentHandler(finder))
-        .setConstructor('handler', Routing)
+        .set('art', deps => new R2CachingHandler(deps, request => deps.illustration.handle(request)))
+        .set('suggestions', deps => new R2CachingHandler(deps, request => deps.suggestions.handle(request)))
+        .set('content', constructor(ContentHandler))
+        .set('handler', constructor(Routing))
         .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request)))
         .decorate('handler', ({handler}) => cacheControlHandler(handler))
         .decorate('handler', ({handler, digest}) => etagHandler(digest, handler))

@@ -2,15 +2,16 @@ import type {D1GameFinder, GameStory} from "../cloudflare/D1GameFinder.ts";
 import {Uri} from "../http/Uri.ts";
 import {compactText, wellFormed} from "../templates/misc.ts";
 import * as elements from 'typed-html';
+import type {Dependency} from "../yadic/mod.ts";
 
 export class ContentHandler {
-    constructor(private gameFinder: D1GameFinder) {
+    constructor(deps: Dependency<'finder', D1GameFinder>, private finder: D1GameFinder = deps.finder) {
     }
 
     async handle(request: Request): Promise<Response> {
         const {path} = new Uri(request.url);
         const [, , id] = path.split('/');
-        const game = await this.gameFinder.get(id);
+        const game = await this.finder.get(id);
 
         if (!game) return new Response('Not Found', {status: 404});
 
