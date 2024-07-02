@@ -1,5 +1,5 @@
 import {describe, expect, test} from "bun:test";
-import {chain, type Dependency, LazyMap} from "../../src/yadic/mod.ts";
+import {chain, type Dependency, LazyMap, constructor} from "../../src/yadic/mod.ts";
 
 describe("LazyMap", () => {
     test("can set using a function", () => {
@@ -52,7 +52,7 @@ describe("LazyMap", () => {
 
         const map = LazyMap.create()
             .setConstructor('object', A)
-            .decorate('object', deps => new B(deps));
+            .decorate('object', constructor(B));
         expect(map.object).toBeInstanceOf(B);
         expect(map.object.a).toBeInstanceOf(A);
     });
