@@ -36,7 +36,7 @@ export class LazyMap {
     private deps: this;
 
     private constructor(parent?: LazyMap) {
-        this.deps = parent? chain(this, parent) : this;
+        this.deps = parent ? chain(this, parent) : this;
     }
 
     static create<P extends LazyMap>(parent?: P): LazyMap & P {
@@ -57,16 +57,11 @@ export class LazyMap {
     }
 
     setInstance<K extends PropertyKey, V>(key: K, value: V): this & Dependency<K, V> {
-        return this.set(key, () => value);
+        return this.set(key, constant(value));
     }
 
     setConstructor<K extends string, V>(key: K, valueConstructor: Constructor<V> | AutoConstructor<this, V>): this & Dependency<K, V> {
-        if (!isConstructor(valueConstructor)) throw new Error(`${valueConstructor.name} is not a constructor`);
-        if (valueConstructor.length === 0) { // @ts-ignore
-            return this.set(key, () => new valueConstructor());
-        }
-        if (valueConstructor.length === 1) return this.set(key, deps => new valueConstructor(deps));
-        throw new Error(`${valueConstructor.name} must take either no arguments or a dependency object. Use set() with function for other use cases`);
+        return this.set(key, constructor(valueConstructor));
     }
 
     decorate<K extends keyof this, V>(key: K, fun: (deps: this) => V): this & Dependency<K, V> {
@@ -77,4 +72,17 @@ export class LazyMap {
             return fun(chain(Object.defineProperty({}, key, p), deps));
         }) as any;
     }
+}
+
+export function constant<T>(value: T) {
+    return () => value;
+}
+
+export function constructor<D, T>(valueConstructor: Constructor<T> | AutoConstructor<D, T>) {
+    if (!isConstructor(valueConstructor)) throw new Error(`${valueConstructor.name} is not a constructor`);
+    if (valueConstructor.length === 0) { // @ts-ignore
+        return () => new valueConstructor();
+    }
+    if (valueConstructor.length === 1) return (deps: D) => new valueConstructor(deps);
+    throw new Error(`${valueConstructor.name} must take either no arguments or a dependency object. Use set() with function for other use cases`);
 }
