@@ -1,5 +1,5 @@
 import {describe, expect, test} from "bun:test";
-import {chain, constant, constructor, type Dependency, LazyMap} from "../../src/yadic/mod.ts";
+import {chain, instance, constructor, type Dependency, LazyMap} from "../../src/yadic/mod.ts";
 
 describe("LazyMap", () => {
     test("can set using a function", () => {
@@ -18,7 +18,7 @@ describe("LazyMap", () => {
 
     test("can set with an instance", () => {
         const map = LazyMap.create()
-            .set('should', constant('work'));
+            .set('should', instance('work'));
         expect(map.should).toEqual('work');
     });
 
@@ -39,7 +39,7 @@ describe("LazyMap", () => {
         }
 
         const map = LazyMap.create()
-            .set('aDependency', constant(1))
+            .set('aDependency', instance(1))
             .set('should', constructor(Foo));
         expect(map.should).toBeInstanceOf(Foo);
         expect(map.should.aDependency).toEqual(1);
@@ -63,7 +63,7 @@ describe("LazyMap", () => {
 
     test("can create a map from another map", () => {
         const parent = LazyMap.create()
-            .set('a', constant(1))
+            .set('a', instance(1))
 
         const child = LazyMap.create(parent)
             .set('b', deps => deps.a + 1);
@@ -86,9 +86,9 @@ describe("LazyMap", () => {
 
     test("can override a dependency as long as it has not been used", () => {
         const map = LazyMap.create()
-            .set('a', constant(1))
+            .set('a', instance(1))
             .set('b', deps => deps.a + 1)
-            .set('a', constant(2));
+            .set('a', instance(2));
 
         expect(map.b).toEqual(3);
         expect(map.a).toEqual(2);
@@ -96,11 +96,11 @@ describe("LazyMap", () => {
 
     test("once a dependency has been used it can't be changed", () => {
         const map = LazyMap.create()
-            .set('a', constant(1));
+            .set('a', instance(1));
         expect(map.a).toEqual(1);
 
         try {
-            map.set('a', constant(2));
+            map.set('a', instance(2));
             expect(map.a).toEqual(1);
         } catch (e) {
             expect(e).toBeInstanceOf(TypeError);

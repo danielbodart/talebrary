@@ -68,7 +68,7 @@ export function alias<T extends object, K extends keyof T>(key: K) {
     return (deps: T) => Reflect.get(deps, key);
 }
 
-export function constant<T>(value: T) {
+export function instance<T>(value: T) {
     return () => value;
 }
 
