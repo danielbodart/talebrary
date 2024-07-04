@@ -55,7 +55,7 @@ function build() {
 
 function start() {
   check
-  build-client --watch &
+  build-client --watch
   bun run --watch src/bun/app.ts
 }
 
