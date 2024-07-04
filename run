@@ -40,7 +40,7 @@ function build-client() {
 
   if [[ "${option}" == "--watch" ]]; then
     bun build --watch --minify "${src}/main.ts" --outdir "${dest}/" &
-    watchexec -w "${src}" --exts css bunx lightningcss --bundle "${src}/main.css" --output-dir "${dest}/" &
+    watchexec -w "${src}" --exts css bunx lightningcss --minify --bundle "${src}/main.css" --output-dir "${dest}/" &
   else
     bun build --minify "${src}/main.ts" --outdir "${dest}/"
     bunx lightningcss --minify --bundle "${src}/main.css" --output-dir "${dest}/"
