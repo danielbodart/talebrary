@@ -35,23 +35,22 @@ function dev() {
 
 function build-client() {
   local option=${1}
+  local src="./src/client"
+  local dest="./www/client"
 
-  bun build ./src/client/main.ts --outdir ./www/client/ --minify "$option" &
-
-  if [[ "$option" = "--watch" && $(command -v inotifywait) ]]; then
-    while inotifywait -r -e modify,move,create,delete ./src/client/; do
-        bunx lightningcss --minify --bundle ./src/client/main.css --output-dir ./www/client/
-    done
+  if [[ "${option}" == "--watch" ]]; then
+    bun build --watch --minify "${src}/main.ts" --outdir "${dest}/" &
+    watchexec -w "${src}" --exts css bunx lightningcss --bundle "${src}/main.css" --output-dir "${dest}/" &
   else
-    bunx lightningcss --minify --bundle ./src/client/main.css --output-dir ./www/client/
+    bun build --minify "${src}/main.ts" --outdir "${dest}/"
+    bunx lightningcss --minify --bundle "${src}/main.css" --output-dir "${dest}/"
   fi
-
 }
 
 function build() {
   check
-  build-client
-  test
+  build-client "$@"
+  test "$@"
 }
 
 function start() {

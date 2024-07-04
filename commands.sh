@@ -38,6 +38,18 @@ function rclone() {
 export -f rclone
 
 
+function watchexec() {
+  unset -f watchexec
+  if [[ ! $(asdf plugin list) =~ watchexec ]]; then
+    echo "* Downloading and installing watchexec plugin..."
+    asdf plugin add watchexec > /dev/null 2>&1
+  fi
+  asdf install watchexec > /dev/null 2>&1
+  watchexec "$@"
+}
+export -f watchexec
+
+
 function node() {
   unset -f node
   if [[ ! $(asdf plugin list) =~ nodejs ]]; then
