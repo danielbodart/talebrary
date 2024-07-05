@@ -306,7 +306,7 @@ div.suggestions::before {
     hyphenate-limit-chars: 6 3 2;
 }
 
-.card > div:last-child, .card > .input {
+.card > div:last-child, .card > .title, .card > .author, .card > .input {
     padding-bottom: 10px;
 }
 
