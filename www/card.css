@@ -225,7 +225,7 @@ body.search {
     aspect-ratio: 1/1;
 }
 
-.title, div.header, div.subheader, div.suggestions {
+.title, div.header:first-child, div.subheader:first-child, img + div.header, img + div.subheader, div.suggestions {
     font-family: "League Spartan", sans-serif;
     font-optical-sizing: auto;
     font-weight: 700;
@@ -237,7 +237,7 @@ body.search {
     border-bottom: 10px ridge var(--sunset);
 }
 
-.title, div.header, div.subheader {
+.title, div.header:first-child, div.subheader:first-child, img + div.header, img + div.subheader {
     font-size: 1.5rem;
     text-align: center;
     display: flex;
