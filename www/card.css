@@ -300,13 +300,13 @@ div.suggestions::before {
     font-style: italic;
 }
 
-div.normal, div.alert, div.emphasized, div.preformatted {
+.card > div {
     padding: 10px 10px 0 10px;
     hyphens: auto;
     hyphenate-limit-chars: 6 3 2;
 }
 
-div.normal:last-child, div.alert:last-child, div.emphasized:last-child, div.preformatted:last-child {
+.card > div:last-child, .card > .input {
     padding-bottom: 10px;
 }
 
