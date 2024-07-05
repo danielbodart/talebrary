@@ -300,7 +300,7 @@ div.suggestions::before {
     font-style: italic;
 }
 
-.card > div {
+.card > div:not(.rating) {
     padding: 10px 10px 0 10px;
     hyphens: auto;
     hyphenate-limit-chars: 6 3 2;
