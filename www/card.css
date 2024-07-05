@@ -300,14 +300,23 @@ div.suggestions::before {
     font-style: italic;
 }
 
-.card > div:not(.rating) {
-    padding: 10px 10px 0 10px;
-    hyphens: auto;
-    hyphenate-limit-chars: 6 3 2;
-}
+@layer defaults {
+    .buffer > .card > div {
+        padding: 10px 10px 0 10px;
+        hyphens: auto;
+        hyphenate-limit-chars: 6 3 2;
+    }
 
-.card > div:last-child, .card > .title, .card > .author, .card > .input {
-    padding-bottom: 10px;
+    .card > .rating {
+        padding: 0;
+    }
+
+    .buffer > .card > div:last-child,
+    .buffer > .card > .title,
+    .buffer > .card > .author,
+    .buffer > .card > .input {
+        padding-bottom: 10px;
+    }
 }
 
 .author {
