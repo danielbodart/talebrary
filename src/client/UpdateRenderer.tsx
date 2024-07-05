@@ -59,6 +59,35 @@ function instructions(line: LineData, maxLength: number = 4): string {
     return line.text;
 }
 
+function group(html: DocumentFragment, classes: string[]): DocumentFragment {
+    const chunks = splitWhen(Array.from(html.children), (e: Element) => {
+        return e.previousElementSibling instanceof HTMLElement && (e.previousElementSibling.classList.contains('normal') || e.previousElementSibling.classList.contains('input')) &&
+            e instanceof HTMLElement && (e.classList.contains('header') || e.classList.contains('subheader')) &&
+            e.nextElementSibling instanceof HTMLElement && e.nextElementSibling.classList.contains('normal');
+    });
+    return chunks.reduce((a, elements) => {
+        const card = document.createElement('div');
+        card.classList.add(...classes);
+        card.append(...elements);
+        a.appendChild(card);
+        return a;
+    }, fragment(''));
+}
+
+function splitWhen<T>(values: T[], predicate: (t: T) => boolean): T[][] {
+    const result: T[][] = [];
+    let current: T[] = [];
+    for (const value of values) {
+        if (predicate(value)) {
+            result.push(current);
+            current = [];
+        }
+        current.push(value);
+    }
+    result.push(current);
+    return result;
+}
+
 export class UpdateRenderer {
     constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
         Instruction.register(document.defaultView!)
@@ -72,7 +101,7 @@ export class UpdateRenderer {
             if (!isUpdateMessage(message)) return;
             this.handle(message as UpdateMessage);
         })
-        document.addEventListener(InstructionEventName, (ev:CustomEvent<InstructionEvent>) => {
+        document.addEventListener(InstructionEventName, (ev: CustomEvent<InstructionEvent>) => {
             const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
             htmlInput.value = `${htmlInput.value} ${ev.detail.text}`.trim();
             htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
@@ -121,8 +150,6 @@ export class UpdateRenderer {
         return this.document.querySelector<HTMLDivElement>(`#window-${id}`);
     }
 
-    private breakOn = new Set(['header', 'subheader']);
-
     updateContent(updates: (GridContent | BufferContent | GraphicsContent)[], gen: number) {
         return updates.map((update, index) => {
             const window = this.getWindow(update.id);
@@ -142,39 +169,29 @@ export class UpdateRenderer {
                     window.innerHTML = '';
                 }
 
-                const html = fragment(<div class={`card${index < 2 ? ' scroll' : ''}`}>
-                        {
-                            update.text.flatMap(t => {
-                                if (!('content' in t)) return [];
-                                const lineData = cleanLineData(t.content);
-                                if (lineData.length === 0) return [];
-                                if (lineData.length === 1) {
-                                    return lineData.map(c => {
-                                        if (this.breakOn.has(c.style)) {
-                                            return '</div><div class="card">' + <div class={c.style}>{c.text}</div>
-                                        } else {
-                                            return <div
-                                                class={c.style}>{c.style === 'normal' ? instructions(c) : c.text}</div>
-                                        }
-                                    });
-                                } else {
-                                    return [<div class="normal">{lineData.map(c => <span
-                                        class={c.style}>{instructions(c)}</span>)}</div>]
-                                }
-                            }).join('')
+                const html = fragment(update.text
+                    .flatMap(t => {
+                        if (!('content' in t)) return [];
+                        const lineData = cleanLineData(t.content);
+                        if (lineData.length === 0) return [];
+                        if (lineData.length === 1) {
+                            return lineData.map(c =>
+                                <div class={c.style}>{c.style === 'normal' ? instructions(c) : c.text}</div>);
                         }
-                    </div>
+                        return [<div class="normal">{lineData.map(c => <span
+                            class={c.style}>{instructions(c)}</span>)}</div>]
+                    }).join('')
                 );
 
-                window.appendChild(html);
+                window.appendChild(group(html, index < 2 && gen > 1 ? ['card', 'scroll'] : ['card']));
 
-                if (index < 2 && gen > 1) {
-                    const scroll = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll')).reverse()[0];
-                    this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView({
-                        block: 'start',
-                        behavior: 'smooth'
-                    }), 0);
-                }
+                const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll'));
+                const scroll = scrollElements[0];
+                this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView({
+                    block: 'start',
+                    behavior: 'smooth'
+                }), 0);
+                scrollElements.forEach(e => e.classList.remove('scroll'));
 
                 // Add image
                 let lastCard = window.querySelector<HTMLElement>(".card:last-child")!;
@@ -216,7 +233,7 @@ export class UpdateRenderer {
                                 return acc;
                             }, []).sort((a, b) => b.length - a.length);
 
-                            if(result.length === 0) return;
+                            if (result.length === 0) return;
                             result.length = Math.min(15, result.length);
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
