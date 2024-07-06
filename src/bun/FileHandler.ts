@@ -1,4 +1,4 @@
-import {client, get, type HttpHandler} from "../http/mod.ts";
+import {client, get, type Http} from "../http/mod.ts";
 import {file} from 'bun';
 import {Uri} from "../http/Uri.ts";
 
@@ -23,7 +23,7 @@ export async function fileHandler(request: Request) {
     }
 }
 
-export function localhostHandler(root: string): HttpHandler {
+export function localhostHandler(root: string): Http {
     const name = file(root).name;
     console.log('root', name);
     // TODO add support for canonical Uri and add check

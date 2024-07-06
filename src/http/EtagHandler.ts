@@ -1,4 +1,4 @@
-import type {HttpHandler} from "./mod.ts";
+import type {Http} from "./mod.ts";
 import type {Digest} from "../system/digest.ts";
 
 const safeHeaders = [
@@ -18,7 +18,7 @@ function copySafeHeaders(source: Response): Record<string, string> {
 }
 
 
-export function etagHandler(digest: Digest, http: HttpHandler) {
+export function etagHandler(digest: Digest, http: Http) {
     return async (request: Request) => {
         const response = await http(request);
         if (request.method === 'GET' && response.ok && response.body) {

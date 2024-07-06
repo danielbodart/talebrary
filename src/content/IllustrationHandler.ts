@@ -1,7 +1,6 @@
 import type {Ai} from "@cloudflare/workers-types";
 
 import {Uri} from "../http/Uri.ts";
-import {type Describable, type SceneContext} from "../types.ts";
 import {illustrationPrompt} from "./Prompts.ts";
 
 import type {Dependency} from "../yadic/mod.ts";
@@ -11,7 +10,7 @@ export class IllustrationHandler {
     }
 
     async handle(request: Request): Promise<Response> {
-        const {query} = new Uri(request.url);
+        const {path, query} = new Uri(request.url);
         const params = new URLSearchParams(query);
 
         const model = params.get('model') ?? "@cf/bytedance/stable-diffusion-xl-lightning" as any;
@@ -19,8 +18,8 @@ export class IllustrationHandler {
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});
 
-        const data: Describable | SceneContext = JSON.parse(rawPrompt);
-        const prompt = illustrationPrompt(data).replace(/\s+/g, ' ');
+        const data = JSON.parse(rawPrompt);
+        const prompt = illustrationPrompt(path, data);
 
         const response = await this.ai.run(model, {prompt});
 

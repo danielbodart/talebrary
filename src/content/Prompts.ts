@@ -10,11 +10,20 @@ function scenePrompt(data: SceneContext) {
 }
 
 function storyPrompt(data: Describable) {
-    return `Create covert art illustration for the interactive fiction called "${data.title}" 
+    return `Create the cover art illustration for the interactive fiction called "${data.title}" 
             "${data.description ? `and described as "${data.description}".` : ''}`;
 }
 
-export function illustrationPrompt(data: Describable | SceneContext): string {
+function cardPrompt(data: Describable) {
+    return `Create the illustration for a playing card that is part of a board game. The card is titled "${data.title}" 
+            "${data.description ? `and described as "${data.description}".` : ''}.`;
+}
+
+export function illustrationPrompt(path: string, data: any): string {
+    const [, section] = path.split('/');
+    if (section === 'cards') {
+        return cardPrompt(data);
+    }
     return isDescribable(data) ? storyPrompt(data) : scenePrompt(data);
 }
 

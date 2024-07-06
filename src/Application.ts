@@ -1,7 +1,7 @@
 import {Ai, D1Database, type Queue, R2Bucket} from "@cloudflare/workers-types";
 import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
-import {type HttpHandler} from "./http/mod.ts";
+import {type Http} from "./http/mod.ts";
 import {Routing} from "./Routing.ts";
 import {templateHandler} from "./templates/TemplateHandler.ts";
 import {R2CachingHandler} from "./cloudflare/R2CachingHandler.ts";
@@ -36,7 +36,7 @@ export interface Env extends Config {
 }
 
 
-export function application(http: HttpHandler, db: D1Database, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
+export function application(http: Http, db: D1Database, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
     return LazyMap.create()
         .set('HONEYCOMB_API_KEY', instance(config.HONEYCOMB_API_KEY))
         .set('HONEYCOMB_BATCH_SIZE', instance(config.HONEYCOMB_BATCH_SIZE))
