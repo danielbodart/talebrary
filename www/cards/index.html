@@ -14,8 +14,8 @@
                 <div class="title">
                     <slot name="title">Need a title</slot>
                 </div>
-                <div class="description">
-                    <slot name="description">Needs a description</slot>
+                <div class="rules">
+                    <slot name="rules">The rules</slot>
                 </div>
             </div>
         </template>
@@ -23,8 +23,10 @@
             <form class="input">
                 <label>Title: <input type="text" id="title" name="title" required autofocus/></label>
                 <label>Description: <input type="text" id="description" name="description" required/></label>
+                <label>Rules: <input type="text" id="rules" name="rules" required/></label>
             </form>
             <script>
+
                 document.querySelector('input[name=title]').addEventListener('keyup', (event) => {
                     if (event.key === 'Enter') {
                         event.preventDefault();
@@ -35,17 +37,32 @@
                     // on enter focus description element
                     if (event.key === 'Enter') {
                         event.preventDefault();
-                        const form = document.querySelector('form.input');
-                        const title = form.querySelector('input[name=title]').value;
-                        const description = form.querySelector('input[name=description]').value;
-                        const card = document.getElementById('card').content.cloneNode(true);
-                        card.querySelector('.image').src += encodeURIComponent(JSON.stringify({title, description}));
-                        card.querySelector('.title').textContent = title;
-                        card.querySelector('.description').textContent = description;
-                        document.querySelector('.results').appendChild(card);
-                        form.reset();
-                        document.querySelector('input[name=title]').focus({preventScroll: true});
+                        document.querySelector('input[name=rules]').focus({preventScroll: true});
                     }
+                });
+                document.querySelector('input[name=rules]').addEventListener('keyup', (event) => {
+                    // on enter focus description element
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        const form = document.querySelector('form');
+                        form.dispatchEvent(new SubmitEvent('submit', {cancelable: true}));
+                    }
+                });
+                document.querySelector('form').addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    const form = document.querySelector('form.input');
+                    const title = form.querySelector('input[name=title]').value;
+                    const description = form.querySelector('input[name=description]').value;
+                    const rules = form.querySelector('input[name=rules]').value;
+                    const card = document.getElementById('card').content.cloneNode(true);
+                    const image = card.querySelector('.image');
+                    image.src += encodeURIComponent(JSON.stringify({title, description, rules}));
+                    image.alt = description;
+                    card.querySelector('.title').textContent = title;
+                    card.querySelector('.rules').textContent = rules;
+                    document.querySelector('.results').appendChild(card);
+                    form.reset();
+                    document.querySelector('input[name=title]').focus({preventScroll: true});
                 });
             </script>
         </div>

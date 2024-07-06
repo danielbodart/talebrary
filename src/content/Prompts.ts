@@ -14,9 +14,13 @@ function storyPrompt(data: Describable) {
             "${data.description ? `and described as "${data.description}".` : ''}`;
 }
 
-function cardPrompt(data: Describable) {
-    return `Create the illustration for a playing card that is part of a board game. The card is titled "${data.title}" 
-            "${data.description ? `and described as "${data.description}".` : ''}.`;
+function cardPrompt(data: Describable & {rules: string}) {
+    return `Create the illustration for a playing card that is part of a board game. 
+            The card is titled "${data.title}" and described as "${data.description}". 
+            The rules for the card are "${data.rules}".
+            The illustration should be colourful, it should lean into fantasy or sci-fi themes.
+            Do NOT depict actual playing cards or card games. 
+            The image should really speak to the title and description of the card.`;
 }
 
 export function illustrationPrompt(path: string, data: any): string {
