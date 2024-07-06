@@ -1,5 +1,5 @@
 import type {SupportedGameType} from "../types.ts";
-import {get, type HttpHandler} from "../http/mod.ts";
+import {get, type Http} from "../http/mod.ts";
 import {Buffer} from "buffer/";
 import {MiniDialog} from "./MiniDialog.ts";
 import {type BaseMessage, engineMapping, isBaseMessage, type Logger, type MessageHandler} from "./types.ts";
@@ -24,7 +24,7 @@ export async function client(story: string,
                              storage: Storage,
                              messageHandler: MessageHandler,
                              prefix: string = '',
-                             http: HttpHandler = fetch,
+                             http: Http = fetch,
                              logger: Logger = console) {
     const engineName = engineMapping.get(type);
     if (!engineName) throw new Error('Unsupported engine');

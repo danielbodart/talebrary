@@ -3,6 +3,7 @@ artifacts
 node_modules
 www/content
 www/client
+www/cards/art
 db/full.sql
 .idea/inspectionProfiles/
 games

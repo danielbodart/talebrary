@@ -49,6 +49,12 @@ export class Routing {
             return this.deps.search.handle(request);
         }
 
+        if (section === 'cards') {
+            if (id === 'art') {
+                return this.deps.art.handle(request);
+            }
+        }
+
         if(section === 'events') {
             return this.deps.events.handle(request);
         }

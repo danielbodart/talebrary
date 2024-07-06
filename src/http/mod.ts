@@ -1,10 +1,14 @@
 import type {Uri} from "./Uri.ts";
 
-export interface HttpHandler {
+export interface Http {
     (request: Request): Promise<Response>;
 }
 
-export const client: HttpHandler = (request: Request): Promise<Response> => fetch(request);
+export interface HttpHandler {
+    handle(request: Request): Promise<Response>;
+}
+
+export const client: Http = (request: Request): Promise<Response> => fetch(request);
 
 export type HttpMethod = 'HEAD' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 

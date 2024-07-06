@@ -1,10 +1,10 @@
-import type {HttpHandler} from "../http/mod.ts";
+import type {Http} from "../http/mod.ts";
 import type {Timers} from "../system/timers.ts";
 import type {Clock} from "../system/clock.ts";
 import type {EventSender} from "./EventSender.ts";
 import type {Dependency} from "../yadic/mod.ts";
 
-export interface EventBatcherConfig extends Dependency<'http', HttpHandler>,
+export interface EventBatcherConfig extends Dependency<'http', Http>,
     Dependency<'timers', Timers>,
     Dependency<'clock', Clock> {
     HONEYCOMB_API_KEY: string

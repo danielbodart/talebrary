@@ -120,7 +120,6 @@ body.search {
     background-repeat: no-repeat;
     background-position: center center;
     width: 1em;
-    width: 1em;
     height: 1em;
     font-size: 2rem;
     margin-right: 10px;
@@ -170,6 +169,42 @@ body.search {
     outline-style: none;
 }
 
+.cards .input::before {
+    display: none;
+}
+
+.cards form label {
+    display: block;
+}
+
+.cards form {
+    display: block;
+}
+
+.cards form input {
+    font-family: "League Spartan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.5rem;
+    background-color: transparent;
+    color: var(--white-smoke);
+    border: none;
+    margin: 0;
+    outline-width: 0;
+    outline-style: none;
+}
+
+.cards .description {
+    border: none;
+}
+
+.cards.results {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
 .rating {
     position: absolute;
@@ -351,16 +386,6 @@ div.suggestions::before {
     border-top: 10px ridge var(--sunset);
 }
 
-.results .description {
-    position: absolute;
-    height: calc(100% - 20px);
-    overflow-y: auto;
-}
-
-.results .description {
-    transform: rotateY(180deg);
-}
-
 .play {
     font-family: "Cinzel", serif;
     font-optical-sizing: auto;
@@ -429,40 +454,5 @@ div.suggestions::before {
     font-variation-settings: "wdth" 75;
 }
 
-.results .card {
-    perspective: 1000px;
-    transition: transform 0.5s;
-    transform-style: preserve-3d;
-    cursor: pointer;
-}
-
-.results .card:hover {
-    transform: scale(1.03);
-}
-
-.results .card > *:not(.rating) {
-    backface-visibility: hidden;
-}
-
-.orientation {
-    display: none;
-}
-
-.results .orientation:checked + .card {
-    transform: rotateY(180deg);
-}
-
-.results .orientation:checked + .card:hover {
-    transform: rotateY(180deg) scale(1.03);
-}
-
-.results .rating {
-    transition: 0s 0.15s;
-}
-
-.results .orientation:checked + .card > .rating {
-    color: transparent;
-    z-index: 1;
-}
 
 

@@ -1,4 +1,4 @@
-import {type HttpHandler} from "../http/mod.ts";
+import {type Http} from "../http/mod.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import {Uri} from "../http/Uri.ts";
@@ -16,7 +16,7 @@ export interface R2CachingHandlerDeps extends Dependency<'r2', R2Bucket>,
 }
 
 export class R2CachingHandler {
-    constructor(private deps: R2CachingHandlerDeps, private http: HttpHandler) {
+    constructor(private deps: R2CachingHandlerDeps, private http: Http) {
     }
 
     async handle(request: Request): Promise<Response> {

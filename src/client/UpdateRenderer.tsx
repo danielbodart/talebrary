@@ -205,7 +205,6 @@ export class UpdateRenderer {
 
                     const title = this.document.title;
                     const description = this.document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
-                    const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
                     const current = scene(lastCard);
                     const data: SceneContext = {
                         story: {
@@ -213,7 +212,6 @@ export class UpdateRenderer {
                             description
                         },
                         scene: current,
-                        previous: previous ? scene(previous) : undefined,
                     };
 
                     for (const model of this.models) {

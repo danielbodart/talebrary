@@ -1,4 +1,4 @@
-import {type HttpHandler} from "../http/mod.ts";
+import {type Http} from "../http/mod.ts";
 import {parseHTML} from 'linkedom';
 import {card} from "./card.tsx";
 import {Uri} from "../http/Uri.ts";
@@ -9,7 +9,7 @@ const templates: { [key: string]: Template } = {
     'card': card
 }
 
-export function templateHandler(http: HttpHandler): HttpHandler {
+export function templateHandler(http: Http): Http {
     return async (request) => {
         const response = await http(request);
         if (!response.ok) return response;
