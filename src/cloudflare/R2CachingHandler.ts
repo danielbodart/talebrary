@@ -1,7 +1,6 @@
 import {type Http} from "../http/mod.ts";
 import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
-import {Uri} from "../http/Uri.ts";
 import type {Digest} from "../system/digest.ts";
 
 import type {Dependency} from "../yadic/mod.ts";
@@ -20,19 +19,29 @@ export class R2CachingHandler {
     }
 
     async handle(request: Request): Promise<Response> {
-        const key = await this.key(request);
-        try {
-            const oldEtag = request.headers.get('if-none-match');
-            const response = toResponse(await this.deps.r2.get(key, oldEtag ? {onlyIf: {etagDoesNotMatch: unquote(oldEtag)}} : undefined));
-            if (response.status !== 404) {
-                console.log('Found in R2', key, response.status);
-                return response;
+        const {pathname: path, searchParams} = new URL(request.url);
+        const reload = searchParams.has('reload');
+        if (reload) searchParams.delete('reload');
+        const query = searchParams.toString();
+        const key = path.substring(1) + (query ? `/${await this.deps.digest(new TextEncoder().encode(query).buffer)}` : '')
+
+        if (reload) {
+            console.log('Force reload', key);
+        } else {
+            try {
+                const oldEtag = request.headers.get('if-none-match');
+                const response = toResponse(await this.deps.r2.get(key, oldEtag ? {onlyIf: {etagDoesNotMatch: unquote(oldEtag)}} : undefined));
+                if (response.status !== 404) {
+                    console.log('Found in R2', key, response.status);
+                    return response;
+                }
+            } catch (e) {
+                console.error(e);
             }
-        } catch (e) {
-            console.error(e);
+
+            console.log('Not found in R2', key);
         }
 
-        console.log('Not found in R2', key);
         const response = await this.http(request);
         if (!response.ok) return response;
 
@@ -51,8 +60,4 @@ export class R2CachingHandler {
         return new Response(buffer, {status: 200})
     }
 
-    private async key(request: Request) {
-        const {path, query} = new Uri(request.url);
-        return path.substring(1) + (query ? `/${await this.deps.digest(new TextEncoder().encode(query).buffer)}` : '')
-    }
 }
