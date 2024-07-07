@@ -24,8 +24,14 @@ class CaptureMessage implements MessageHandler {
 describe("client", () => {
     test("can load an story", async () => {
         const messageHandler = new CaptureMessage();
-        await client(`file://${import.meta.dir}/Floatpoint.gblorb`, "blorb/glulx", {} as any,
-            messageHandler, `file://${import.meta.dir}/../../www`, fileHandler, new NoLogger())
+        await client({
+            story: `file://${import.meta.dir}/Floatpoint.gblorb`,
+            type: "blorb/glulx",
+            storage: {} as any,
+            http: fileHandler,
+            logger: new NoLogger(),
+            messageHandler
+        },`file://${import.meta.dir}/../../www`)
         messageHandler.send!({type: "init", gen: 0, metrics: {}});
         expect((await messageHandler.received()).type).toEqual('update')
     });

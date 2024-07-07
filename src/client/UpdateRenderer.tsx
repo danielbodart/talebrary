@@ -21,10 +21,10 @@ import {
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
 import {commonCommands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
-import {type InstructionEvent, InstructionEventName} from "./comonents/InstructionEvent.tsx";
-import {Instruction} from "./comonents/Instruction.tsx";
+import {type InstructionEvent, InstructionEventName} from "./components/InstructionEvent.tsx";
 import {EventBuilder} from "./EventBuilder.ts";
-import {SystemClock} from "../system/clock.ts";
+import {type Clock, SystemClock} from "../system/clock.ts";
+import {type Dependency} from "../yadic/mod.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -88,9 +88,18 @@ function splitWhen<T>(values: T[], predicate: (t: T) => boolean): T[][] {
     return result;
 }
 
+export interface UpdateRendererDependencies extends Dependency<'window', Window>,
+    Dependency<'document', Document>,
+    Dependency<'messageHandler', MessageHandler>,
+    Dependency<'clock', Clock>,
+    Dependency<'metrics', Partial<Metrics>> {
+}
+
 export class UpdateRenderer {
-    constructor(private document: Document, private messageHandler: MessageHandler, metrics: Partial<Metrics> = {}) {
-        Instruction.register(document.defaultView!)
+    constructor(deps: UpdateRendererDependencies,
+                private document: Document = deps.document,
+                private messageHandler: MessageHandler = deps.messageHandler,
+                metrics: Partial<Metrics> = deps.metrics) {
         messageHandler.postMessage({
             type: "init",
             gen: 0,
@@ -217,7 +226,8 @@ export class UpdateRenderer {
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${model}`;
                         lastCard.insertBefore(
-                            fragment(<img class="image reloadable" loading="lazy" src={image} alt="" aria-hidden="true"
+                            fragment(<img is="x-image" reloadable class="image" loading="lazy" src={image} alt=""
+                                          aria-hidden="true"
                                           data-gen={gen}/>),
                             lastCard.firstChild);
                     }
