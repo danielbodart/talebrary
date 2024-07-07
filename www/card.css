@@ -243,7 +243,6 @@ body.search {
 }
 
 .image {
-    display: block;
     flex-shrink: 0;
     object-fit: contain;
     width: 100%;

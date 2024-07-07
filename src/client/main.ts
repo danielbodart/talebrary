@@ -4,6 +4,7 @@ import {UpdateRenderer} from "./UpdateRenderer.tsx";
 import {calculateMaxSize} from "./Measure.ts";
 
 (async () => {
+    reloadableImages(document)
     removeBrokenImages(document)
     const story = document.querySelector<HTMLLinkElement>('#story');
     if (!story) throw new Error("Could not find story");
@@ -19,6 +20,17 @@ function removeBrokenImages(document:Document) {
     document.addEventListener('error', ev => {
         if (ev.target instanceof HTMLElement && ev.target.tagName === 'IMG') {
             ev.target.parentElement!.removeChild(ev.target);
+        }
+    }, true)
+}
+
+function reloadableImages(document:Document) {
+    document.addEventListener('click', ev => {
+        const element = ev.target;
+        if (element instanceof HTMLImageElement && element.classList.contains('reloadable')) {
+            const url = new URL(element.src);
+            url.searchParams.set('reload', Date.now().toString());
+            element.src = url.toString();
         }
     }, true)
 }
