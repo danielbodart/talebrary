@@ -51,11 +51,19 @@ export class ImageElement {
                 params.set('reload', String(clock.now().getTime()));
                 url.query = params.toString();
                 this.src = url.toString();
+                this.updateState();
             }
 
             updateState() {
                 this.setAttribute('state', calculateImageState(this));
             }
+
+            static readonly observedAttributes: string[] = ["src"];
+
+            attributeChangedCallback(_name: string, _oldValue: string, _newValue: string) {
+                this.updateState();
+            }
+
         }, {extends: 'img'});
     }
 }

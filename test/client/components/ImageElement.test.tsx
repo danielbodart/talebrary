@@ -25,6 +25,10 @@ describe("ImageElement", () => {
         const element = window.document.querySelector<HTMLImageElement>('img[is=x-image]')!;
         element.click();
 
-        expect(element.src).toEqual('/art?reload=1234567890')
+        expect(element.src).toEqual('/art?reload=1234567890');
+    });
+
+    test('when reloading state is also updated', async () => {
+       // Not possible with linkedom so manual test
     });
 })
