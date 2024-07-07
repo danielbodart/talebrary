@@ -260,6 +260,16 @@ body.search {
     aspect-ratio: 1/1;
 }
 
+img[state=loading] {
+    object-position: 2000% 2000%;
+    object-fit: none;
+    background-color: #000;
+    background-image: url("/icons/loader.svg");
+    background-size: 100px 100px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 img[state=failed] {
     display: none !important;
 }
