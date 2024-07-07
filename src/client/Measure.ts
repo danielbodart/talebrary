@@ -1,3 +1,5 @@
+import type {Dependency} from "../yadic/mod.ts";
+
 export interface Measure {
     width: number;
     height: number;
@@ -17,7 +19,7 @@ export function charWidthHeight(document: Document, styled: HTMLElement): Measur
     return {width, height};
 }
 
-export function calculateMaxSize(window: Window): Measure {
+export function calculateMaxSize({window}: Dependency<'window', Window>): Measure {
     const grid = window.document.createElement('div');
     grid.classList.add('window', 'grid');
     grid.style.display = 'none';

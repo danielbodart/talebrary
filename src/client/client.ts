@@ -4,9 +4,10 @@ import {Buffer} from "buffer/";
 import {MiniDialog} from "./MiniDialog.ts";
 import {type BaseMessage, engineMapping, isBaseMessage, type Logger, type MessageHandler} from "./types.ts";
 import {MiniGlkOte} from "./MiniGlkOte.ts";
+import type {Dependency} from "../yadic/mod.ts";
 
 export class WindowMessageHandler implements MessageHandler {
-    constructor(private window: Window) {
+    constructor(deps: Dependency<'window', Window>, private window: Window = deps.window) {
     }
 
     postMessage<T extends BaseMessage>(message: T): void {
@@ -16,16 +17,19 @@ export class WindowMessageHandler implements MessageHandler {
     onMessage<T extends BaseMessage>(fun: (message: T) => void): void {
         this.window.addEventListener('message', e => isBaseMessage(e.data) ? fun(e.data as T) : undefined);
     }
-
 }
 
-export async function client(story: string,
-                             type: SupportedGameType,
-                             storage: Storage,
-                             messageHandler: MessageHandler,
-                             prefix: string = '',
-                             http: Http = fetch,
-                             logger: Logger = console) {
+export interface ClientDependencies extends
+    Dependency<'story', string>,
+    Dependency<'type', SupportedGameType>,
+    Dependency<'storage', Storage>,
+    Dependency<'messageHandler', MessageHandler>,
+    Dependency<'http', Http>,
+    Dependency<'logger', Logger>
+{}
+
+export async function client({story, type, storage, messageHandler, http, logger}: ClientDependencies,
+                             prefix: string = '') {
     const engineName = engineMapping.get(type);
     if (!engineName) throw new Error('Unsupported engine');
     const engine = (await import(`${prefix}/emglken/src/${engineName}.js`)).default;
@@ -46,6 +50,7 @@ export async function client(story: string,
     const vm = await new engine();
     vm.init(Buffer.from(await storyResponse.arrayBuffer()), options);
     await vm.start();
+    return 'Created VM';
 }
 
 

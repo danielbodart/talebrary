@@ -8,6 +8,6 @@ declare namespace JSX {
     }
 
     interface HtmlImageTag {
-        loading: 'lazy' | 'eager'
+        loading?: 'lazy' | 'eager'
     }
 }
