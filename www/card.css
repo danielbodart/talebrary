@@ -271,7 +271,7 @@ img[reloadable]:hover {
     cursor: pointer;
 }
 
-img[state=loading] {
+img[state=loading], img[state=loading][reloadable]:hover {
     object-position: 2000% 2000%;
     object-fit: none;
     background-color: #000;
@@ -279,6 +279,7 @@ img[state=loading] {
     background-size: 100px 100px;
     background-position: center;
     background-repeat: no-repeat;
+    cursor: unset;
 }
 
 img[state=failed] {
