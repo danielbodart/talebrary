@@ -260,6 +260,17 @@ body.search {
     aspect-ratio: 1/1;
 }
 
+img[reloadable]:hover {
+    object-position: 2000% 2000%;
+    object-fit: none;
+    background-color: #000;
+    background-image: url("/icons/rotate-right-solid.svg");
+    background-size: 100px 100px;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
 img[state=loading] {
     object-position: 2000% 2000%;
     object-fit: none;
