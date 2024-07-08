@@ -18,11 +18,13 @@ describe("ImageElement", () => {
         expect(element.getAttribute('state')).toEqual(ImageState.Loading);
     });
 
-    test("when reloadable is true, clicking on the image will cause it to reload", async () => {
+    test("when reloadable is true, clicking on the image while holding down the ctrl key will cause it to reload", async () => {
         const window = parseHTML(<body><img is="x-image" alt="" reloadable src="/art"/></body>);
         ImageElement.definition(chain({clock}, window)).apply(window.customElements);
 
         const element = window.document.querySelector<HTMLImageElement>('img[is=x-image]')!;
+        // Currently this is done by a generic event lister in the main.ts file
+        window.document.body.classList.add('ctrl');
         element.click();
 
         expect(element.src).toEqual('/art?reload=1234567890');
