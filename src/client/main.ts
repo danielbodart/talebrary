@@ -48,16 +48,10 @@ export function realise(...args: any[]) {
 }
 
 export function controlKeys(document: Document) {
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey) document.body.classList.add('ctrl');
-        if (e.altKey) document.body.classList.add('alt');
-        if (e.shiftKey) document.body.classList.add('shift');
-        if (e.metaKey) document.body.classList.add('meta');
-    });
-    document.addEventListener('keyup', (e) => {
-        if (e.ctrlKey) document.body.classList.remove('ctrl');
-        if (e.altKey) document.body.classList.remove('alt');
-        if (e.shiftKey) document.body.classList.remove('shift');
-        if (e.metaKey) document.body.classList.remove('meta');
-    });
+    ['keydown', 'keyup'].forEach(event => document.addEventListener(event as 'keydown' | 'keyup', (e: KeyboardEvent) => {
+        document.body.classList.toggle('ctrl', e.ctrlKey);
+        document.body.classList.toggle('alt', e.altKey);
+        document.body.classList.toggle('shift', e.shiftKey);
+        document.body.classList.toggle('meta', e.metaKey);
+    }));
 }
