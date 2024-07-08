@@ -260,7 +260,7 @@ body.search {
     aspect-ratio: 1/1;
 }
 
-img[reloadable]:hover {
+.ctrl img[reloadable]:hover {
     object-position: 2000% 2000%;
     object-fit: none;
     background-color: #000;
@@ -271,7 +271,7 @@ img[reloadable]:hover {
     cursor: pointer;
 }
 
-img[state=loading], img[state=loading][reloadable]:hover {
+img[state=loading], .ctrl img[state=loading][reloadable]:hover {
     object-position: 2000% 2000%;
     object-fit: none;
     background-color: #000;

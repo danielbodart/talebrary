@@ -34,7 +34,7 @@ import type {CustomElementDefinition} from "./components/CustomElementDefinition
         .set('renderer', constructor(UpdateRenderer));
     await app.client;
     realise(app.renderer, app.Instruction, app.ImageElement);
-
+    controlKeys(document);
 })();
 
 export function customElement<D, C extends CustomElementConstructor>(value: {
@@ -45,4 +45,19 @@ export function customElement<D, C extends CustomElementConstructor>(value: {
 
 export function realise(...args: any[]) {
     return args;
+}
+
+export function controlKeys(document: Document) {
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey) document.body.classList.add('ctrl');
+        if (e.altKey) document.body.classList.add('alt');
+        if (e.shiftKey) document.body.classList.add('shift');
+        if (e.metaKey) document.body.classList.add('meta');
+    });
+    document.addEventListener('keyup', (e) => {
+        if (e.ctrlKey) document.body.classList.remove('ctrl');
+        if (e.altKey) document.body.classList.remove('alt');
+        if (e.shiftKey) document.body.classList.remove('shift');
+        if (e.metaKey) document.body.classList.remove('meta');
+    });
 }
