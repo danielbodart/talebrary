@@ -354,16 +354,15 @@ export function sortToFit(parent: HTMLElement) {
     order(parent.children[0] as HTMLElement)
 }
 
-function sameLine(element: HTMLElement): boolean {
-    const previousSibling = element.previousElementSibling as HTMLElement;
-    return !previousSibling || element.offsetTop === previousSibling.offsetTop;
+function sameLine(a: HTMLElement, b: HTMLElement): boolean {
+    return a.offsetTop === b.offsetTop;
 }
 
 function order(current: HTMLElement | undefined): undefined {
     if (!current) return;
     const next = current.nextElementSibling as HTMLElement;
     if (!next) return;
-    if (sameLine(next)) return order(next);
+    if (sameLine(current, next)) return order(next);
     return tryNext(current, next);
 }
 
@@ -371,7 +370,7 @@ function tryNext(current: HTMLElement, next: HTMLElement) {
     const next2 = next.nextElementSibling as HTMLElement;
     if (!next2) return;
     current.after(next2);
-    if (sameLine(next2)) return order(next2);
+    if (sameLine(current, next2)) return order(next2);
     next.after(next2);
     return tryNext(current, next2)
 }
