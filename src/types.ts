@@ -25,11 +25,24 @@ export interface SceneContext {
     previous?: Describable
 }
 
-export const commonCommands = ["about", "again", "all", "ask", "break", "burn", "climb", "curse", "dig", "down", "drink", "drop",
-    "east", "eat", "enter", "examine", "feel", "fill", "give", "go", "help", "in", "info", "inventory",
-    "jump", "listen", "look", "north", "off", "on", "open", "out", "pray", "pull", "push", "put", "restore", "save",
-    "search", "show", "sing", "sleep", "smell", "south", "take", "talk", "tell", "throw", "to", "turn", "turn",
-    "under", "undo", "unlock", "up", "wait", "wake", "wave", "wear", "west", "with"];
+// https://pr-if.org/doc/play-if-card/play-if-card.html
+
+export const always = ["look", "examine", "inventory"];
+
+export const peopleCommands = ["ask", "give", "talk", "tell", "show"];
+
+export const directions = ["north", "east", "south", "west", "up", "down", "in", "out", "go"]
+
+export const common = ["take", "drop", "open", "put", "pull", "push", "turn", "feel"];
+
+export const extra = [
+    "eat", "drink", "climb", "wave", "fill", "wear", "smell", "off", "on", "listen", "turn", "dig", "burn", "enter", "look", "under", "search", "unlock", "with", "break",
+    "jump", "sleep", "pray", "wake", "curse", "sing", "undo", "throw"
+]
+
+export const controls = ["about", "info", "help", "again", "restore", "save", "quit"];
+
+export const commands = [...peopleCommands, ...directions, ...always, ...common, ...controls, ...extra];
 
 
 export interface Suggestions {
