@@ -231,13 +231,9 @@ export class UpdateRenderer {
 
                     fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
                         if (response.ok) response.json().then((json: Suggestions) => {
-                            const result = [json.commands, json.nouns, json.actions].reduce((acc, val) => {
-                                if (acc.length < 10) acc.push(...val);
-                                return acc;
-                            }, []).sort((a, b) => b.length - a.length);
-
-                            if (result.length === 0) return;
+                            const result = [...json.commands, ...json.nouns, ...json.actions]
                             result.length = Math.min(15, result.length);
+                            result.sort((a, b) => b.length - a.length);
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
                                 <x-instruction>{action}</x-instruction>)}</div>))
