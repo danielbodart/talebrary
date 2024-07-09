@@ -20,11 +20,12 @@ import {
 } from "./types.ts";
 import {fragment} from "../templates/Fragment.tsx";
 import * as elements from "typed-html";
-import {commonCommands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
+import {commands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
 import {type InstructionEvent, InstructionEventName} from "./components/InstructionEvent.tsx";
 import {EventBuilder} from "./EventBuilder.ts";
 import {type Clock, SystemClock} from "../system/clock.ts";
 import {type Dependency} from "../yadic/mod.ts";
+import {capitalWords, wordCount} from "../system/Strings.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -38,13 +39,7 @@ function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
 }
 
 
-const wordCountPattern = /(\p{L}+\p{M}*|\p{N}+)/gu;
 
-function wordCount(value: string): number {
-    return value.match(wordCountPattern)?.length ?? 0;
-}
-
-const capitalWords = /\b\p{Lu}+\b(?:\s+\b\p{Lu}+\b)*/gu;
 
 function instructions(line: LineData, maxLength: number = 4): string {
     if (line.style === 'normal') {
@@ -270,7 +265,7 @@ export class UpdateRenderer {
             if (!window) throw new Error(`Could not find window ${update.id}`);
 
             const history = Array.from(window.querySelectorAll<HTMLElement>('div.input')).flatMap(e => e.innerText.split(/\s+/));
-            const auto = Array.from(new Set([...commonCommands, ...history])).sort();
+            const auto = Array.from(new Set([...commands, ...history])).sort();
 
             window.append(fragment(
                 <div class="card input-control">

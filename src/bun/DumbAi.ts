@@ -1,19 +1,57 @@
-import {commonCommands, type ScopedPrompt, type TextGenerationPrompt, type UnscopedPrompt} from "../types.ts";
-import type {SuggestionedActions} from "../content/Prompts.ts";
+import {
+    always,
+    commands,
+    directions,
+    peopleCommands,
+    type ScopedPrompt,
+    type TextGenerationPrompt,
+    type UnscopedPrompt
+} from "../types.ts";
+import type {Suggestions} from "../content/Prompts.ts";
 import {Arrays} from "../system/Arrays.ts";
+import type {AiTextGenerationOutput} from "@cloudflare/workers-types";
+import {words} from "../system/Strings.ts";
 
 export class DumbAi {
-    run(model: "@cf/meta/llama-3-8b-instruct-awq", prompt: ScopedPrompt): Promise<Uint8Array>;
+    run(model: "@cf/meta/llama-3-8b-instruct-awq", prompt: ScopedPrompt): Promise<AiTextGenerationOutput | undefined>;
     run(model: "@cf/bytedance/stable-diffusion-xl-lightning", prompt: UnscopedPrompt): Promise<Uint8Array>;
-    async run(model: any, _prompt: TextGenerationPrompt): Promise<any> {
+    async run(model: any, prompt: TextGenerationPrompt): Promise<any> {
         switch (model) {
             case "@cf/bytedance/stable-diffusion-xl-lightning":
                 return new Uint8Array(0);
             case "@cf/meta/llama-3-8b-instruct-awq":
-                return {response: JSON.stringify({actions: [], commands: Arrays.shuffle(commonCommands), nouns: []} satisfies SuggestionedActions)}
+                return {response: JSON.stringify(this.instructions(prompt as ScopedPrompt))};
             default:
                 throw new Error(`Model ${model} not found`);
         }
     }
+
+    private instructions(prompt: ScopedPrompt) {
+        const system = prompt.messages.find(m => m.role === 'system');
+        const user = prompt.messages.find(m => m.role === 'user');
+        if (system?.content.includes('commands list:')) {
+            const foundWords = words(user?.content);
+            const people = foundWords.some(w => peopleWords.has(w));
+            const dir = foundWords.filter(w => directionWords.has(w));
+            const mentioned = foundWords.filter(w => commandWords.has(w));
+            return {
+                actions: [],
+                nouns: [],
+                people: people,
+                commands: Arrays.unique(Arrays.shuffle([
+                    ...always,
+                    ...dir,
+                    ...(people ? peopleCommands : []),
+                    ...(dir.length ? directions : []),
+                    ...mentioned,
+                ])),
+            } satisfies Suggestions;
+        }
+        return 'Unsupported prompt';
+
+    }
 }
 
+const peopleWords = new Set(['he', 'she', 'they', 'them', 'it', 'him', 'her', 'his', 'hers', 'their', 'theirs']);
+const directionWords = new Set(directions);
+const commandWords = new Set(commands);
