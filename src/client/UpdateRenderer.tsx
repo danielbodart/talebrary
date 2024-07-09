@@ -39,8 +39,6 @@ function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
 }
 
 
-
-
 function instructions(line: LineData, maxLength: number = 4): string {
     if (line.style === 'normal') {
         return line.text.replace(capitalWords, match => match.length >= 3 && wordCount(match) <= maxLength ?
@@ -232,11 +230,12 @@ export class UpdateRenderer {
                     fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
                         if (response.ok) response.json().then((json: Suggestions) => {
                             const result = [...json.commands, ...json.nouns, ...json.actions]
-                            result.length = Math.min(15, result.length);
                             result.sort((a, b) => b.length - a.length);
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
                                 <x-instruction>{action}</x-instruction>)}</div>))
+
+                            sortToFit(lastCard.querySelector('.suggestions')!);
                         });
                     });
 
@@ -343,3 +342,39 @@ export function scene(card: HTMLElement): Describable {
         description: Array.from(card.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ')
     };
 }
+
+
+export function sortToFit(parent: HTMLElement) {
+    const children = Array.from(parent.children) as HTMLElement[];
+
+    children.sort((a, b) => b.offsetWidth - a.offsetWidth);
+
+    children.forEach(child => parent.appendChild(child));
+
+    order(parent.children[0] as HTMLElement)
+}
+
+function sameLine(element: HTMLElement): boolean {
+    const previousSibling = element.previousElementSibling as HTMLElement;
+    return !previousSibling || element.offsetTop === previousSibling.offsetTop;
+}
+
+function order(current: HTMLElement | undefined): undefined {
+    if (!current) return;
+    const next = current.nextElementSibling as HTMLElement;
+    if (!next) return;
+    if (sameLine(next)) return order(next);
+    return tryNext(current, next);
+}
+
+function tryNext(current: HTMLElement, next: HTMLElement) {
+    const next2 = next.nextElementSibling as HTMLElement;
+    if (!next2) return;
+    current.after(next2);
+    if (sameLine(next2)) return order(next2);
+    next.after(next2);
+    return tryNext(current, next2)
+}
+
+
+
