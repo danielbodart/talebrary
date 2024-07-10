@@ -91,6 +91,10 @@ body.search {
     margin: 50px auto;
 }
 
+.search .card:first-child {
+    margin-top: 100px;
+}
+
 .card:not(:has(*)) {
     display: none;
 }
@@ -374,7 +378,11 @@ div.suggestions::before {
 }
 
 @layer defaults {
-    .buffer > .card > div {
+    .orientation {
+        display: none;
+    }
+
+    .buffer > .card > div:not(.rating) {
         padding: 10px 10px 0 10px;
         hyphens: auto;
         hyphenate-limit-chars: 6 3 2;
