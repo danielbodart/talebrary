@@ -26,6 +26,7 @@ import {EventBuilder} from "./EventBuilder.ts";
 import {type Clock, SystemClock} from "../system/clock.ts";
 import {type Dependency} from "../yadic/mod.ts";
 import {capitalWords, wordCount} from "../system/Strings.ts";
+import {Arrays} from "../system/Arrays.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -229,7 +230,7 @@ export class UpdateRenderer {
 
                     fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
                         if (response.ok) response.json().then((json: Suggestions) => {
-                            const result = [...json.commands, ...json.nouns, ...json.actions]
+                            const result = Arrays.unique([...json.commands, ...json.nouns, ...json.actions])
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
                                 <x-instruction>{action}</x-instruction>)}</div>))
