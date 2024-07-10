@@ -240,7 +240,7 @@ export class UpdateRenderer {
                             const intersect = new IntersectionObserver((entries) =>
                                     entries.forEach(entry => {
                                         const target = entry.target as HTMLElement;
-                                        return target.classList.toggle( 'hidden', entry.intersectionRatio < 1);
+                                        return target.classList.toggle('hidden', entry.intersectionRatio < 1);
                                     }),
                                 {root: element});
 
@@ -370,8 +370,7 @@ function checkFits(current: HTMLElement | undefined): undefined {
     if (!current) return;
     const next = current.nextElementSibling as HTMLElement;
     if (!next) return;
-    if (sameLine(current, next)) return checkFits(next);
-    findNextBestFit(current, next);
+    if (!sameLine(current, next)) findNextBestFit(current, next);
     return checkFits(next);
 }
 
