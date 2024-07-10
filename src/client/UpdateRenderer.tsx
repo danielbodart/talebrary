@@ -246,7 +246,7 @@ export class UpdateRenderer {
 
                             Array.from(element.children).forEach(child => intersect.observe(child));
 
-                            new ResizeObserver(() => sortToFit(element)).observe(element);
+                            new ResizeObserver(() => binPack(element)).observe(element);
                         });
                     });
 
@@ -355,13 +355,10 @@ export function scene(card: HTMLElement): Describable {
 }
 
 
-export function sortToFit(parent: HTMLElement) {
+export function binPack(parent: HTMLElement) {
     const children = Array.from(parent.children) as HTMLElement[];
-
     children.sort((a, b) => b.offsetWidth - a.offsetWidth);
-
     children.forEach(child => parent.appendChild(child));
-
     order(parent.children[0] as HTMLElement)
 }
 
