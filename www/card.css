@@ -340,6 +340,7 @@ div.suggestions {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+align-content: stretch;
     position: relative;
     max-height: calc((10px * 3) + (32px * 3) + (6px * 2));
     box-sizing: border-box;
