@@ -373,7 +373,8 @@ function order(current: HTMLElement | undefined): undefined {
     const next = current.nextElementSibling as HTMLElement;
     if (!next) return;
     if (sameLine(current, next)) return order(next);
-    return tryNext(current, next);
+    tryNext(current, next);
+    return order(next);
 }
 
 function tryNext(current: HTMLElement, next: HTMLElement) {
