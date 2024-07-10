@@ -230,12 +230,22 @@ export class UpdateRenderer {
                     fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`).then(response => {
                         if (response.ok) response.json().then((json: Suggestions) => {
                             const result = [...json.commands, ...json.nouns, ...json.actions]
-                            result.sort((a, b) => b.length - a.length);
 
                             lastCard.append(fragment(<div class="suggestions">{result.map(action =>
                                 <x-instruction>{action}</x-instruction>)}</div>))
 
-                            sortToFit(lastCard.querySelector('.suggestions')!);
+                            const element = lastCard.querySelector<HTMLElement>('.suggestions')!;
+
+                            const intersect = new IntersectionObserver((entries) =>
+                                    entries.forEach(entry => {
+                                        const target = entry.target as HTMLElement;
+                                        return target.classList.toggle( 'hidden', entry.intersectionRatio < 1);
+                                    }),
+                                {root: element});
+
+                            Array.from(element.children).forEach(child => intersect.observe(child));
+
+                            new ResizeObserver(() => sortToFit(element)).observe(element);
                         });
                     });
 
