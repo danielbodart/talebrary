@@ -344,6 +344,22 @@ div.suggestions {
     max-height: calc((10px * 3) + (32px * 3) + (6px * 2));
     box-sizing: border-box;
     overflow: hidden;
+    padding-left: 44px;
+}
+
+div.suggestions::before {
+    content: "";
+    display: inline-block;
+    background-image: url('icons/lightbulb-regular.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+    height: 100%;
+    width: 24px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin-left: 10px;
 }
 
 div.suggestions x-instruction {
@@ -364,16 +380,7 @@ div.suggestions x-instruction:hover {
     color: var(--eerie-black);
 }
 
-div.suggestions::before {
-    content: "";
-    display: inline-block;
-    background-image: url('icons/lightbulb-regular.svg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center center;
-    height: 32px;
-    width: 24px;
-}
+
 .emphasized {
     font-style: italic;
 }
