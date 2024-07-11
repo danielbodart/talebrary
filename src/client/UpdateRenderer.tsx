@@ -137,7 +137,7 @@ export class UpdateRenderer {
                 } else {
                     const main = this.document.querySelector('main') || this.document.body;
                     main.append(fragment(<div id={`window-${update.id}`}
-                                                     class={`window ${update.type}`}>
+                                              class={`window ${update.type}`}>
                         {update.type === "grid" ?
                             <div class="card">{this.createLines(update.gridheight)}</div> :
                             ''
@@ -192,15 +192,14 @@ export class UpdateRenderer {
 
                 const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll'));
                 const scroll = scrollElements[0];
-                const w = this.document.defaultView!;
-                if(scroll) {
-                    w.setTimeout(() => {
+                if (scroll) {
+                    this.document.defaultView!.setTimeout(() => {
                         scroll.scrollIntoView({
                             block: 'start',
                             behavior: 'smooth'
                         })
                         scrollElements.forEach(e => e.classList.remove('scroll'));
-                    }, 10);
+                    }, 100);
                 }
 
                 // Add image
