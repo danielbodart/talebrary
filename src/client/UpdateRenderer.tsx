@@ -190,7 +190,7 @@ export class UpdateRenderer {
 
                 window.appendChild(group(html, ['card', 'scroll']));
 
-                const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll'));
+                const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll:not(:has(.input:only-child))'));
                 const scroll = scrollElements[0];
                 if (scroll) {
                     this.document.defaultView!.setTimeout(() => {
