@@ -27,6 +27,7 @@ import {type Clock, SystemClock} from "../system/clock.ts";
 import {type Dependency} from "../yadic/mod.ts";
 import {capitalWords, wordCount} from "../system/Strings.ts";
 import {Arrays} from "../system/Arrays.ts";
+import {binPack} from "./BinPack.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -134,8 +135,9 @@ export class UpdateRenderer {
                     }
                     return window;
                 } else {
-                    this.document.body.append(fragment(<div id={`window-${update.id}`}
-                                                            class={`window ${update.type}`}>
+                    const main = this.document.querySelector('main') || this.document.body;
+                    main.append(fragment(<div id={`window-${update.id}`}
+                                                     class={`window ${update.type}`}>
                         {update.type === "grid" ?
                             <div class="card">{this.createLines(update.gridheight)}</div> :
                             ''
@@ -154,7 +156,7 @@ export class UpdateRenderer {
     }
 
     updateContent(updates: (GridContent | BufferContent | GraphicsContent)[], gen: number) {
-        return updates.map((update, index) => {
+        return updates.map((update) => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
 
@@ -166,8 +168,8 @@ export class UpdateRenderer {
             }
 
             if (isBufferContent(update)) {
-                if (update.clear && gen > 1) {
-                    const introCard = this.document.querySelector('body > .card');
+                if (update.clear) {
+                    const introCard = this.document.querySelector('main > .card');
                     if (introCard) introCard.parentElement!.removeChild(introCard);
                     window.innerHTML = '';
                 }
@@ -186,15 +188,20 @@ export class UpdateRenderer {
                     }).join('')
                 );
 
-                window.appendChild(group(html, index < 2 && gen > 1 ? ['card', 'scroll'] : ['card']));
+                window.appendChild(group(html, ['card', 'scroll']));
 
                 const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll'));
                 const scroll = scrollElements[0];
-                this.document.defaultView?.setTimeout(() => scroll?.scrollIntoView({
-                    block: 'start',
-                    behavior: 'smooth'
-                }), 0);
-                scrollElements.forEach(e => e.classList.remove('scroll'));
+                const w = this.document.defaultView!;
+                if(scroll) {
+                    w.setTimeout(() => {
+                        scroll.scrollIntoView({
+                            block: 'start',
+                            behavior: 'smooth'
+                        })
+                        scrollElements.forEach(e => e.classList.remove('scroll'));
+                    }, 10);
+                }
 
                 // Add image
                 let lastCard = window.querySelector<HTMLElement>(".card:last-child")!;
@@ -246,7 +253,7 @@ export class UpdateRenderer {
 
                             Array.from(element.children).forEach(child => intersect.observe(child));
 
-                            new ResizeObserver(() => binPack(element)).observe(element);
+                            new ResizeObserver(() => requestAnimationFrame(() => binPack(element))).observe(element);
                         });
                     });
 
@@ -352,35 +359,6 @@ export function scene(card: HTMLElement): Describable {
         title: card.querySelector<HTMLElement>('.header, .subheader')!.innerText,
         description: Array.from(card.querySelectorAll<HTMLElement>(':scope > .normal')).map(e => e.innerText).join(' ')
     };
-}
-
-
-export function binPack(parent: HTMLElement) {
-    const children = Array.from(parent.children) as HTMLElement[];
-    children.sort((a, b) => b.offsetWidth - a.offsetWidth);
-    children.forEach(child => parent.appendChild(child));
-    checkFits(parent.children[0] as HTMLElement)
-}
-
-function sameLine(a: HTMLElement, b: HTMLElement): boolean {
-    return a.offsetTop === b.offsetTop;
-}
-
-function checkFits(current: HTMLElement | undefined): undefined {
-    if (!current) return;
-    const next = current.nextElementSibling as HTMLElement;
-    if (!next) return;
-    if (!sameLine(current, next)) findNextBestFit(current, next);
-    return checkFits(next);
-}
-
-function findNextBestFit(current: HTMLElement, doesNotFit: HTMLElement) {
-    const mightFit = doesNotFit.nextElementSibling as HTMLElement;
-    if (!mightFit) return;
-    current.after(mightFit);
-    if (sameLine(current, mightFit)) return checkFits(mightFit);
-    doesNotFit.after(mightFit);
-    return findNextBestFit(current, mightFit)
 }
 
 
