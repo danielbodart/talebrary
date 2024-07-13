@@ -11,9 +11,7 @@
 
 @media (max-width: 652px /* 600 + (border-size * 2) + () */) {
     .story .card form {
-        display: grid;
         grid-template-columns: 1fr 2fr;
-        grid-gap: 10px;
     }
 }
 
