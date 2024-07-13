@@ -23,11 +23,7 @@ export class IllustrationHandler {
 
         const response = await this.ai.run(model, {prompt});
 
-        return new Response(response, {
-            headers: {
-                "content-type": "image/png",
-            },
-        });
+        return new Response(response);
     }
 }
 
