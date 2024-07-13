@@ -4,6 +4,57 @@
     --padding: 10px;
 }
 
+.story .card form {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    grid-gap: 10px;
+}
+
+.story .card form label {
+    text-align: right;
+}
+
+.story .card form select, .story .card form select option {
+    font-family: "League Spartan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.5rem;
+    background-color: var(--eerie-black);
+    color: var(--white-smoke);
+    border: none;
+    margin: 0;
+    outline-width: 0;
+    outline-style: none;
+    appearance: none;
+}
+
+.story .card form button {
+    grid-column: 2;
+    font-family: "League Spartan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.5rem;
+    background-color: var(--eerie-black);
+    color: var(--white-smoke);
+    border: 2px solid var(--white-smoke);
+    border-radius: 7px;
+    padding: 6px 7px 6px 6px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.story .card form button:hover {
+    text-decoration: none;
+    background-color: var(--white-smoke);
+    color: var(--eerie-black);
+}
+
+.story .card form button {
+    grid-column: 2;
+}
+
 .results .card {
     box-sizing: content-box;
     width: 56mm;
