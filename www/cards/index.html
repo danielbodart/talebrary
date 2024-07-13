@@ -10,7 +10,7 @@
         <template id="card">
             <div class="card">
                 <img class="image" loading="lazy" alt="" aria-hidden="true"
-                     src="/cards/art?prompt=">
+                     src="/cards/art?">
                 <div class="title">
                     <slot name="title">Need a title</slot>
                 </div>
@@ -22,8 +22,16 @@
         <div class="card">
             <form class="input">
                 <label>Title: <input type="text" id="title" name="title" required autofocus/></label>
-                <label>Description: <input type="text" id="description" name="description" required/></label>
+                <label>Image description: <input type="text" id="description" name="description" required/></label>
                 <label>Rules: <input type="text" id="rules" name="rules" required/></label>
+                <label>Model:
+                    <select name="model">
+                        <option value="@cf/bytedance/stable-diffusion-xl-lightning" selected>
+                            stable-diffusion-xl-lightning
+                        </option>
+                        <option value="@cf/lykon/dreamshaper-8-lcm">@cf/lykon/dreamshaper-8-lcm</option>
+                    </select>
+                </label>
             </form>
             <script>
 
@@ -54,9 +62,13 @@
                     const title = form.querySelector('input[name=title]').value;
                     const description = form.querySelector('input[name=description]').value;
                     const rules = form.querySelector('input[name=rules]').value;
+                    const model = form.querySelector('select[name=model]').value;
                     const card = document.getElementById('card').content.cloneNode(true);
                     const image = card.querySelector('.image');
-                    image.src += encodeURIComponent(JSON.stringify({title, description, rules}));
+                    const query = new URLSearchParams();
+                    query.set('model', model);
+                    query.set('prompt', JSON.stringify({title, description, rules}));
+                    image.src += query.toString();
                     image.alt = description;
                     card.querySelector('.title').textContent = title;
                     card.querySelector('.rules').textContent = rules;
