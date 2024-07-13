@@ -35,15 +35,15 @@ function dev() {
 
 function build-client() {
   local option=${1}
-  local src="./src/client"
-  local dest="./www/client"
+  local src="./src"
+  local dest="./www"
 
   if [[ "${option}" == "--watch" ]]; then
-    bun build --watch --minify "${src}/main.ts" --outdir "${dest}/" &
-    watchexec -w "${src}" --exts css bunx lightningcss --minify --bundle "${src}/main.css" --output-dir "${dest}/" &
+    bun build --watch --minify "${src}/client/main.ts" "${src}/cards/main.ts" --outdir "${dest}/" &
+    watchexec -w "${src}" --exts css bunx lightningcss --minify --bundle "${src}/client/main.css" --output-dir "${dest}/client/" &
   else
-    bun build --minify "${src}/main.ts" --outdir "${dest}/"
-    bunx lightningcss --minify --bundle "${src}/main.css" --output-dir "${dest}/"
+    bun build --minify "${src}/client/main.ts" "${src}/cards/main.ts" --outdir "${dest}/"
+    bunx lightningcss --minify --bundle "${src}/client/main.css" --output-dir "${dest}/client/"
   fi
 }
 

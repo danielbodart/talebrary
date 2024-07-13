@@ -3,14 +3,14 @@
 <head>
     <title>Cards</title>
     <meta name="template" content="card"/>
-    <link rel="stylesheet" href="/cards/extra.css">
+    <link rel="stylesheet" href="/cards/main.css">
 </head>
 <body>
 <main class="story cards">
     <div class="window buffer">
         <template id="card">
             <div class="card">
-                <img class="image" loading="lazy" alt="" aria-hidden="true"
+                <img is="x-image" class="image" loading="lazy" alt="" aria-hidden="true"
                      src="/cards/art?">
                 <div class="title">
                     <slot name="title">Need a title</slot>
@@ -32,50 +32,7 @@
                     </select>
                 </label>
             </form>
-            <script>
-
-                document.querySelector('input[name=title]').addEventListener('keyup', (event) => {
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        document.querySelector('input[name=description]').focus({preventScroll: true});
-                    }
-                });
-                document.querySelector('input[name=description]').addEventListener('keyup', (event) => {
-                    // on enter focus description element
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        document.querySelector('input[name=rules]').focus({preventScroll: true});
-                    }
-                });
-                document.querySelector('input[name=rules]').addEventListener('keyup', (event) => {
-                    // on enter focus description element
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        const form = document.querySelector('form');
-                        form.dispatchEvent(new SubmitEvent('submit', {cancelable: true}));
-                    }
-                });
-                document.querySelector('form').addEventListener('submit', (event) => {
-                    event.preventDefault();
-                    const form = document.querySelector('form.input');
-                    const title = form.querySelector('input[name=title]').value;
-                    const description = form.querySelector('input[name=description]').value;
-                    const rules = form.querySelector('input[name=rules]').value;
-                    const model = form.querySelector('select[name=model]').value;
-                    const card = document.getElementById('card').content.cloneNode(true);
-                    const image = card.querySelector('.image');
-                    const query = new URLSearchParams();
-                    query.set('model', model);
-                    query.set('prompt', JSON.stringify({title, description, rules}));
-                    image.src += query.toString();
-                    image.alt = description;
-                    card.querySelector('.title').textContent = title;
-                    card.querySelector('.rules').textContent = rules;
-                    document.querySelector('.results').appendChild(card);
-                    form.reset();
-                    document.querySelector('input[name=title]').focus({preventScroll: true});
-                });
-            </script>
+            <script src="/cards/main.js"></script>
         </div>
     </div>
 </main>

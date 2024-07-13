@@ -1,0 +1,31 @@
+
+:root {
+    --border-size: 10px;
+    --padding: 10px;
+}
+
+.results .card {
+    box-sizing: content-box;
+    width: 56mm;
+    min-width: unset;
+    height: 89mm;
+}
+
+@media print {
+    @page {
+        size: landscape;
+        margin: 0;
+    }
+
+    .story {
+        display: none;
+    }
+
+    .results .card {
+        box-shadow: none;
+        break-inside: avoid;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        page-break-inside: avoid;
+    }
+}
