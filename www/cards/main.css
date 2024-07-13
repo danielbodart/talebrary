@@ -11,7 +11,7 @@
     height: 89mm;
 }
 
-.duplicate {
+.results .card.duplicate {
     display: none;
 }
 
@@ -33,7 +33,7 @@
         page-break-inside: avoid;
     }
 
-    .duplicate {
+    .results .card.duplicate {
         display: block;
     }
 }

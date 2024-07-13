@@ -53,7 +53,7 @@ document.querySelector<HTMLFormElement>('form')!.addEventListener('submit', (eve
     const quantity = Number(form.querySelector<HTMLSelectElement>('input[name=quantity]')!.value);
 
     for (let i = 0; i < quantity; i++) {
-        const card = document.querySelector<HTMLTemplateElement>('#card')!.content.cloneNode(true) as HTMLElement;
+        const card = document.querySelector<HTMLTemplateElement>('#card')!.content.cloneNode(true) as DocumentFragment;
         const image = card.querySelector<HTMLImageElement>('.image')!;
         const query = new URLSearchParams();
         query.set('model', model);
@@ -62,8 +62,10 @@ document.querySelector<HTMLFormElement>('form')!.addEventListener('submit', (eve
         image.alt = description;
         card.querySelector<HTMLDivElement>('.title')!.textContent = title;
         card.querySelector<HTMLDivElement>('.rules')!.textContent = rules;
-        const added = document.querySelector<HTMLDivElement>('.results')!.appendChild(card);
-        if (quantity > 1) added.classList.add('duplicate');
+        document.querySelector<HTMLDivElement>('.results')!.appendChild(card);
+        if (i > 0) {
+            document.querySelector<HTMLDivElement>('.results .card:last-child')!.classList.add('duplicate');
+        }
     }
 
     form.reset();
