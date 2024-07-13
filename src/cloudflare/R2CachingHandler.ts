@@ -4,6 +4,7 @@ import {toResponse} from "./ToResponse.ts";
 import type {Digest} from "../system/digest.ts";
 
 import type {Dependency} from "../yadic/mod.ts";
+import {detectMimeType} from "../http/DetectMimeType.ts";
 
 
 export function unquote(oldEtag: string) {
@@ -49,7 +50,7 @@ export class R2CachingHandler {
         try {
             const result = await this.deps.r2.put(key, buffer, {
                 httpMetadata: {
-                    contentType: response.headers.get('content-type') ?? "application/octet-stream",
+                    contentType: response.headers.get('content-type') ?? (await detectMimeType(new Uint8Array(buffer))),
                     cacheControl: 'public, max-age=60'
                 }
             });
@@ -59,5 +60,4 @@ export class R2CachingHandler {
         }
         return new Response(buffer, {status: 200})
     }
-
 }
