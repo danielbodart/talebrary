@@ -86,6 +86,24 @@
     display: none;
 }
 
+.ctrl .results .card::before, .meta .results .card::before {
+        content: attr(data-quantity);
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        background-color: var(--eerie-black);
+        color: var(--white-smoke);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: bold;
+        border: var(--border-size-small) ridge var(--sunset);
+    }
+
 @media print {
     @page {
         size: landscape;
