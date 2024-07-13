@@ -10,7 +10,7 @@
     <div class="window buffer">
         <template id="card">
             <div class="card">
-                <img is="x-image" class="image" loading="lazy" alt="" aria-hidden="true"
+                <img is="x-image" reloadable class="image" loading="lazy" alt="" aria-hidden="true"
                      src="/cards/art?">
                 <div class="title">
                     <slot name="title">Need a title</slot>
@@ -31,6 +31,7 @@
                         <option value="@cf/lykon/dreamshaper-8-lcm">dreamshaper-8-lcm</option>
                     </select>
                 </label>
+                <label>Quantity: <input type="range" min="1" max="10" value="1" name="quantity"/></label>
             </form>
             <script src="/cards/main.js"></script>
         </div>
