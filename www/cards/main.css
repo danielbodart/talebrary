@@ -4,6 +4,11 @@
     --padding: 10px;
 }
 
+.story .card .rules {
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+
 .story .card form {
     display: grid;
     grid-template-columns: 1fr 4fr;
