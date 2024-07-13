@@ -12,31 +12,27 @@
             <div class="card">
                 <img is="x-image" reloadable class="image" loading="lazy" alt="" aria-hidden="true"
                      src="/cards/art?">
-                <div class="title">
-                    <slot name="title">Need a title</slot>
-                </div>
-                <div class="rules">
-                    <slot name="rules">The rules</slot>
-                </div>
+                <div class="title"></div>
+                <div class="rules"></div>
             </div>
         </template>
         <div class="card">
-            <form class="input">
-                <label>Title: <input type="text" id="title" name="title" required autofocus/></label>
-                <label>Image description: <input type="text" id="description" name="description" required/></label>
-                <label>Rules: <input type="text" id="rules" name="rules" required/></label>
-                <label>Model:
-                    <select name="model">
-                        <option value="@cf/bytedance/stable-diffusion-xl-lightning" selected>stable-diffusion-xl-lightning</option>
-                        <option value="@cf/lykon/dreamshaper-8-lcm">dreamshaper-8-lcm</option>
-                    </select>
-                </label>
-                <label>Quantity: <input type="number" min="1" max="10" value="1" name="quantity"/></label>
+            <form is="card-creator" class="input">
+                <label for="title">Title:</label><input type="text" id="title" name="title" required autofocus/>
+                <label for="description">Image of:</label><input type="text" id="description" name="description" required/>
+                <label for="rules">Rules:</label><input type="text" id="rules" name="rules" required/>
+                <label for="model">Model:</label>
+                <select name="model" id="model">
+                    <option value="@cf/bytedance/stable-diffusion-xl-lightning" selected>stable-diffusion-xl-lightning</option>
+                    <option value="@cf/lykon/dreamshaper-8-lcm">dreamshaper-8-lcm</option>
+                </select>
+                <label for="quantity">Quantity: (printed)</label><input type="number" min="1" max="10" value="1" name="quantity" id="quantity"/>
+                <button type="submit">Add</button>
             </form>
-            <script src="/cards/main.js"></script>
         </div>
     </div>
 </main>
 <section class="results cards"></section>
+<script src="/cards/main.js"></script>
 </body>
 </html>
