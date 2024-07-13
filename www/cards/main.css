@@ -11,6 +11,10 @@
     height: 89mm;
 }
 
+.duplicate {
+    display: none;
+}
+
 @media print {
     @page {
         size: landscape;
@@ -27,5 +31,9 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         page-break-inside: avoid;
+    }
+
+    .duplicate {
+        display: block;
     }
 }
