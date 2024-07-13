@@ -37,7 +37,8 @@ export class ImageElement {
                 super();
                 ['load', 'error'].forEach(event => this.addEventListener(event, () => this.updateState()));
                 this.addEventListener('click', (e) => {
-                    if (this.ownerDocument.body.classList.contains('ctrl') && this.getAttribute('reloadable') !== null) {
+                    if ((this.ownerDocument.body.classList.contains('ctrl')||this.ownerDocument.body.classList.contains('meta'))
+                        && this.getAttribute('reloadable') !== null) {
                         e.stopPropagation();
                         this.reload();
                     }
