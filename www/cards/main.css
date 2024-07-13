@@ -86,7 +86,7 @@
     display: none;
 }
 
-.ctrl .results .card::before, .meta .results .card::before {
+.results .card::before {
         content: attr(data-quantity);
         position: absolute;
         top: -20px;
@@ -102,7 +102,11 @@
         font-size: 1rem;
         font-weight: bold;
         border: var(--border-size-small) ridge var(--sunset);
-    }
+}
+
+.results .card[data-quantity="1"]::before {
+    display: none;
+}
 
 @media print {
     @page {
@@ -124,5 +128,9 @@
 
     .results .card.duplicate {
         display: block;
+    }
+
+    .results .card::before {
+        display: none;
     }
 }
