@@ -86,7 +86,9 @@ function deploy() {
 
 function pull() {
   check-rclone
+  rm -rf www/content www/cards/art
   rclone --config rclone.conf copy cloudflare:talebrary/content www/content/ --metadata -v
+  rclone --config rclone.conf copy cloudflare:talebrary/cards/art www/cards/art --metadata -v
 }
 
 function ci() {

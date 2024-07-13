@@ -5,11 +5,11 @@
     <meta name="template" content="card"/>
     <link rel="stylesheet" href="/cards/main.css">
 </head>
-<body>
+<body is="card-creator">
 <main class="story cards">
     <div class="window buffer">
         <template id="card">
-            <div class="card">
+            <div class="card" data-quantity="1" data-uuid="">
                 <img is="x-image" reloadable class="image" loading="lazy" alt="" aria-hidden="true"
                      src="/cards/art?">
                 <div class="title"></div>
@@ -17,7 +17,7 @@
             </div>
         </template>
         <div class="card">
-            <form is="card-creator" class="input">
+            <form class="input">
                 <label for="title">Title:</label><input type="text" id="title" name="title" required autofocus/>
                 <label for="description">Image of:</label><input type="text" id="description" name="description" required/>
                 <label for="rules">Rules:</label><input type="text" id="rules" name="rules" required/>
