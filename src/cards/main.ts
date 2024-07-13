@@ -50,16 +50,22 @@ document.querySelector<HTMLFormElement>('form')!.addEventListener('submit', (eve
     const description = form.querySelector<HTMLInputElement>('input[name=description]')!.value;
     const rules = form.querySelector<HTMLInputElement>('input[name=rules]')!.value;
     const model = form.querySelector<HTMLSelectElement>('select[name=model]')!.value;
-    const card = document.querySelector<HTMLTemplateElement>('#card')!.content.cloneNode(true) as HTMLElement;
-    const image = card.querySelector<HTMLImageElement>('.image')!;
-    const query = new URLSearchParams();
-    query.set('model', model);
-    query.set('prompt', JSON.stringify({title, description, rules}));
-    image.src += query.toString();
-    image.alt = description;
-    card.querySelector<HTMLDivElement>('.title')!.textContent = title;
-    card.querySelector<HTMLDivElement>('.rules')!.textContent = rules;
-    document.querySelector<HTMLDivElement>('.results')!.appendChild(card);
+    const quantity = Number(form.querySelector<HTMLSelectElement>('input[name=quantity]')!.value);
+
+    for (let i = 0; i < quantity; i++) {
+        const card = document.querySelector<HTMLTemplateElement>('#card')!.content.cloneNode(true) as HTMLElement;
+        const image = card.querySelector<HTMLImageElement>('.image')!;
+        const query = new URLSearchParams();
+        query.set('model', model);
+        query.set('prompt', JSON.stringify({title, description, rules}));
+        image.src += query.toString();
+        image.alt = description;
+        card.querySelector<HTMLDivElement>('.title')!.textContent = title;
+        card.querySelector<HTMLDivElement>('.rules')!.textContent = rules;
+        const added = document.querySelector<HTMLDivElement>('.results')!.appendChild(card);
+        if (quantity > 1) added.classList.add('duplicate');
+    }
+
     form.reset();
     document.querySelector<HTMLInputElement>('input[name=title]')!.focus({preventScroll: true});
 });
