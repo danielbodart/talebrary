@@ -245,14 +245,22 @@ export class UpdateRenderer {
 
                             const element = lastCard.querySelector<HTMLElement>('.suggestions')!;
 
-                            const intersect = new IntersectionObserver((entries) => entries.forEach(entry => {
-                                const target = entry.target as HTMLElement;
-                                return target.classList.toggle('hidden', entry.intersectionRatio < 1);
-                            }), {root: element});
+                            function processIntersection(entries: IntersectionObserverEntry[]) {
+                                entries.forEach(entry => {
+                                    const target = entry.target as HTMLElement;
+                                    return target.classList.toggle('hidden', entry.intersectionRatio < 1);
+                                });
+                            }
+
+                            const intersect = new IntersectionObserver((entries) => processIntersection(entries), {root: element});
 
                             Array.from(element.children).forEach(child => intersect.observe(child));
 
-                            new ResizeObserver(this.deps.timers.debounce(100, () => requestAnimationFrame(() => binPack(element)))).observe(element);
+                            new ResizeObserver(this.deps.timers.debounce(100, () => requestAnimationFrame(() => {
+                                binPack(element);
+                                // Firefox bug where it doesn't fire the intersection event
+                                processIntersection(intersect.takeRecords());
+                            }))).observe(element);
                         });
                     });
 
