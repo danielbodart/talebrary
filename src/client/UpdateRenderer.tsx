@@ -243,16 +243,23 @@ export class UpdateRenderer {
 
                             const element = lastCard.querySelector<HTMLElement>('.suggestions')!;
 
-                            const intersect = new IntersectionObserver((entries) =>
-                                    entries.forEach(entry => {
-                                        const target = entry.target as HTMLElement;
-                                        return target.classList.toggle('hidden', entry.intersectionRatio < 1);
-                                    }),
-                                {root: element});
+
+                            function processIntersection(entries: IntersectionObserverEntry[]) {
+                                entries.forEach(entry => {
+                                    const target = entry.target as HTMLElement;
+                                    return target.classList.toggle('hidden', entry.intersectionRatio < 1);
+                                });
+                            }
+
+                            const intersect = new IntersectionObserver((entries) => processIntersection(entries), {root: element});
 
                             Array.from(element.children).forEach(child => intersect.observe(child));
 
-                            new ResizeObserver(() => requestAnimationFrame(() => binPack(element))).observe(element);
+                            new ResizeObserver(() => requestAnimationFrame(() => {
+                                binPack(element);
+                                // Firefox bug, does not seem to fire final intersection event
+                                processIntersection(intersect.takeRecords());
+                            })).observe(element);
                         });
                     });
 
