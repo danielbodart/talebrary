@@ -28,6 +28,7 @@ import {type Dependency} from "../yadic/mod.ts";
 import {capitalWords, wordCount} from "../system/Strings.ts";
 import {Arrays} from "../system/Arrays.ts";
 import {binPack} from "./BinPack.ts";
+import type {Timers} from "../system/timers.ts";
 
 function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -87,11 +88,12 @@ export interface UpdateRendererDependencies extends Dependency<'window', Window>
     Dependency<'document', Document>,
     Dependency<'messageHandler', MessageHandler>,
     Dependency<'clock', Clock>,
+    Dependency<'timers', Timers>,
     Dependency<'metrics', Partial<Metrics>> {
 }
 
 export class UpdateRenderer {
-    constructor(deps: UpdateRendererDependencies,
+    constructor(private deps: UpdateRendererDependencies,
                 private document: Document = deps.document,
                 private messageHandler: MessageHandler = deps.messageHandler,
                 metrics: Partial<Metrics> = deps.metrics) {
@@ -243,23 +245,14 @@ export class UpdateRenderer {
 
                             const element = lastCard.querySelector<HTMLElement>('.suggestions')!;
 
-
-                            function processIntersection(entries: IntersectionObserverEntry[]) {
-                                entries.forEach(entry => {
-                                    const target = entry.target as HTMLElement;
-                                    return target.classList.toggle('hidden', entry.intersectionRatio < 1);
-                                });
-                            }
-
-                            const intersect = new IntersectionObserver((entries) => processIntersection(entries), {root: element});
+                            const intersect = new IntersectionObserver((entries) => entries.forEach(entry => {
+                                const target = entry.target as HTMLElement;
+                                return target.classList.toggle('hidden', entry.intersectionRatio < 1);
+                            }), {root: element});
 
                             Array.from(element.children).forEach(child => intersect.observe(child));
 
-                            new ResizeObserver(() => requestAnimationFrame(() => {
-                                binPack(element);
-                                // Firefox bug, does not seem to fire final intersection event
-                                processIntersection(intersect.takeRecords());
-                            })).observe(element);
+                            new ResizeObserver(this.deps.timers.debounce(100, () => requestAnimationFrame(() => binPack(element)))).observe(element);
                         });
                     });
 
