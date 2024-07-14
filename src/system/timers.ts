@@ -1,4 +1,4 @@
-import {type Clock, SystemClock} from './clock.ts';
+import {type Clock} from './clock.ts';
 
 import type {Dependency} from "../yadic/mod.ts";
 
@@ -11,6 +11,8 @@ export interface Timers {
     task<R>(fun: () => Promise<R>): Promise<R>;
 
     delay(timeout: number): Promise<void>
+
+    debounce<T extends (...args: any[]) => any>(delay: number, func: T): (...args: Parameters<T>) => void;
 
     setTimeout(handler: (...args: any[]) => void, timeout: number): number;
 
@@ -28,8 +30,8 @@ export interface Timers {
     cancelIdleCallback(handle: number): void;
 }
 
-export class SystemTimers implements Timers {
-    constructor(private deps: Dependency<'clock', Clock>) {
+export abstract class BaseTimers implements Timers {
+    constructor(protected deps: Dependency<'clock', Clock>) {
     }
 
     async task<R>(fun: () => Promise<R>): Promise<R> {
@@ -45,6 +47,30 @@ export class SystemTimers implements Timers {
         });
     }
 
+    debounce<T extends (...args: any[]) => any>(delay: number, func: T): (...args: Parameters<T>) => void {
+        let timeoutId: number | undefined;
+        const self = this;
+
+        return function (this: any, ...args: Parameters<T>) {
+            if (timeoutId !== undefined) self.clearTimeout(timeoutId);
+            timeoutId = self.setTimeout(() => func(...args), delay);
+        };
+    }
+
+    abstract cancelIdleCallback(handle: number): void ;
+
+    abstract clearInterval(handle: number): void ;
+
+    abstract clearTimeout(handle: number): void;
+
+    abstract requestIdleCallback(handler: { (deadline: Deadline): void }, opts?: { timeout: number }): number ;
+
+    abstract setInterval(handler: { (...args: any[]): void }, timeout: number): number ;
+
+    abstract setTimeout(handler: { (...args: any[]): void }, timeout: number): number ;
+}
+
+export class SystemTimers extends BaseTimers implements Timers {
     setTimeout(handler: (...args: any[]) => void, timeout: number): number {
         // @ts-ignore
         return setTimeout(handler, timeout);
@@ -63,7 +89,9 @@ export class SystemTimers implements Timers {
         clearInterval(handle);
     }
 
-    requestIdleCallback(handler: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void, options?: { timeout: number }): number {
+    requestIdleCallback(handler: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void, options?: {
+        timeout: number
+    }): number {
         const timeout = options ? options.timeout : 1;
         let start = this.deps.clock.now().getTime() + timeout;
         const self = this;
@@ -85,35 +113,19 @@ export class SystemTimers implements Timers {
 
 export type Handler = (...args: any[]) => void;
 
-export type Type = 'interval' | 'timeout' | 'idle';
+export type ManualTimerType = 'interval' | 'timeout' | 'idle';
 
-export interface Timer {
+export interface ManualTimer {
     handle: number
     handler: Handler
-    type: Type
+    type: ManualTimerType
     timeout: number
     scheduled: Date;
 }
 
-export class ManualTimers implements Timers {
-    private timers: Timer[] = [];
+export class ManualTimers extends BaseTimers implements Timers {
+    private timers: ManualTimer[] = [];
     private lastHandle: number = 0;
-
-    constructor(private clock: Clock = new SystemClock()) {
-    }
-
-    async task<R>(fun: () => Promise<R>): Promise<R> {
-        await this.delay(0);
-        return fun();
-    }
-
-    delay(timeout: number){
-        return new Promise<void>(resolve => {
-            this.setTimeout(() => {
-                resolve();
-            }, timeout);
-        });
-    }
 
     setTimeout(handler: (...args: any[]) => void, timeout: number): number {
         return this.createTimer(timeout, handler, 'timeout');
@@ -131,7 +143,9 @@ export class ManualTimers implements Timers {
         this.timers = this.timers.filter(t => t.handle != handle);
     }
 
-    requestIdleCallback(handler: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void, { timeout }: { timeout: number } = { timeout: 50 }): number {
+    requestIdleCallback(handler: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void, {timeout}: {
+        timeout: number
+    } = {timeout: 50}): number {
         return this.createTimer(timeout, handler, 'interval');
     }
 
@@ -139,7 +153,7 @@ export class ManualTimers implements Timers {
         this.timers = this.timers.filter(t => t.handle != handle);
     }
 
-    runNext(): Timer | undefined {
+    runNext(): ManualTimer | undefined {
         this.timers = this.timers.sort((a, b) => b.scheduled.getTime() - a.scheduled.getTime());
         const next = this.timers.pop();
         if (!next) return;
@@ -150,8 +164,8 @@ export class ManualTimers implements Timers {
         return next;
     }
 
-    runAll(): Timer[] {
-        const result: Timer[] = [];
+    runAll(): ManualTimer[] {
+        const result: ManualTimer[] = [];
         let next;
         while (next = this.runNext()) {
             result.push(next);
@@ -159,9 +173,9 @@ export class ManualTimers implements Timers {
         return result;
     }
 
-    private createTimer(timeout: number, handler: (...args: any[]) => void, type: Type, handle = this.nextHandle()) {
-        const scheduled = new Date(this.clock.now().getTime() + timeout);
-        this.timers.push({ handler, timeout, type: type, handle, scheduled });
+    private createTimer(timeout: number, handler: (...args: any[]) => void, type: ManualTimerType, handle = this.nextHandle()) {
+        const scheduled = new Date(this.deps.clock.now().getTime() + timeout);
+        this.timers.push({handler, timeout, type: type, handle, scheduled});
         return handle;
     }
 

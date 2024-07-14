@@ -7,6 +7,7 @@ import {SystemClock} from "../system/clock.ts";
 import {Instruction} from "./components/Instruction.tsx";
 import {ImageElement} from "./components/ImageElement.ts";
 import {controlKeys, customElement, realise} from "./misc.ts";
+import {SystemTimers} from "../system/timers.ts";
 
 (async () => {
     const story = document.querySelector<HTMLLinkElement>('#story');
@@ -20,6 +21,7 @@ import {controlKeys, customElement, realise} from "./misc.ts";
         .set('storage', instance(window.localStorage))
         .set('document', instance(document))
         .set('clock', constructor(SystemClock))
+        .set('timers', constructor(SystemTimers))
         .set('http', instance(fetch))
         .set('logger', instance(console))
         .set('messageHandler', constructor(WindowMessageHandler))
