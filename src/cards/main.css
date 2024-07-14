@@ -1,0 +1,45 @@
+@layer normalise, variables, defaults, components, overrides;
+
+@import url('../normalize.css') layer(normalise);
+@import url('../variables.css') layer(variables);
+@import url('card.css') layer(components);
+@import url('CardCreator.css') layer(components);
+
+:root {
+    --border-size: 10px;
+    --padding: 10px;
+    zoom: 125%;
+    margin: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    :root {
+        zoom: 100%;
+    }
+}
+
+@media print {
+    @page {
+        size: landscape;
+        margin: 0;
+    }
+}
+
+body {
+    font-family: "Libre Baskerville", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13pt;
+    background-color: black;
+    background-image: url(/desk.jpeg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center bottom;
+    margin: 0;
+    padding: 0;
+}

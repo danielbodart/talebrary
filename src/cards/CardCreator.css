@@ -1,0 +1,9 @@
+@import url('NewCard.css') layer(components);
+@import url('PlayingCard.css') layer(components);
+
+card-creator {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}

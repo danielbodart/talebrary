@@ -1,0 +1,68 @@
+playing-card {
+    position: relative;
+}
+
+playing-card .quantity {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    background-color: var(--eerie-black);
+    color: var(--white-smoke);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
+    border: var(--border-size-small) ridge var(--sunset);
+}
+
+playing-card img:not([src]) + form {
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 1/1;
+    background-color: var(--eerie-black);
+    padding: 10px;
+}
+
+playing-card textarea {
+    flex-grow: 1;
+}
+
+playing-card .model {
+    display: flex;
+    padding-top: 10px;
+    align-items: baseline;
+}
+
+playing-card textarea, playing-card select {
+    box-sizing: content-box;
+    background-color: var(--eerie-black);
+    color: var(--white-smoke);
+    border: none;
+    outline: none;
+    flex-grow: 1;
+}
+
+playing-card select:focus {
+    border: 1px solid var(--white-smoke);
+}
+
+@media print {
+    playing-card .quantity {
+        display: none;
+    }
+
+    playing-card {
+        box-shadow: none;
+        break-inside: avoid;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        page-break-inside: avoid;
+    }
+}
