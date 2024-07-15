@@ -1,9 +1,9 @@
 import type {Dependency} from "../yadic/mod.ts";
 import {CustomElementDefinition} from "../client/components/CustomElementDefinition.ts";
+import {Arrays} from "../system/Arrays.ts";
 
 
-export interface CardCreatorDependencies extends
-    Dependency<'HTMLElement', typeof HTMLElement> {
+export interface CardCreatorDependencies extends Dependency<'HTMLElement', typeof HTMLElement> {
 }
 
 export class CardCreator {
@@ -17,6 +17,42 @@ export class CardCreator {
                     this.after(element);
                 });
             }
+
+            connectedCallback() {
+                const params = this.getParamsFromLocation();
+                const data = Arrays.zip(params.getAll('title'), params.getAll('description'), params.getAll('rules'), params.getAll('model'), params.getAll('quantity'));
+                data.forEach(([title, description, rules, model, quantity]) => this.createCard(title, description, rules, model, Number(quantity)));
+            }
+
+            private getParamsFromLocation() {
+                return new URLSearchParams(this.ownerDocument.defaultView!.location.search);
+            }
+
+            private createCard(title: string, description: string, rules: string, model: string, quantity: number): HTMLDivElement {
+                const fragment = this.querySelector<HTMLTemplateElement>('template')!.content.cloneNode(true) as DocumentFragment;
+                const card = fragment.querySelector<HTMLDivElement>('playing-card')!;
+                card.dataset.quantity = String(quantity);
+                const image = card.querySelector<HTMLImageElement>('.image')!;
+                const query = new URLSearchParams();
+                query.set('model', model);
+                query.set('prompt', JSON.stringify({title, description, rules}));
+                image.src = '/cards/art' +  query.toString();
+                image.alt = description;
+                card.querySelector<HTMLDivElement>('.title')!.textContent = title;
+                card.querySelector<HTMLDivElement>('.rules')!.textContent = rules;
+                card.addEventListener('click', () => {
+                    const data = this.extractDataFromCard(card);
+                    this.setFormValues(data);
+                    this.querySelectorAll(`.results.cards .card[data-uuid="${data.uuid}"]`)
+                        .forEach(duplicate => duplicate.parentElement!.removeChild(duplicate));
+
+                    const params = this.getParamsFromCard();
+                    this.setParams(params);
+                });
+                return card;
+            }
+
+
         });
     }
 }
@@ -124,15 +160,7 @@ export class CardCreator {
 //         }, new URLSearchParams());
 // }
 //
-// private getParamsFromLocation() {
-//     return new URLSearchParams(this.ownerDocument.defaultView!.location.search);
-// }
 //
-// connectedCallback() {
-//     const params = this.getParamsFromLocation();
-//     const data = Arrays.zip(params.getAll('title'), params.getAll('description'), params.getAll('rules'), params.getAll('model'), params.getAll('quantity'));
-//     data.forEach(([title, description, rules, model, quantity]) => this.createCards(title, description, rules, model, Number(quantity)));
-// }
 //
 // private extractDataFromCard(card: HTMLDivElement): CardData {
 //     const image = card.querySelector<HTMLImageElement>('.image')!;

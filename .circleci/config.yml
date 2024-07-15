@@ -1,8 +1,8 @@
 version: 2.1
-#orbs:
-#  codecov: codecov/codecov@3.2.5
 jobs:
   build:
+    branches:
+      only: master
     docker:
       - image: cimg/base:2023.03
     steps:
@@ -17,5 +17,3 @@ jobs:
           path: artifacts
       - store_test_results:
           path: artifacts/test-results
-#      - codecov/upload:
-#          file: artifacts/coverage.lcov
