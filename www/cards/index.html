@@ -2,37 +2,38 @@
 <html lang="en">
 <head>
     <title>Cards</title>
-    <meta name="template" content="card"/>
+    <meta name="template" content="default"/>
     <link rel="stylesheet" href="/cards/main.css">
 </head>
-<body is="card-creator">
-<main class="story cards">
-    <div class="window buffer">
-        <template id="card">
-            <div class="card" data-quantity="1" data-uuid="">
-                <img is="x-image" reloadable class="image" loading="lazy" alt="" aria-hidden="true"
-                     src="/cards/art?">
-                <div class="title"></div>
-                <div class="rules"></div>
-            </div>
-        </template>
-        <div class="card">
-            <form class="input">
-                <label for="title">Title:</label><input type="text" id="title" name="title" required autofocus/>
-                <label for="description">Image of:</label><input type="text" id="description" name="description" required/>
-                <label for="rules">Rules:</label><input type="text" id="rules" name="rules" required/>
-                <label for="model">Model:</label>
-                <select name="model" id="model">
-                    <option value="@cf/bytedance/stable-diffusion-xl-lightning" selected>stable-diffusion-xl-lightning</option>
-                    <option value="@cf/lykon/dreamshaper-8-lcm">dreamshaper-8-lcm</option>
-                </select>
-                <label for="quantity">Quantity: (printed)</label><input type="number" min="1" max="10" value="1" name="quantity" id="quantity"/>
-                <button type="submit">Add</button>
+<body>
+<card-creator class="card active">
+    <template>
+        <playing-card class="card" tabindex="0">
+            <div class="delete"><img src="/icons/xmark-solid.svg" alt="Delete Card" title="Delete Card"></div>
+            <img class="image" loading="lazy" alt="">
+            <form class="form-image">
+                <textarea name="description" required placeholder="Image description"></textarea>
+                <label class="model">
+                    <span>Model:</span>
+                    <select name="model">
+                        <option value="@cf/bytedance/stable-diffusion-xl-lightning" selected>stable-diffusion</option>
+                        <option value="@cf/lykon/dreamshaper-8-lcm">dreamshaper</option>
+                    </select>
+                    <div class="regenerate">
+                        <img src="/icons/rotate-right-solid.svg" alt="Regenerate image" title="Regenerate image">
+                    </div>
+                </label>
             </form>
-        </div>
-    </div>
-</main>
-<section class="results cards"></section>
-<script src="/cards/main.js"></script>
+            <h1 class="title" contenteditable="plaintext-only" data-placeholder="Title"></h1>
+            <div class="rules" contenteditable="plaintext-only" data-placeholder="Rules"></div>
+            <div class="quantity" contenteditable="plaintext-only" title="Quantity">1</div>
+        </playing-card>
+    </template>
+    <img class="image" alt="Isomorphic image of a card workshop taken from a 45 degree angle"
+         src="/cards/creator.jpeg">
+    <h1 class="title">Card Creator</h1>
+    <div class="rules">Click me to create a blank card</div>
+</card-creator>
+<script type="module" src="/cards/main.js"></script>
 </body>
 </html>
