@@ -1,8 +1,6 @@
 version: 2.1
 jobs:
   build:
-    branches:
-      only: master
     docker:
       - image: cimg/base:2023.03
     steps:
@@ -17,3 +15,13 @@ jobs:
           path: artifacts
       - store_test_results:
           path: artifacts/test-results
+
+
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
