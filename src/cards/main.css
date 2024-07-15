@@ -2,7 +2,7 @@
 
 @import url('../normalize.css') layer(normalise);
 @import url('../variables.css') layer(variables);
-@import url('card.css') layer(components);
+@import url('card.css') layer(defaults);
 @import url('CardCreator.css') layer(components);
 
 :root {

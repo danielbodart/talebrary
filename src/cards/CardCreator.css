@@ -7,3 +7,9 @@ card-creator {
     flex-wrap: wrap;
     justify-content: center;
 }
+
+@media print {
+    .card.inactive, new-card {
+        display: none;
+    }
+}
