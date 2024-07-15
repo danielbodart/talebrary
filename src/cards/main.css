@@ -23,6 +23,11 @@
 }
 
 @media print {
+    :root {
+        zoom: 100%;
+        margin: 0;
+    }
+
     @page {
         size: landscape;
         margin: 0;

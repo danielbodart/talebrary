@@ -9,7 +9,7 @@ playing-card {
         }
     }
 
-    &:hover .delete {
+    &:focus-within .delete {
         position: absolute;
         top: -22px;
         right: -22px;
@@ -47,24 +47,27 @@ playing-card {
         }
     }
 
-    img {
-        + form {
-            font-family: Arial, sans-serif;
-            font-size: 0.9rem;
-            display: flex;
-            flex-direction: column;
-            aspect-ratio: 1/1;
-            background-color: var(--eerie-black);
-        }
+    .image {
+        aspect-ratio: 1/1;
+    }
 
-        &[src] + form {
+    form {
+        font-family: Arial, sans-serif;
+        font-size: 0.9rem;
+        display: none;
+        flex-direction: column;
+        aspect-ratio: 1/1;
+        background-color: var(--eerie-black);
+    }
+
+    &:focus-within, &:has(.image:not([src])) {
+        .image {
             display: none;
         }
 
-    }
-
-    &:focus-within img + form, img:not([src]) + form {
-        display: flex;
+        form {
+            display: flex;
+        }
     }
 
     textarea {

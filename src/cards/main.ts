@@ -17,6 +17,7 @@ import {PlayingCard} from "./PlayingCard.ts";
         .set('customElements', instance(window.customElements))
         .set('crypto', instance(window.crypto))
         .set('CustomEvent', instance(CustomEvent))
+        .set('history', instance(history))
         .set('HTMLElement', instance(HTMLElement))
         .set('HTMLImageElement', instance(HTMLImageElement))
         .set('HTMLDivElement', instance(HTMLDivElement))

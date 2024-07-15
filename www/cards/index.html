@@ -8,10 +8,10 @@
 <body>
 <card-creator class="card active">
     <template>
-        <playing-card class="card">
+        <playing-card class="card" tabindex="0">
+            <div class="delete"><img src="/icons/xmark-solid.svg" alt="Delete Card" title="Delete Card"></div>
             <img class="image" loading="lazy" alt="">
-            <form>
-                <div class="delete"><img src="/icons/xmark-solid.svg" alt="Delete Card" title="Delete Card"></div>
+            <form class="form-image">
                 <textarea name="description" required placeholder="Image description"></textarea>
                 <label class="model">
                     <span>Model:</span>
