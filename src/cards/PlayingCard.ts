@@ -11,7 +11,11 @@ export class PlayingCard {
         return new CustomElementDefinition('playing-card', class extends HTMLElement {
             constructor() {
                 super();
-                console.log('PlayingCard constructor');
+                this.querySelector('.delete')!.addEventListener('click', () => this.remove());
+            }
+
+            connectedCallback() {
+                this.querySelector('textarea')!.focus()
             }
         });
     }

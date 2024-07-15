@@ -10,83 +10,83 @@
     border-radius: var(--border-size);
     border: var(--border-size) ridge var(--sunset);
     color: var(--white-smoke);
-    box-shadow: 0px 0px var(--border-size-large) var(--eerie-black);
-}
+    box-shadow: 10px 10px 10px 0 var(--eerie-black);
 
-new-card {
-    z-index: 1;
-    transition: transform 0.3s ease;
-}
+    &.active {
+        transition: transform 0.2s;
 
-new-card:hover {
-    cursor: pointer;
-    transform: scale(1.1);
-    z-index: 2;
-}
+        &:hover {
+            cursor: pointer;
+            transform: translateY(-5px);
+        }
+    }
 
-.card .image {
-    width: 100%;
-    min-height: 50%;
-    display: block;
-    aspect-ratio: 1 / 1;
-    flex-shrink: 0;
-    object-fit: contain;
-    background-color: #000;
-    background-image: url(/icons/loader.svg);
-    background-size: 100px 100px;
-    background-position: center;
-    background-repeat: no-repeat;
-}
+    .image {
+        width: 100%;
+        min-height: 50%;
+        display: block;
+        aspect-ratio: 1 / 1;
+        flex-shrink: 0;
+        object-fit: contain;
+        background-color: #000;
+        background-image: url(/icons/loader.svg);
+        background-size: 100px 100px;
+        background-position: center;
+        background-repeat: no-repeat;
 
-.card .image:not([src]) {
-    display: none;
-}
+        &:not([src]) {
+            display: none;
+        }
+    }
 
-.card .title {
-    position: relative;
-    margin: 0;
-    font-size: 1.5rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    font-family: "League Spartan", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 700;
-    font-style: normal;
-    padding: 10px;
-    background-color: var(--eerie-black);
-    color: var(--white-smoke);
-    border-top: var(--border-size-small) ridge var(--sunset);
-    border-bottom: var(--border-size-small) ridge var(--sunset);
-}
+    .title {
+        position: relative;
+        margin: 0;
+        font-size: 1.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        font-family: "League Spartan", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 700;
+        font-style: normal;
+        padding: 10px;
+        background-color: var(--eerie-black);
+        color: var(--white-smoke);
+        border-top: var(--border-size-small) ridge var(--sunset);
+        border-bottom: var(--border-size-small) ridge var(--sunset);
+    }
 
-.card [data-placeholder]:empty::before {
-    position: absolute;
-    content: attr(data-placeholder);
-    color: #757575;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
+    [data-placeholder] {
+        &:empty::before {
+            position: absolute;
+            content: attr(data-placeholder);
+            color: #757575;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
 
-.card [data-placeholder]:focus::before {
-    display: none;
-}
+        &:focus::before {
+            display: none;
+        }
+    }
 
-.card .rules {
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    font-size: 0.9rem;
-    position: relative;
-    flex-grow: 1;
-    padding: 10px;
-    text-align: center;
-    display: grid;
-    place-items: center;
+    .rules {
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        font-size: 0.9rem;
+        position: relative;
+        flex-grow: 1;
+        padding: 10px;
+        text-align: center;
+        display: grid;
+        place-items: center;
+    }
 }

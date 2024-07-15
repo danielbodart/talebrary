@@ -42,4 +42,8 @@ body {
     background-position: center bottom;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
 }

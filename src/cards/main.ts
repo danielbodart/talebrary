@@ -5,7 +5,6 @@ import {ImageElement} from "../client/components/ImageElement.ts";
 import {controlKeys, customElement, realise} from "../client/misc.ts";
 import {CardCreator} from "./CardCreator.ts";
 import {PlayingCard} from "./PlayingCard.ts";
-import {NewCard} from "./NewCard.ts";
 
 (async () => {
     const app = LazyMap.create()
@@ -23,8 +22,7 @@ import {NewCard} from "./NewCard.ts";
         .set('HTMLDivElement', instance(HTMLDivElement))
         .set('ImageElement', customElement(ImageElement))
         .set('CardCreator', customElement(CardCreator))
-        .set('NewCard', customElement(NewCard))
         .set('PlayingCard', customElement(PlayingCard))
-    realise(app.ImageElement, app.CardCreator, app.PlayingCard, app.NewCard);
+    realise(app.ImageElement, app.CardCreator, app.PlayingCard);
     controlKeys(document);
 })();
