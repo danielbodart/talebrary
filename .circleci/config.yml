@@ -1,6 +1,4 @@
 version: 2.1
-#orbs:
-#  codecov: codecov/codecov@3.2.5
 jobs:
   build:
     docker:
@@ -17,5 +15,13 @@ jobs:
           path: artifacts
       - store_test_results:
           path: artifacts/test-results
-#      - codecov/upload:
-#          file: artifacts/coverage.lcov
+
+
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master

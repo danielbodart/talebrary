@@ -2,10 +2,12 @@ import {type Http} from "../http/mod.ts";
 import {parseHTML} from 'linkedom';
 import {card} from "./card.tsx";
 import {Uri} from "../http/Uri.ts";
+import {defaultTemplate} from "./default.tsx";
 
 type Template = (document: Document) => string;
 
 const templates: { [key: string]: Template } = {
+    'default': defaultTemplate,
     'card': card
 }
 

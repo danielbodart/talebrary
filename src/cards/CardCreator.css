@@ -1,0 +1,7 @@
+@import url('PlayingCard.css') layer(components);
+
+@media print {
+    card-creator {
+        display: none;
+    }
+}
