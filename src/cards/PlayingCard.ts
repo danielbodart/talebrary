@@ -19,9 +19,7 @@ export class PlayingCard {
                 this.addEventListener('focus', () => this.querySelector('textarea')!.focus());
                 this.addEventListener('change', () => this.classList.add('changed'));
                 this.addEventListener('focusout', () => {
-                    const changed = this.classList.contains('changed');
-                    console.log('Form changed', changed);
-                    if (changed) {
+                    if (this.classList.contains('changed')) {
                         this.updateImage();
                         this.updateUrl();
                         this.classList.remove('changed');
