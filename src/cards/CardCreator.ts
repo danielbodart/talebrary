@@ -12,8 +12,12 @@ export class CardCreator {
         return new CustomElementDefinition('card-creator', class extends HTMLElement {
             constructor() {
                 super();
-                this.addEventListener('click', (_) => {
-                    this.before(this.newCard());
+                this.addEventListener('click', (_) => this.before(this.newCard()));
+                this.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.before(this.newCard());
+                    }
                 });
                 this.ownerDocument.defaultView!.addEventListener('popstate', e => {
                     console.log('popstate', e.state);
@@ -46,7 +50,7 @@ export class CardCreator {
                 const image = card.querySelector<HTMLImageElement>('.image')!;
                 image.src = createImageUrl({model, title, description, rules});
                 image.alt = description;
-                card.querySelector<HTMLTextAreaElement>('textarea[name=description]')!.textContent = description;
+                card.querySelector<HTMLTextAreaElement>('textarea[name=description]')!.value = description;
                 card.querySelector<HTMLDivElement>('.title')!.textContent = title;
                 card.querySelector<HTMLDivElement>('.rules')!.textContent = rules;
                 card.querySelector<HTMLDivElement>('.quantity')!.textContent = quantity;
