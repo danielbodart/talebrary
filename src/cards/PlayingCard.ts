@@ -17,12 +17,14 @@ export class PlayingCard {
                     this.updateUrl();
                 });
                 this.addEventListener('focus', () => this.querySelector('textarea')!.focus());
+                this.addEventListener('change', () => this.classList.add('changed'));
                 this.addEventListener('focusout', () => {
-                    const changed = this.hasFormChanged();
+                    const changed = this.classList.contains('changed');
                     console.log('Form changed', changed);
                     if (changed) {
                         this.updateImage();
                         this.updateUrl();
+                        this.classList.remove('changed');
                     }
                 });
             }
@@ -52,23 +54,4 @@ export class PlayingCard {
             }
         });
     }
-}
-
-function hasFormChanged(form: HTMLFormElement): boolean {
-    for (const element of Array.from(form.elements)) {
-        if (element instanceof HTMLInputElement) {
-            if (element.type === 'checkbox' || element.type === 'radio') {
-                if (element.checked !== element.defaultChecked) return true;
-            } else {
-                if (element.value !== element.defaultValue) return true;
-            }
-        } else if (element instanceof HTMLSelectElement) {
-            for (const option of Array.from(element.options)) {
-                if (option.selected !== option.defaultSelected) return true;
-            }
-        } else if (element instanceof HTMLTextAreaElement) {
-            if (element.value !== element.defaultValue) return true;
-        }
-    }
-    return false;
 }
