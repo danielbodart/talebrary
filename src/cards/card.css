@@ -22,12 +22,11 @@
     }
 
     .image {
-        width: 100%;
-        min-height: 50%;
+        width: 212px;
+        height: 212px;
         display: block;
-        aspect-ratio: 1 / 1;
         flex-shrink: 0;
-        object-fit: contain;
+        flex-grow: 0;
         background-color: #000;
         background-image: url(/icons/loader.svg);
         background-size: 100px 100px;

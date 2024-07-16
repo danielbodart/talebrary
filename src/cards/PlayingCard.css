@@ -48,8 +48,6 @@ playing-card {
     }
 
     .image {
-        aspect-ratio: 1/1;
-
         &:hover {
             cursor: pointer;
         }
@@ -62,19 +60,10 @@ playing-card {
         flex-direction: column;
         aspect-ratio: 1/1;
         background-color: var(--eerie-black);
+        position: relative;
     }
 
-    &:focus-within {
-        .image {
-            display: none;
-        }
-
-        form {
-            display: flex;
-        }
-    }
-
-    &:has(.image:not([src])) {
+    &:focus-within, &:has(.image:not([src])) {
         .image {
             display: none;
         }
@@ -90,14 +79,11 @@ playing-card {
     }
 
     .model {
-        font-weight: bold;
         display: flex;
-        justify-content: space-between;
+        justify-content: start;
+        align-items: baseline;
         padding: 10px;
-    }
-
-    .model {
-        align-items: center;
+        font-weight: bold;
     }
 
     textarea, select {
@@ -106,6 +92,9 @@ playing-card {
         color: var(--white-smoke);
         border: none;
         outline: none;
+    }
+
+    textarea {
         flex-grow: 1;
     }
 
@@ -121,6 +110,9 @@ playing-card {
     }
 
     .regenerate {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
         align-self: center;
         background-color: var(--eerie-black);
         color: var(--white-smoke);
