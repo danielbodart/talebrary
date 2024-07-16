@@ -1,5 +1,16 @@
 @import url('PlayingCard.css') layer(components);
 
+card-creator {
+
+    .image {
+        background-image: url('/icons/plus-solid.svg');
+
+        &:not([src]) {
+            display: block;
+        }
+    }
+}
+
 @media print {
     card-creator {
         display: none;

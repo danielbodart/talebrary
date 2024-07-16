@@ -12,18 +12,25 @@ export class CardCreator {
         return new CustomElementDefinition('card-creator', class extends HTMLElement {
             constructor() {
                 super();
-                console.log('CardCreator constructor');
                 this.addEventListener('click', (_) => {
-                    const element = this.querySelector('template')!.content.querySelector('playing-card')!.cloneNode(true) as HTMLElement;
-                    this.before(element);
+                    this.before(this.newCard());
                 });
-                this.ownerDocument.defaultView!.addEventListener('popstate', _ => {
-                    this.ownerDocument.querySelectorAll('playing-card').forEach(card => card.remove());
-                    this.connectedCallback();
+                this.ownerDocument.defaultView!.addEventListener('popstate', e => {
+                    console.log('popstate', e.state);
+                    this.createCards();
                 })
             }
 
             connectedCallback() {
+                this.createCards();
+            }
+
+            private newCard() {
+                return this.querySelector('template')!.content.querySelector('playing-card')!.cloneNode(true) as HTMLElement;
+            }
+
+            private createCards() {
+                this.ownerDocument.querySelectorAll('playing-card').forEach(card => card.remove());
                 const params = this.getParamsFromLocation();
                 const data = Arrays.zip(params.getAll('title'), params.getAll('description'), params.getAll('rules'), params.getAll('model'), params.getAll('quantity'));
                 data.forEach(([title, description, rules, model, quantity]) =>
@@ -34,9 +41,8 @@ export class CardCreator {
                 return new URLSearchParams(this.ownerDocument.defaultView!.location.search);
             }
 
-            private createCard({title, description, rules, model, quantity}: CardData): HTMLDivElement {
-                const fragment = this.querySelector<HTMLTemplateElement>('template')!.content.cloneNode(true) as DocumentFragment;
-                const card = fragment.querySelector<HTMLDivElement>('playing-card')!;
+            private createCard({title, description, rules, model, quantity}: CardData): HTMLElement {
+                const card = this.newCard()
                 const image = card.querySelector<HTMLImageElement>('.image')!;
                 image.src = createImageUrl({model, title, description, rules});
                 image.alt = description;
