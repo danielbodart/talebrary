@@ -38,6 +38,11 @@
         }
     }
 
+    img[is="x-image"][state=loading], img[is="x-image"][state=loading]:hover {
+        object-position: 2000% 2000%;
+        object-fit: none;
+    }
+
     .title {
         position: relative;
         margin: 0;
