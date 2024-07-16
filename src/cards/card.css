@@ -11,14 +11,14 @@
     border: var(--border-size) ridge var(--sunset);
     color: var(--white-smoke);
     box-shadow: 10px 10px 10px 0 var(--eerie-black);
+    transition: transform 0.2s;
 
-    &.active {
-        transition: transform 0.2s;
+    &.active &:hover {
+        cursor: pointer;
+    }
 
-        &:hover {
-            cursor: pointer;
-            transform: translateY(-5px);
-        }
+    &:hover, &:focus-within {
+        transform: translateY(-5px);
     }
 
     .image {
