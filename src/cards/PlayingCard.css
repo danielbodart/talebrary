@@ -60,7 +60,17 @@ playing-card {
         background-color: var(--eerie-black);
     }
 
-    &:focus-within, &:has(.image:not([src])) {
+    &:focus-within {
+        .image {
+            display: none;
+        }
+
+        form {
+            display: flex;
+        }
+    }
+
+    &:has(.image:not([src])) {
         .image {
             display: none;
         }
