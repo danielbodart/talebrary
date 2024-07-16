@@ -33,10 +33,6 @@ export class PlayingCard {
                 this.querySelector('textarea')!.focus()
             }
 
-            hasFormChanged() {
-                return hasFormChanged(this.querySelector('form')!);
-            }
-
             private updateUrl() {
                 this.setParams(getParams(this.ownerDocument));
             }
