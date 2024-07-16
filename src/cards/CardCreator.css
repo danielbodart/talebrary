@@ -1,8 +1,10 @@
 @import url('PlayingCard.css') layer(components);
 
 card-creator {
+    background: black;
 
     .image {
+        background-color: black;
         background-image: url('/icons/plus-solid.svg');
 
         &:not([src]) {
