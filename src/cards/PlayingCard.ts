@@ -33,6 +33,15 @@ export class PlayingCard {
                         this.classList.remove('changed');
                     }
                 });
+                this.ownerDocument.defaultView!.addEventListener('beforeprint', () => {
+                    const quantity = Number(this.querySelector('.quantity')!.textContent);
+                    for (let i = 1; i < quantity; i++) {
+                        const clone = this.cloneNode(true) as HTMLElement;
+                        clone.classList.add('duplicate');
+                        this.after(clone);
+                    }
+                });
+                this.ownerDocument.defaultView!.addEventListener('afterprint', () => this.ownerDocument.querySelectorAll('.duplicate').forEach(e => e.remove()));
             }
 
             focus() {

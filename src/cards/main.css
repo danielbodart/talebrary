@@ -24,9 +24,13 @@
 }
 
 @media print {
+    :root, html, body {
+        margin: 0;
+        padding: 0;
+    }
+
     :root {
         zoom: 100%;
-        margin: 0;
     }
 
     @page {
