@@ -12,19 +12,19 @@ export function createImageUrl({
 
 export function extractDataFromCard(card: HTMLElement): CardData {
     return {
+        description: card.querySelector<HTMLTextAreaElement>('[name=description]')!.value!,
+        model: card.querySelector<HTMLSelectElement>('[name=model]')!.value!,
         title: card.querySelector<HTMLDivElement>('.title')!.textContent!,
         rules: card.querySelector<HTMLDivElement>('.rules')!.textContent!,
-        description: card.querySelector<HTMLTextAreaElement>('[name=description]')!.textContent!,
-        model: card.querySelector<HTMLSelectElement>('[name=model]')!.value!,
         quantity: card.querySelector<HTMLDivElement>('.quantity')!.textContent!,
     }
 }
 
 export interface CardData {
-    title: string;
     description: string;
-    rules: string;
     model: string;
+    title: string;
+    rules: string;
     quantity: string;
 }
 
