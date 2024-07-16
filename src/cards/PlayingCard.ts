@@ -18,7 +18,12 @@ export class PlayingCard {
                     this.remove();
                     this.updateUrl();
                 });
-                this.querySelector('.regenerate')!.addEventListener('click', () => this.classList.add('regenerate', 'changed'));
+                this.querySelector('.regenerate')!.addEventListener('click', () => {
+                    this.classList.add('regenerate', 'changed');
+                    if(this.ownerDocument.activeElement instanceof HTMLElement) {
+                        this.ownerDocument.activeElement.blur();
+                    }
+                });
                 this.addEventListener('focus', () => this.focus());
                 this.addEventListener('change', () => this.classList.add('changed'));
                 this.addEventListener('focusout', () => {

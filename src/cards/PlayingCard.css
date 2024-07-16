@@ -126,6 +126,15 @@ playing-card {
         img {
             width: 20px;
             height: 20px;
+
+            &:hover {
+                filter: invert(100%);
+            }
+        }
+
+        &:hover {
+            background-color: var(--white-smoke);
+            cursor: pointer;
         }
     }
 
