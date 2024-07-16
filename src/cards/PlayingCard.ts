@@ -35,7 +35,6 @@ export class PlayingCard {
                 this.setParams(getParams(this.ownerDocument));
             }
 
-            // @ts-ignore
             private updateImage() {
                 const image = this.querySelector<HTMLImageElement>('.image')!;
                 const data = extractDataFromCard(this);
