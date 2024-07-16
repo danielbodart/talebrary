@@ -19,6 +19,7 @@
 @media (max-width: 600px) {
     :root {
         zoom: 100%;
+        margin: 0;
     }
 }
 
