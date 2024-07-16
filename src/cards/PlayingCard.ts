@@ -1,14 +1,16 @@
 import type {Dependency} from "../yadic/mod.ts";
 import {CustomElementDefinition} from "../client/components/CustomElementDefinition.ts";
 import {createImageUrl, extractDataFromCard, getParams} from "./shared.ts";
+import type {Clock} from "../system/clock.ts";
 
 export interface CardCreatorDependencies extends Dependency<'HTMLElement', typeof HTMLElement>,
     Dependency<'CustomEvent', typeof CustomEvent>,
+    Dependency<'clock', Clock>,
     Dependency<'history', History> {
 }
 
 export class PlayingCard {
-    static definition({HTMLElement, history}: CardCreatorDependencies) {
+    static definition({HTMLElement, history, clock}: CardCreatorDependencies) {
         return new CustomElementDefinition('playing-card', class extends HTMLElement {
             constructor() {
                 super();
@@ -16,7 +18,8 @@ export class PlayingCard {
                     this.remove();
                     this.updateUrl();
                 });
-                this.addEventListener('focus', () => this.querySelector('textarea')!.focus());
+                this.querySelector('.regenerate')!.addEventListener('click', () => this.classList.add('regenerate', 'changed'));
+                this.addEventListener('focus', () => this.focus());
                 this.addEventListener('change', () => this.classList.add('changed'));
                 this.addEventListener('focusout', () => {
                     if (this.classList.contains('changed')) {
@@ -27,8 +30,12 @@ export class PlayingCard {
                 });
             }
 
+            focus() {
+                this.querySelector('textarea')!.focus();
+            }
+
             connectedCallback() {
-                this.querySelector('textarea')!.focus()
+                this.focus()
             }
 
             private updateUrl() {
@@ -38,8 +45,9 @@ export class PlayingCard {
             private updateImage() {
                 const image = this.querySelector<HTMLImageElement>('.image')!;
                 const data = extractDataFromCard(this);
-                image.src = createImageUrl(data);
+                image.src = createImageUrl(data, this.classList.contains('regenerate') ? String(clock.now().getTime()) : undefined);
                 image.alt = data.description;
+                this.classList.remove('regenerate');
             }
 
             private setParams(params: URLSearchParams) {

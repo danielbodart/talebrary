@@ -3,10 +3,11 @@ export function createImageUrl({
                                    title,
                                    description,
                                    rules
-                               }: Pick<CardData, 'model' | 'title' | 'description' | 'rules'>) {
+                               }: Pick<CardData, 'model' | 'title' | 'description' | 'rules'>, reload?: string) {
     const query = new URLSearchParams();
     query.set('model', model);
     query.set('prompt', JSON.stringify({title, description, rules}));
+    if (reload) query.set('reload', reload);
     return `/cards/art?${query.toString()}`;
 }
 
