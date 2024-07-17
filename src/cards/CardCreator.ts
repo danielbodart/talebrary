@@ -12,17 +12,14 @@ export class CardCreator {
         return new CustomElementDefinition('card-creator', class extends HTMLElement {
             constructor() {
                 super();
-                this.addEventListener('click', (_) => this.before(this.newCard()));
+                this.addEventListener('click', _ => this.before(this.newCard()));
                 this.addEventListener('keydown', e => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         this.before(this.newCard());
                     }
                 });
-                this.ownerDocument.defaultView!.addEventListener('popstate', e => {
-                    console.log('popstate', e.state);
-                    this.createCards();
-                })
+                this.ownerDocument.defaultView!.addEventListener('popstate', _ => this.createCards())
             }
 
             connectedCallback() {
