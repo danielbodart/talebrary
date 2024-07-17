@@ -3,14 +3,14 @@ import {CustomElementDefinition} from "../client/components/CustomElementDefinit
 import {createImageUrl, extractDataFromCard, getParams} from "./shared.ts";
 import type {Clock} from "../system/clock.ts";
 
-export interface CardCreatorDependencies extends Dependency<'HTMLElement', typeof HTMLElement>,
+export interface PlayingCardDependencies extends Dependency<'HTMLElement', typeof HTMLElement>,
     Dependency<'CustomEvent', typeof CustomEvent>,
     Dependency<'clock', Clock>,
     Dependency<'history', History> {
 }
 
 export class PlayingCard {
-    static definition({HTMLElement, history, clock}: CardCreatorDependencies) {
+    static definition({HTMLElement, history, clock}: PlayingCardDependencies) {
         return new CustomElementDefinition('playing-card', class extends HTMLElement {
             constructor() {
                 super();
