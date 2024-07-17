@@ -18,10 +18,15 @@ export class PlayingCard {
                     this.remove();
                     this.updateUrl();
                 });
-                this.querySelector('.regenerate')!.addEventListener('click', () => {
-                    this.classList.add('regenerate', 'changed');
-                    if(this.ownerDocument.activeElement instanceof HTMLElement) {
-                        this.ownerDocument.activeElement.blur();
+                const regenerate = this.querySelector<HTMLButtonElement>('.regenerate')!;
+                regenerate.addEventListener('click', e => {
+                    e.preventDefault();
+                    this.regenerate()
+                });
+                regenerate.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.regenerate();
                     }
                 });
                 this.addEventListener('focus', () => this.focus());
@@ -33,15 +38,28 @@ export class PlayingCard {
                         this.classList.remove('changed');
                     }
                 });
-                this.ownerDocument.defaultView!.addEventListener('beforeprint', () => {
-                    const quantity = Number(this.querySelector('.quantity')!.textContent);
-                    for (let i = 1; i < quantity; i++) {
-                        const clone = this.cloneNode(true) as HTMLElement;
-                        clone.classList.add('duplicate');
-                        this.after(clone);
-                    }
-                });
-                this.ownerDocument.defaultView!.addEventListener('afterprint', () => this.ownerDocument.querySelectorAll('.duplicate').forEach(e => e.remove()));
+                this.ownerDocument.defaultView!.addEventListener('beforeprint', () => this.createDuplicates());
+                this.ownerDocument.defaultView!.addEventListener('afterprint', () => this.removeDuplicates());
+            }
+
+            private removeDuplicates() {
+                this.ownerDocument.querySelectorAll('.duplicate').forEach(e => e.remove());
+            }
+
+            private createDuplicates() {
+                const quantity = Number(this.querySelector('.quantity')!.textContent);
+                for (let i = 1; i < quantity; i++) {
+                    const clone = this.cloneNode(true) as HTMLElement;
+                    clone.classList.add('duplicate');
+                    this.after(clone);
+                }
+            }
+
+            private regenerate() {
+                this.classList.add('regenerate', 'changed');
+                if (this.ownerDocument.activeElement instanceof HTMLElement) {
+                    this.ownerDocument.activeElement.blur();
+                }
             }
 
             focus() {
