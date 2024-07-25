@@ -6,5 +6,6 @@ www/client
 www/cards/*
 db/full.sql
 .idea/inspectionProfiles/
+.idea/dataSources.local.xml
 games
 wrangler-local.toml
