@@ -12,7 +12,7 @@ export class SuggestionsHandler {
         const {query} = new Uri(request.url);
         const params = new URLSearchParams(query);
 
-        const model = params.get('model') ?? "@cf/meta/llama-3-8b-instruct-awq" as any;
+        const model = params.get('model') ?? "@cf/meta/llama-3.1-8b-instruct" as any;
 
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});

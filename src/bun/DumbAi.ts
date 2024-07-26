@@ -16,10 +16,13 @@ export class DumbAi {
     run(model: "@cf/meta/llama-3-8b-instruct-awq", prompt: ScopedPrompt): Promise<AiTextGenerationOutput | undefined>;
     run(model: "@cf/bytedance/stable-diffusion-xl-lightning", prompt: UnscopedPrompt): Promise<Uint8Array>;
     async run(model: any, prompt: TextGenerationPrompt): Promise<any> {
+        console.log('Running model', model, 'with prompt', prompt);
         switch (model) {
             case "@cf/bytedance/stable-diffusion-xl-lightning":
                 return new Uint8Array(0);
             case "@cf/meta/llama-3-8b-instruct-awq":
+                return {response: JSON.stringify(this.instructions(prompt as ScopedPrompt))};
+            case "@cf/meta/llama-3.1-8b-instruct":
                 return {response: JSON.stringify(this.instructions(prompt as ScopedPrompt))};
             default:
                 throw new Error(`Model ${model} not found`);
