@@ -14,11 +14,16 @@ export type HttpMethod = 'HEAD' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 
 
 export type HttpHeader = [string, string];
 
-export function request(method: HttpMethod, uri: string, headers: HttpHeader[]): Request {
-    return new Request(uri, {method, headers});
+export function request(method: HttpMethod, uri: string, headers: HttpHeader[], body?: BodyInit): Request {
+    return new Request(uri, {method, headers, body});
 }
 
 export function get(uri: string | Uri, ...headers: HttpHeader[]): Request {
     return request('GET', uri.toString(), headers);
 }
+
+export function post(uri: string | Uri, headers: HttpHeader[], body: BodyInit): Request {
+    return request('POST', uri.toString(), headers, body);
+}
+
 

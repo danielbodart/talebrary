@@ -4,9 +4,14 @@ import {Uri} from "../http/Uri.ts";
 import {illustrationPrompt} from "./Prompts.ts";
 
 import type {Dependency} from "../yadic/mod.ts";
+import type {StableDiffusion} from "../stability-ai/StableDiffusion.ts";
+
+export interface IllustrationDependencies extends Dependency<'ai', Ai>,
+    Dependency<'stableDiffusion', StableDiffusion> {
+}
 
 export class IllustrationHandler {
-    constructor(deps: Dependency<'ai', Ai>, private ai: Ai = deps.ai) {
+    constructor(private deps: IllustrationDependencies) {
     }
 
     async handle(request: Request): Promise<Response> {
@@ -21,9 +26,12 @@ export class IllustrationHandler {
         const data = JSON.parse(rawPrompt);
         const prompt = illustrationPrompt(path, data);
 
-        const response = await this.ai.run(model, {prompt});
-
-        return new Response(response);
+        if (model.startsWith('sd3')) {
+            const image = await this.deps.stableDiffusion.run({prompt, model, output_format: "jpeg"});
+            return new Response(image, {headers: {'content-type': 'image/jpeg'}});
+        }
+        const image = await this.deps.ai.run(model, {prompt});
+        return new Response(image);
     }
 }
 
