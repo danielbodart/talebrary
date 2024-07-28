@@ -8,7 +8,11 @@ import {DumbAi} from "./DumbAi.ts";
 
 const root = `${import.meta.dir}/../../www/`;
 const r2 = new FolderBucket(root);
-const config = {HONEYCOMB_API_KEY: process.env.HONEYCOMB_API_KEY!, ...DEFAULT_CONFIG};
+const config = {
+    HONEYCOMB_API_KEY: process.env.HONEYCOMB_API_KEY!,
+    STABLE_DIFFUSION_API_KEY: process.env.STABLE_DIFFUSION_API_KEY!,
+    ...DEFAULT_CONFIG
+};
 const app = application(localhostHandler(root), talebrary(), r2, md5, new DumbAi() as any, config);
 
 const server = serve({
