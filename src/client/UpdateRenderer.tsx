@@ -265,8 +265,8 @@ export class UpdateRenderer {
 
     models = [
         '@cf/bytedance/stable-diffusion-xl-lightning',
+        'llama+stable-diffusion'
     ];
-
 
     updateInput(updates: (CharInput | LineInput)[]) {
         const inputs = Array.from(this.document.querySelectorAll('.input-control'));
