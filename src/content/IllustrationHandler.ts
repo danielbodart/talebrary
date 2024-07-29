@@ -45,7 +45,7 @@ export class IllustrationHandler {
             }
 
             const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt);
-            return new Response(image as any);
+            return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
         }
 
         const prompt = illustrationPrompt(path, data);
@@ -56,7 +56,7 @@ export class IllustrationHandler {
         }
 
         const image = await this.deps.ai.run(model, {prompt});
-        return new Response(image);
+        return new Response(image, {headers: {'content-type': 'image/jpeg'}});
     }
 }
 

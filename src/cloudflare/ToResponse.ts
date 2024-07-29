@@ -16,5 +16,7 @@ export function toResponse(object: R2Object | R2ObjectBody | null): Response {
     if (!('body' in object)) return new Response(null, {status: 304, headers})
     const etag = getEtag(object);
     if (etag) headers.set('etag', etag);
+    const description = object.customMetadata?.description;
+    if (description) headers.set('description', description);
     return new Response(object.body as any, {headers});
 }

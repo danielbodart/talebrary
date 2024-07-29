@@ -52,12 +52,15 @@ export class R2CachingHandler {
                 httpMetadata: {
                     contentType: response.headers.get('content-type') ?? (await detectMimeType(new Uint8Array(buffer))),
                     cacheControl: 'public, max-age=60'
+                },
+                customMetadata: {
+                    description: response.headers.get('description') ?? ''
                 }
             });
             console.log("Uploaded to R2", result.key, result.version);
         } catch (e) {
             console.error("Error uploading to R2", e);
         }
-        return new Response(buffer, {status: 200})
+        return new Response(buffer, {status: 200, headers: response.headers});
     }
 }
