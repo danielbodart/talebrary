@@ -226,7 +226,7 @@ export class UpdateRenderer {
                     };
 
                     for (const model of this.models) {
-                        const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${model}`;
+                        const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${encodeURIComponent(model)}`;
                         lastCard.insertBefore(
                             fragment(<img is="x-image" reloadable class="image" loading="lazy" src={image} alt=""
                                           aria-hidden="true"
