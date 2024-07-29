@@ -217,12 +217,14 @@ export class UpdateRenderer {
                     const title = this.document.title;
                     const description = this.document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
                     const current = scene(lastCard);
+                    // const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
                     const data: SceneContext = {
                         story: {
                             title,
                             description
                         },
                         scene: current,
+                        // previous: previous ? scene(previous) : undefined,
                     };
 
                     for (const model of this.models) {
@@ -264,7 +266,7 @@ export class UpdateRenderer {
     }
 
     models = [
-        '@cf/bytedance/stable-diffusion-xl-lightning',
+        // '@cf/bytedance/stable-diffusion-xl-lightning',
         'llama+stable-diffusion'
     ];
 
