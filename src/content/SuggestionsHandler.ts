@@ -1,7 +1,7 @@
 import type {Ai, AiTextGenerationOutput} from "@cloudflare/workers-types";
 
 import {Uri} from "../http/Uri.ts";
-import {actionsPrompt} from "./Prompts.ts";
+import {actionsPrompt} from "../prompts/ActionsPrompt.ts";
 import type {Dependency} from "../yadic/mod.ts";
 
 export class SuggestionsHandler {

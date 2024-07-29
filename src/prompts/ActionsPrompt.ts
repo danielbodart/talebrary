@@ -1,32 +1,4 @@
-import {commands, type Describable, isDescribable, type SceneContext, type ScopedPrompt} from "../types.ts";
-
-function scenePrompt(data: SceneContext) {
-    return `Create an illustration for a scene called "${data.scene.title}" and described as 
-            "${data.scene.description.replace('"', '`')}"
-            The scene is part of the interactive fiction called "${data.story.title}" 
-            "${data.story.description ? `and described as "${data.story.description}".` : ''}
-            ${data.previous ? `The scene should be consistent with the previous scene, which was called "${data.previous.title}" 
-            and described as "${data.previous.description.replace('"', '`')}"` : ''}`;
-}
-
-function storyPrompt(data: Describable) {
-    return `Create the cover art illustration for the interactive fiction called "${data.title}" 
-            "${data.description ? `and described as "${data.description}".` : ''}`;
-}
-
-function cardPrompt(data: Describable & {rules: string}) {
-    return `Create a colourful illustration for a card titled "${data.title}"
-            and described as "${data.description}" 
-            with a fantasy or sci-fi theme.`;
-}
-
-export function illustrationPrompt(path: string, data: any): string {
-    const [, section] = path.split('/');
-    if (section === 'cards') {
-        return cardPrompt(data);
-    }
-    return isDescribable(data) ? storyPrompt(data) : scenePrompt(data);
-}
+import {commands, type Describable, type ScopedPrompt} from "../types.ts";
 
 export interface Suggestions {
     people: boolean;
