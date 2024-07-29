@@ -43,8 +43,9 @@ export interface TextToImageRequest extends StableDiffusion3Prompt {
 export interface ImageToImageRequest extends StableDiffusion3Prompt {
     mode: 'image-to-image';
     // Every side must be at least 64 pixels
-    // jpeg png webp
+    // jpeg png
     image: Blob;
+    // 0-1: 0 = completely original, 1 = completely new
     strength: number;
 }
 

@@ -1,6 +1,6 @@
 import {describe, expect, test} from "bun:test";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
-import {actionsPrompt, ExamplePrompt, type Suggestions} from "../../src/content/Prompts.ts";
+import {actionsPrompt, ExamplePrompt, type Suggestions} from "../../src/prompts/ActionsPrompt.ts";
 
 describe("DumbAi", () => {
     const ai = new DumbAi();

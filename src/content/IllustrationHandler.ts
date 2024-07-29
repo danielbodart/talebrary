@@ -1,10 +1,10 @@
 import type {Ai} from "@cloudflare/workers-types";
 
 import {Uri} from "../http/Uri.ts";
-import {illustrationPrompt} from "./Prompts.ts";
 
 import type {Dependency} from "../yadic/mod.ts";
 import type {StableDiffusion} from "../stability-ai/StableDiffusion.ts";
+import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 
 export interface IllustrationDependencies extends Dependency<'ai', Ai>,
     Dependency<'stableDiffusion', StableDiffusion> {
