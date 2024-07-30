@@ -1,6 +1,5 @@
 import {
     type BufferContent,
-    type BufferImage,
     type BufferWindow,
     type CharInput,
     type GraphicsContent,
@@ -10,9 +9,7 @@ import {
     type InitMessage,
     isBufferContent,
     isGridContent,
-    isLineData,
     isUpdateMessage,
-    type LineData,
     type LineInput,
     type MessageHandler,
     type Metrics,
@@ -23,92 +20,37 @@ import * as elements from "typed-html";
 import {commands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
 import {type InstructionEvent, InstructionEventName} from "./components/InstructionEvent.tsx";
 import {EventBuilder} from "./EventBuilder.ts";
-import {type Clock, SystemClock} from "../system/clock.ts";
+import {type Clock} from "../system/clock.ts";
 import {type Dependency} from "../yadic/mod.ts";
-import {capitalWords, wordCount} from "../system/Strings.ts";
 import {Arrays} from "../system/Arrays.ts";
 import {binPack} from "./BinPack.ts";
 import type {Timers} from "../system/timers.ts";
+import {cleanLineData, group, instructions} from "./misc.tsx";
 
-function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
-    return content.filter<LineData>(isLineData).map(line => {
-        return {
-            ...line,
-            text: line.text.trim()
-        }
-    }).filter(line => {
-        return line.text !== '' && line.text !== '>';
-    });
-}
-
-
-function instructions(line: LineData, maxLength: number = 4): string {
-    if (line.style === 'normal') {
-        return line.text.replace(capitalWords, match => match.length >= 3 && wordCount(match) <= maxLength ?
-            <x-instruction>{match}</x-instruction> : match);
-    }
-    if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
-        if (wordCount(line.text) <= maxLength) {
-            return <x-instruction>{line.text}</x-instruction>
-        }
-    }
-    return line.text;
-}
-
-function group(html: DocumentFragment, classes: string[]): DocumentFragment {
-    const chunks = splitWhen(Array.from(html.children), (e: Element) => {
-        return e.previousElementSibling instanceof HTMLElement && (e.previousElementSibling.classList.contains('normal') || e.previousElementSibling.classList.contains('input')) &&
-            e instanceof HTMLElement && (e.classList.contains('header') || e.classList.contains('subheader')) &&
-            e.nextElementSibling instanceof HTMLElement && e.nextElementSibling.classList.contains('normal');
-    });
-    return chunks.reduce((a, elements) => {
-        const card = document.createElement('div');
-        card.classList.add(...classes);
-        card.append(...elements);
-        a.appendChild(card);
-        return a;
-    }, fragment(''));
-}
-
-function splitWhen<T>(values: T[], predicate: (t: T) => boolean): T[][] {
-    const result: T[][] = [];
-    let current: T[] = [];
-    for (const value of values) {
-        if (predicate(value)) {
-            result.push(current);
-            current = [];
-        }
-        current.push(value);
-    }
-    result.push(current);
-    return result;
-}
-
-export interface UpdateRendererDependencies extends Dependency<'window', Window>,
+export interface UpdateRendererDependencies extends
+    Dependency<'window', Window>,
     Dependency<'document', Document>,
     Dependency<'messageHandler', MessageHandler>,
     Dependency<'clock', Clock>,
     Dependency<'timers', Timers>,
-    Dependency<'metrics', Partial<Metrics>> {
-}
+    Dependency<'metrics', Partial<Metrics>>,
+    Dependency<'eventBuilder', EventBuilder>
+{}
 
 export class UpdateRenderer {
-    constructor(private deps: UpdateRendererDependencies,
-                private document: Document = deps.document,
-                private messageHandler: MessageHandler = deps.messageHandler,
-                metrics: Partial<Metrics> = deps.metrics) {
-        messageHandler.postMessage({
+    constructor(private deps: UpdateRendererDependencies) {
+        this.deps.messageHandler.postMessage({
             type: "init",
             gen: 0,
-            metrics,
+            metrics: this.deps.metrics,
             supports: ["garglktext", "graphics", "graphicswin", "hyperlinks", "timer"]
         } as InitMessage);
-        messageHandler.onMessage(message => {
+        this.deps.messageHandler.onMessage(message => {
             if (!isUpdateMessage(message)) return;
             this.handle(message as UpdateMessage);
         })
-        document.addEventListener(InstructionEventName, (ev: CustomEvent<InstructionEvent>) => {
-            const htmlInput = document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
+        this.deps.document.addEventListener(InstructionEventName, (ev: CustomEvent<InstructionEvent>) => {
+            const htmlInput = this.deps.document.querySelector<HTMLInputElement>('.window.buffer .input-control form input')!;
             htmlInput.value = `${htmlInput.value} ${ev.detail.text}`.trim();
             htmlInput.form?.dispatchEvent(new SubmitEvent('submit'))
         })
@@ -122,7 +64,7 @@ export class UpdateRenderer {
 
     updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
         if (updates.length === 0) {
-            const inputs = Array.from(this.document.querySelectorAll('.window'));
+            const inputs = Array.from(this.deps.document.querySelectorAll('.window'));
             inputs.map(i => i.parentElement!.removeChild(i));
             return
         }
@@ -137,7 +79,7 @@ export class UpdateRenderer {
                     }
                     return window;
                 } else {
-                    const main = this.document.querySelector('main') || this.document.body;
+                    const main = this.deps.document.querySelector('main') || this.deps.document.body;
                     main.append(fragment(<div id={`window-${update.id}`}
                                               class={`window ${update.type}`}>
                         {update.type === "grid" ?
@@ -154,7 +96,7 @@ export class UpdateRenderer {
     }
 
     getWindow(id: number) {
-        return this.document.querySelector<HTMLDivElement>(`#window-${id}`);
+        return this.deps.document.querySelector<HTMLDivElement>(`#window-${id}`);
     }
 
     updateContent(updates: (GridContent | BufferContent | GraphicsContent)[], gen: number) {
@@ -171,7 +113,7 @@ export class UpdateRenderer {
 
             if (isBufferContent(update)) {
                 if (update.clear) {
-                    const introCard = this.document.querySelector('main > .card');
+                    const introCard = this.deps.document.querySelector('main > .card');
                     if (introCard) introCard.parentElement!.removeChild(introCard);
                     window.innerHTML = '';
                 }
@@ -195,7 +137,7 @@ export class UpdateRenderer {
                 const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll:not(:has(.input:only-child))'));
                 const scroll = scrollElements[0];
                 if (scroll) {
-                    this.document.defaultView!.setTimeout(() => {
+                    this.deps.document.defaultView!.setTimeout(() => {
                         scroll.scrollIntoView({
                             block: 'start',
                             behavior: 'smooth'
@@ -211,11 +153,11 @@ export class UpdateRenderer {
 
                     if (!lastCard.matches(':has(.header):has(.normal):not(:has(.image)):not(:has(.input)), :has(.subheader):has(.normal):not(:has(.image)):not(:has(.input))')) return;
 
-                    const path = this.document.defaultView!.location.pathname;
+                    const path = this.deps.document.defaultView!.location.pathname;
                     const [, , id] = path.split('/');
 
-                    const title = this.document.title;
-                    const description = this.document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
+                    const title = this.deps.document.title;
+                    const description = this.deps.document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
                     const current = scene(lastCard);
                     // const previous = Array.from(window.querySelectorAll<HTMLElement>(".scene")).reverse()[0];
                     const data: SceneContext = {
@@ -258,8 +200,8 @@ export class UpdateRenderer {
                         });
                     });
 
-                    const event = new EventBuilder(this.document.defaultView!, new SystemClock()).build(current);
-                    this.document.defaultView?.navigator.sendBeacon(`/events`, JSON.stringify(event));
+                    const event = this.deps.eventBuilder.build(current);
+                    this.deps.window.navigator.sendBeacon(`/events`, JSON.stringify(event));
                 }
             }
         })
@@ -271,7 +213,7 @@ export class UpdateRenderer {
     ];
 
     updateInput(updates: (CharInput | LineInput)[]) {
-        const inputs = Array.from(this.document.querySelectorAll('.input-control'));
+        const inputs = Array.from(this.deps.document.querySelectorAll('.input-control'));
         inputs.map(i => i.parentElement!.removeChild(i));
 
         return updates.map(update => {
@@ -298,7 +240,7 @@ export class UpdateRenderer {
             const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
             window.querySelector('.input-control form')!.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.messageHandler.postMessage({
+                this.deps.messageHandler.postMessage({
                     type: htmlInput.dataset.type!,
                     gen: Number(htmlInput.dataset.gen),
                     window: Number(htmlInput.dataset.id),
@@ -310,7 +252,7 @@ export class UpdateRenderer {
             htmlInput.addEventListener('input', (e) => {
                 if (htmlInput.dataset.type !== 'char') return;
                 e.preventDefault();
-                this.messageHandler.postMessage({
+                this.deps.messageHandler.postMessage({
                     type: htmlInput.dataset.type!,
                     gen: Number(htmlInput.dataset.gen),
                     window: Number(htmlInput.dataset.id),
@@ -321,7 +263,7 @@ export class UpdateRenderer {
             htmlInput.addEventListener('keydown', (e) => {
                 if (htmlInput.dataset.type !== 'char' || e.key === 'Unidentified') return;
                 e.preventDefault();
-                this.messageHandler.postMessage({
+                this.deps.messageHandler.postMessage({
                     type: htmlInput.dataset.type!,
                     gen: Number(htmlInput.dataset.gen),
                     window: Number(htmlInput.dataset.id),
