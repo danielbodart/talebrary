@@ -26,7 +26,7 @@ export function generateIllustrationPrompt(data: SceneContext): ScopedPrompt {
     
     Your tasks are as follows:
     
-    1. Examine the scene object and determine if it actually describes a scene that would make a good illustration. If not return JSON {status: 404, statusText: "No Scene Found"}
+    1. Examine the scene object and determine if it actually describes a scene that would make a good illustration. If not return the reason why you do not think it is a scene in JSON {status: 404, statusText: "No Scene Found", reason: "Some reason why it is not a scene"}
     2. Extract the key concepts from the scene object and use them as the primary components for the prompt.
     2. Next examine the previous scene if present and make sure the current scene is consistent with the previous scene unless it specifically states otherwise. 
        Example: if the previous scene was a dark forest, the current scene should not be a bright sunny beach unless explicitly described that way.
