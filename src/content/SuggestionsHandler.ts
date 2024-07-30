@@ -1,7 +1,7 @@
 import type {Ai, AiTextGenerationOutput} from "@cloudflare/workers-types";
 
 import {Uri} from "../http/Uri.ts";
-import {actionsPrompt} from "../prompts/ActionsPrompt.ts";
+import {suggestionsPrompt} from "../prompts/SuggestionsPrompt.ts";
 import type {Dependency} from "../yadic/mod.ts";
 
 export class SuggestionsHandler {
@@ -18,7 +18,7 @@ export class SuggestionsHandler {
         if (!rawPrompt) return new Response('Not Found', {status: 404});
 
         const data = JSON.parse(rawPrompt);
-        const prompt = actionsPrompt(data);
+        const prompt = suggestionsPrompt(data);
 
         const output: AiTextGenerationOutput = await this.ai.run(model, prompt);
         if (!('response' in output)) return new Response('Unsupported response', {status: 404});
