@@ -41,7 +41,7 @@ export class IllustrationHandler {
             const result = await this.deps.ai.run('@cf/meta/llama-3.1-8b-instruct' as any, generateIllustrationPrompt(data)) as any;
             const prompt = _try(() => JSON.parse(result.response), {status: 500, statusText: 'Expected JSON response'});
             if (prompt.status) {
-                return new Response(prompt.status, prompt);
+                return new Response(prompt, {status: prompt.status, statusText: prompt.statusText});
             }
 
             const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt);
