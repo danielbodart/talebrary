@@ -6,8 +6,9 @@ import {constructor, instance, LazyMap} from "../yadic/mod.ts";
 import {SystemClock} from "../system/clock.ts";
 import {Instruction} from "./components/Instruction.tsx";
 import {ImageElement} from "./components/ImageElement.ts";
-import {controlKeys, customElement, realise} from "./misc.ts";
 import {SystemTimers} from "../system/timers.ts";
+import {controlKeys, customElement, realise} from "./misc.tsx";
+import {EventBuilder} from "./EventBuilder.ts";
 
 (async () => {
     const story = document.querySelector<HTMLLinkElement>('#story');
@@ -25,6 +26,7 @@ import {SystemTimers} from "../system/timers.ts";
         .set('http', instance(fetch))
         .set('logger', instance(console))
         .set('messageHandler', constructor(WindowMessageHandler))
+        .set('eventBuilder', constructor(EventBuilder))
         .set('customElements', instance(window.customElements))
         .set('CustomEvent', instance(CustomEvent))
         .set('HTMLElement', instance(HTMLElement))
