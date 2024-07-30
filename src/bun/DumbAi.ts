@@ -7,7 +7,7 @@ import {
     type TextGenerationPrompt,
     type UnscopedPrompt
 } from "../types.ts";
-import type {Suggestions} from "../prompts/ActionsPrompt.ts";
+import type {Suggestions} from "../prompts/SuggestionsPrompt.ts";
 import {Arrays} from "../system/Arrays.ts";
 import type {AiTextGenerationOutput} from "@cloudflare/workers-types";
 import {words} from "../system/Strings.ts";

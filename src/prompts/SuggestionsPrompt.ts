@@ -19,7 +19,7 @@ export const ExampleSuggestions: Suggestions = {
     actions: ["examine atrium", "examine library", "talk to librarian", "examine bookcases", "examine desk", "open draw", "go east"]
 };
 
-export function actionsPrompt(data: Describable): ScopedPrompt {
+export function suggestionsPrompt(data: Describable): ScopedPrompt {
     const systemPrompt = `You are a interactive fiction copilot API. You must follow the following steps:
 1. Identity nouns in the input text
 2. Identify if people are present in the scene 
