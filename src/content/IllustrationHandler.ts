@@ -11,13 +11,13 @@ export interface IllustrationDependencies extends Dependency<'ai', Ai>,
     Dependency<'stableDiffusion', StableDiffusion> {
 }
 
-export function _try<R>(fun: () => R | undefined, defaultResult: any = undefined): R {
+export function _try<R>(fun: () => R | undefined, rejected:(e: unknown | undefined) => R): R {
     try {
         const result = fun();
-        if (typeof result == 'undefined') return defaultResult;
+        if (typeof result == 'undefined') return rejected(undefined);
         return result;
     } catch (e) {
-        return defaultResult;
+        return rejected(e);
     }
 }
 
@@ -39,7 +39,7 @@ export class IllustrationHandler {
 
         if (model === 'llama+stable-diffusion') {
             const result = await this.deps.ai.run('@cf/meta/llama-3.1-8b-instruct' as any, generateIllustrationPrompt(data)) as any;
-            const prompt = _try(() => JSON.parse(result.response), {status: 500, statusText: 'Expected JSON response'});
+            const prompt = _try(() => JSON.parse(result.response), (e) => ({status: 500, statusText: 'Expected JSON response', reason: String(e)}));
             if (prompt.status) {
                 return new Response(prompt, {status: prompt.status, statusText: prompt.statusText});
             }
