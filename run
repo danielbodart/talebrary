@@ -37,16 +37,34 @@ function build-client() {
   local option=${1}
   local src="./src"
   local dest="./www"
+  local folders=("new-client" "client" "cards")
+
+  local bun_prefix=""
+  local bg_suffix=""
 
   if [[ "${option}" == "--watch" ]]; then
-    bun build --watch --minify "${src}/client/main.ts" "${src}/cards/main.ts" --outdir "${dest}/" &
-    watchexec -w "${src}/client/" --exts css bunx lightningcss --minify --bundle "${src}/client/main.css" --output-dir "${dest}/client/" &
-    watchexec -w "${src}/cards/" --exts css bunx lightningcss --minify --bundle "${src}/cards/main.css" --output-dir "${dest}/cards/" &
-  else
-    bun build --minify "${src}/client/main.ts" "${src}/cards/main.ts" --outdir "${dest}/"
-    bunx lightningcss --minify --bundle "${src}/client/main.css" --output-dir "${dest}/client/"
-    bunx lightningcss --minify --bundle "${src}/cards/main.css" --output-dir "${dest}/cards/"
+    bun_prefix="--watch"
+    bg_suffix="&"
   fi
+
+  local ts_files=()
+  local css_commands=()
+
+  for folder in "${folders[@]}"; do
+    ts_files+=("${src}/${folder}/main.ts")
+
+    local watch_prefix=""
+    if [[ "${option}" == "--watch" ]]; then
+      watch_prefix="watchexec --exts css -w ${src}/${folder}/"
+    fi
+    css_commands+=("${watch_prefix} bunx lightningcss --minify --bundle ${src}/${folder}/main.css --output-dir ${dest}/${folder}/")
+  done
+
+  eval "bun build ${bun_prefix} --minify ${ts_files[*]} --outdir ${dest}/ ${bg_suffix}"
+
+  for cmd in "${css_commands[@]}"; do
+    eval "$cmd $bg_suffix"
+  done
 }
 
 function build() {
