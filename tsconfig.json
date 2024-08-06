@@ -26,6 +26,7 @@
     "experimentalDecorators": true,
     // typed-html
     "jsx": "react",
-    "jsxFactory": "elements.createElement"
+    "jsxFactory": "elements.createElement",
+    "jsxFragmentFactory": "null"
   }
 }

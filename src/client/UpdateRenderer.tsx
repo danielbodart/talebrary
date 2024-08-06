@@ -15,8 +15,6 @@ import {
     type Metrics,
     type UpdateMessage
 } from "./types.ts";
-import {fragment} from "../templates/Fragment.tsx";
-import * as elements from "typed-html";
 import {commands, type Describable, type SceneContext, type Suggestions} from "../types.ts";
 import {type InstructionEvent, InstructionEventName} from "./components/InstructionEvent.tsx";
 import {EventBuilder} from "./EventBuilder.ts";
@@ -26,16 +24,17 @@ import {Arrays} from "../system/Arrays.ts";
 import {binPack} from "./BinPack.ts";
 import type {Timers} from "../system/timers.ts";
 import {cleanLineData, group, instructions} from "./misc.tsx";
+import type {Elements} from "../templates/elements.ts";
 
-export interface UpdateRendererDependencies extends
-    Dependency<'window', Window>,
+export interface UpdateRendererDependencies extends Dependency<'window', Window>,
     Dependency<'document', Document>,
+    Dependency<'elements', Elements>,
     Dependency<'messageHandler', MessageHandler>,
     Dependency<'clock', Clock>,
     Dependency<'timers', Timers>,
     Dependency<'metrics', Partial<Metrics>>,
-    Dependency<'eventBuilder', EventBuilder>
-{}
+    Dependency<'eventBuilder', EventBuilder> {
+}
 
 export class UpdateRenderer {
     constructor(private deps: UpdateRendererDependencies) {
@@ -63,6 +62,7 @@ export class UpdateRenderer {
     }
 
     updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
+        const elements = this.deps.elements;
         if (updates.length === 0) {
             const inputs = Array.from(this.deps.document.querySelectorAll('.window'));
             inputs.map(i => i.parentElement!.removeChild(i));
@@ -75,24 +75,25 @@ export class UpdateRenderer {
                 if (window) {
                     if (update.type === "grid") {
                         const card = window.querySelector<HTMLElement>('.card')!;
-                        card.innerHTML = this.createLines(update.gridheight);
+                        card.replaceChildren(this.createLines(update.gridheight))
                     }
                     return window;
                 } else {
                     const main = this.deps.document.querySelector('main') || this.deps.document.body;
-                    main.append(fragment(<div id={`window-${update.id}`}
-                                              class={`window ${update.type}`}>
+                    main.append(<div id={`window-${update.id}`}
+                                     class={`window ${update.type}`}>
                         {update.type === "grid" ?
                             <div class="card">{this.createLines(update.gridheight)}</div> :
                             ''
                         }
-                    </div>))
+                    </div>)
                 }
             });
     }
 
     private createLines(count: number) {
-        return Array(count).fill(1).map((_, i) => <div id={`grid-line-${i}`} class="line"></div>).join('');
+        const elements = this.deps.elements;
+        return <>{Array(count).fill(1).map((_, i) => <div id={`grid-line-${i}`} class="line"></div>)}</>;
     }
 
     getWindow(id: number) {
@@ -100,6 +101,7 @@ export class UpdateRenderer {
     }
 
     updateContent(updates: (GridContent | BufferContent | GraphicsContent)[], gen: number) {
+        const elements = this.deps.elements;
         return updates.map((update) => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
@@ -107,7 +109,7 @@ export class UpdateRenderer {
             if (isGridContent(update)) {
                 update.lines.forEach(line => {
                     const htmlLine = window.querySelector<HTMLDivElement>(`#grid-line-${line.line}`)!;
-                    htmlLine.innerHTML = line.content.map(c => <span class={c.style}>{c.text}</span>).join('');
+                    htmlLine.replaceChildren(...line.content.map(c => <span class={c.style}>{c.text}</span>));
                 })
             }
 
@@ -115,24 +117,23 @@ export class UpdateRenderer {
                 if (update.clear) {
                     const introCard = this.deps.document.querySelector('main > .card');
                     if (introCard) introCard.parentElement!.removeChild(introCard);
-                    window.innerHTML = '';
+                    window.replaceChildren();
                 }
 
-                const html = fragment(update.text
-                    .flatMap(t => {
+                const html = <>{update.text.flatMap(t => {
                         if (!('content' in t)) return [];
                         const lineData = cleanLineData(t.content);
                         if (lineData.length === 0) return [];
                         if (lineData.length === 1) {
                             return lineData.map(c =>
-                                <div class={c.style}>{c.style === 'normal' ? instructions(c) : c.text}</div>);
+                                <div class={c.style}>{c.style === 'normal' ? instructions(elements, c) : c.text}</div>);
                         }
                         return [<div class="normal">{lineData.map(c => <span
-                            class={c.style}>{instructions(c)}</span>)}</div>]
-                    }).join('')
-                );
+                            class={c.style}>{instructions(elements, c)}</span>)}</div>]
+                    })
+                }</> as any;
 
-                window.appendChild(group(html, ['card', 'scroll']));
+                window.append(...group(elements, html, ['card', 'scroll']));
 
                 const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll:not(:has(.input:only-child))'));
                 const scroll = scrollElements[0];
@@ -172,9 +173,9 @@ export class UpdateRenderer {
                     for (const model of this.models) {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${encodeURIComponent(model)}`;
                         lastCard.insertBefore(
-                            fragment(<img is="x-image" reloadable class="image" loading="lazy" src={image} alt=""
+                            <img is="x-image" reloadable class="image" loading="lazy" src={image} alt=""
                                           aria-hidden="true"
-                                          data-gen={gen}/>),
+                                          data-gen={gen}/>,
                             lastCard.firstChild);
                     }
 
@@ -184,8 +185,8 @@ export class UpdateRenderer {
                         if (response.ok) response.json().then((json: Suggestions) => {
                             const result = Arrays.unique([...json.commands, ...json.nouns, ...json.actions])
 
-                            lastCard.append(fragment(<div class="suggestions">{result.map(action =>
-                                <x-instruction>{action}</x-instruction>)}</div>))
+                            lastCard.append(<div class="suggestions">{result.map(action =>
+                                <x-instruction>{action}</x-instruction>)}</div>)
 
                             const element = lastCard.querySelector<HTMLElement>('.suggestions')!;
 
@@ -213,6 +214,7 @@ export class UpdateRenderer {
     ];
 
     updateInput(updates: (CharInput | LineInput)[]) {
+        const elements = this.deps.elements;
         const inputs = Array.from(this.deps.document.querySelectorAll('.input-control'));
         inputs.map(i => i.parentElement!.removeChild(i));
 
@@ -223,7 +225,7 @@ export class UpdateRenderer {
             const history = Array.from(window.querySelectorAll<HTMLElement>('div.input')).flatMap(e => e.innerText.split(/\s+/));
             const auto = Array.from(new Set([...commands, ...history])).sort();
 
-            window.append(fragment(
+            window.append(
                 <div class="card input-control">
                     <form class="input">
                         <input type="text" maxlength={String('maxlen' in update ? update.maxlen : 1)}
@@ -236,7 +238,7 @@ export class UpdateRenderer {
                             {auto.map(item => <option value={item}></option>)}
                         </datalist>
                     </form>
-                </div>));
+                </div>);
             const htmlInput = window.querySelector<HTMLInputElement>('.input-control form input')!;
             window.querySelector('.input-control form')!.addEventListener('submit', (e) => {
                 e.preventDefault();
