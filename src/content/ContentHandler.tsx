@@ -20,7 +20,7 @@ export class ContentHandler {
 }
 
 export function render(game: GameStory): string {
-    return html5(elements =>
+    return html5(jsx =>
         <html lang="en">
         <head>
             <title>{game.title}</title>

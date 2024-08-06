@@ -24,11 +24,11 @@ import {Arrays} from "../system/Arrays.ts";
 import {binPack} from "./BinPack.ts";
 import type {Timers} from "../system/timers.ts";
 import {cleanLineData, group, instructions} from "./misc.tsx";
-import type {Elements} from "../templates/elements.ts";
+import type {JSX2DOM} from "../jsx2dom/JSX2DOM.ts";
 
 export interface UpdateRendererDependencies extends Dependency<'window', Window>,
     Dependency<'document', Document>,
-    Dependency<'elements', Elements>,
+    Dependency<'jsx', JSX2DOM>,
     Dependency<'messageHandler', MessageHandler>,
     Dependency<'clock', Clock>,
     Dependency<'timers', Timers>,
@@ -62,7 +62,7 @@ export class UpdateRenderer {
     }
 
     updateWindows(updates: (GridWindow | BufferWindow | GraphicsWindow)[]) {
-        const elements = this.deps.elements;
+        const jsx = this.deps.jsx;
         if (updates.length === 0) {
             const inputs = Array.from(this.deps.document.querySelectorAll('.window'));
             inputs.map(i => i.parentElement!.removeChild(i));
@@ -92,7 +92,7 @@ export class UpdateRenderer {
     }
 
     private createLines(count: number) {
-        const elements = this.deps.elements;
+        const jsx = this.deps.jsx;
         return <>{Array(count).fill(1).map((_, i) => <div id={`grid-line-${i}`} class="line"></div>)}</>;
     }
 
@@ -101,7 +101,7 @@ export class UpdateRenderer {
     }
 
     updateContent(updates: (GridContent | BufferContent | GraphicsContent)[], gen: number) {
-        const elements = this.deps.elements;
+        const jsx = this.deps.jsx;
         return updates.map((update) => {
             const window = this.getWindow(update.id);
             if (!window) throw new Error(`Could not find window ${update.id}`);
@@ -126,13 +126,13 @@ export class UpdateRenderer {
                     if (lineData.length === 0) return [];
                     if (lineData.length === 1) {
                         return lineData.map(c =>
-                            <div class={c.style}>{c.style === 'normal' ? instructions(elements, c) : c.text}</div>);
+                            <div class={c.style}>{c.style === 'normal' ? instructions(jsx, c) : c.text}</div>);
                     }
                     return [<div class="normal">{lineData.map(c => <span
-                        class={c.style}>{instructions(elements, c)}</span>)}</div>]
+                        class={c.style}>{instructions(jsx, c)}</span>)}</div>]
                 });
 
-                window.append(...group(elements, html, ['card', 'scroll']));
+                window.append(...group(jsx, html, ['card', 'scroll']));
 
                 const scrollElements = Array.from(window.querySelectorAll<HTMLElement>('.card.scroll:not(:has(.input:only-child))'));
                 const scroll = scrollElements[0];
@@ -213,7 +213,7 @@ export class UpdateRenderer {
     ];
 
     updateInput(updates: (CharInput | LineInput)[]) {
-        const elements = this.deps.elements;
+        const jsx = this.deps.jsx;
         const inputs = Array.from(this.deps.document.querySelectorAll('.input-control'));
         inputs.map(i => i.parentElement!.removeChild(i));
 

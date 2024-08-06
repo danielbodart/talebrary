@@ -18,7 +18,7 @@ export class ContentSearch {
 }
 
 export function render(search: string, games: GameInfo[]): string {
-    return html5(elements =>
+    return html5(jsx =>
         <html lang="en">
         <head>
             <meta name="template" content="card"/>
