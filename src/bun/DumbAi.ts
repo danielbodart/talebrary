@@ -16,7 +16,7 @@ export class DumbAi {
     run(model: "@cf/meta/llama-3-8b-instruct-awq", prompt: ScopedPrompt): Promise<AiTextGenerationOutput | undefined>;
     run(model: "@cf/bytedance/stable-diffusion-xl-lightning", prompt: UnscopedPrompt): Promise<Uint8Array>;
     async run(model: any, prompt: TextGenerationPrompt): Promise<any> {
-        console.log('DumbAi.run', model, 'with prompt', prompt);
+        // console.log('DumbAi.run', model, 'with prompt', prompt);
         switch (model) {
             case "@cf/bytedance/stable-diffusion-xl-lightning":
                 return new Uint8Array(0);

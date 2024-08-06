@@ -10,3 +10,4 @@ db/full.sql
 .idea/dataSources.local.xml
 games
 wrangler-local.toml
+*.png

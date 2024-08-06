@@ -1,11 +1,12 @@
 import {MiniGlkOte} from "./MiniGlkOte.ts";
 import type {FileRef} from "./types.ts";
+import type {Dependency} from "../yadic/mod.ts";
 
 export class MiniDialog {
     streaming = false;
     GlkOte?: MiniGlkOte
 
-    constructor(private storage: Storage) {
+    constructor(private deps: Dependency<'storage', Storage>) {
     }
 
     init(iface: any) {
@@ -46,7 +47,7 @@ export class MiniDialog {
 
     file_ref_exists(ref: any) {
         console.log('MiniDialog.file_ref_exists', ref)
-        return !!this.storage.getItem(ref.dirent);
+        return !!this.deps.storage.getItem(ref.dirent);
     }
 
     file_remove_ref() {
@@ -56,7 +57,7 @@ export class MiniDialog {
     file_write(dirent: FileRef, content: any): boolean {
         console.log('MiniDialog.file_write', dirent, content);
         try {
-            if (dirent.content) this.storage.setItem(dirent.content, this.contentToString(content))
+            if (dirent.content) this.deps.storage.setItem(dirent.content, this.contentToString(content))
             return true;
         } catch (e) {
             console.error('MiniDialog.file_write failed', e);
@@ -73,7 +74,7 @@ export class MiniDialog {
     file_read(dirent: FileRef, raw: boolean): any {
         console.log('MiniDialog.file_read', dirent, raw);
         if (dirent.content) {
-            const result = this.storage.getItem(dirent.content);
+            const result = this.deps.storage.getItem(dirent.content);
             return this.stringToContent(result, raw);
         }
     }
@@ -93,8 +94,8 @@ export class MiniDialog {
     autosave_write(signature: string, snapshot?: object) {
         console.log('MiniDialog.autosave_write')
         const key = MiniDialog.autosaveKey(signature);
-        if (!snapshot) return this.storage.removeItem(key);
-        this.storage.setItem(key, JSON.stringify(snapshot));
+        if (!snapshot) return this.deps.storage.removeItem(key);
+        this.deps.storage.setItem(key, JSON.stringify(snapshot));
     }
 
     static autosaveKey(signature: string) {
@@ -104,7 +105,7 @@ export class MiniDialog {
     autosave_read(signature: string): object {
         console.log('MiniDialog.autosave_read')
         const key = MiniDialog.autosaveKey(signature);
-        const result = this.storage.getItem(key);
+        const result = this.deps.storage.getItem(key);
         return result ? JSON.parse(result) : null;
     }
 

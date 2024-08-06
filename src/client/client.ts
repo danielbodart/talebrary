@@ -41,9 +41,9 @@ export async function client({story, type, storage, messageHandler, http, logger
     if (!storyResponse.ok) throw new Error('Unable to fetch story');
 
     const options = {
-        Dialog: new MiniDialog(storage),
+        Dialog: new MiniDialog({storage}),
         Glk: {},
-        GlkOte: new MiniGlkOte(messageHandler, logger),
+        GlkOte: new MiniGlkOte({messageHandler, logger}),
         wasmBinary: Buffer.from(await wasmResponse.arrayBuffer())
     }
 
