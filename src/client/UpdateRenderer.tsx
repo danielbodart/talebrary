@@ -120,18 +120,17 @@ export class UpdateRenderer {
                     window.replaceChildren();
                 }
 
-                const html = <>{update.text.flatMap(t => {
-                        if (!('content' in t)) return [];
-                        const lineData = cleanLineData(t.content);
-                        if (lineData.length === 0) return [];
-                        if (lineData.length === 1) {
-                            return lineData.map(c =>
-                                <div class={c.style}>{c.style === 'normal' ? instructions(elements, c) : c.text}</div>);
-                        }
-                        return [<div class="normal">{lineData.map(c => <span
-                            class={c.style}>{instructions(elements, c)}</span>)}</div>]
-                    })
-                }</> as any;
+                const html = update.text.flatMap(t => {
+                    if (!('content' in t)) return [];
+                    const lineData = cleanLineData(t.content);
+                    if (lineData.length === 0) return [];
+                    if (lineData.length === 1) {
+                        return lineData.map(c =>
+                            <div class={c.style}>{c.style === 'normal' ? instructions(elements, c) : c.text}</div>);
+                    }
+                    return [<div class="normal">{lineData.map(c => <span
+                        class={c.style}>{instructions(elements, c)}</span>)}</div>]
+                });
 
                 window.append(...group(elements, html, ['card', 'scroll']));
 
@@ -174,8 +173,8 @@ export class UpdateRenderer {
                         const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${encodeURIComponent(model)}`;
                         lastCard.insertBefore(
                             <img is="x-image" reloadable class="image" loading="lazy" src={image} alt=""
-                                          aria-hidden="true"
-                                          data-gen={gen}/>,
+                                 aria-hidden="true"
+                                 data-gen={gen}/>,
                             lastCard.firstChild);
                     }
 
