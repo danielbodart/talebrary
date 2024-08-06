@@ -4,8 +4,8 @@ export type Content = string | number | Node | Content[];
 
 export interface ElementsDependencies extends
     Dependency<'document', Document>,
-    Dependency<'Node', typeof Node>
-{}
+    Dependency<'Node', typeof Node> {
+}
 
 export class Elements {
     constructor(private deps: ElementsDependencies) {
@@ -14,7 +14,7 @@ export class Elements {
     createElement(name: null, attributes: null, ...contents: Content[]): DocumentFragment;
     createElement(name: string, attributes: { [key: string]: string } | null, ...contents: Content[]): HTMLElement;
     createElement(name: string | null, attributes: { [key: string]: string } | null, ...contents: Content[]): Node {
-        const document = this.deps.document;
+        const {document} = this.deps;
         const node = name === null ? document.createDocumentFragment() : document.createElement(name);
 
         if (attributes !== null) {
@@ -29,12 +29,12 @@ export class Elements {
     }
 
     private addContent(node: Node, contents: Content[]) {
-        const document = this.deps.document;
+        const {document, Node} = this.deps;
         for (const content of contents) {
             if (Array.isArray(content)) {
                 this.addContent(node, content);
             } else {
-                node.appendChild(content instanceof this.deps.Node ? content : document.createTextNode(String(content)));
+                node.appendChild(content instanceof Node ? content : document.createTextNode(String(content)));
             }
         }
     }
