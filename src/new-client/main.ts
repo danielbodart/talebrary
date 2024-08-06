@@ -5,6 +5,9 @@ import {ImageElement} from "../client/components/ImageElement.ts";
 import {InteractiveFiction} from "./InteractiveFiction.ts";
 import {GridWindow} from "./GridWindow.ts";
 import {SystemTimers} from "../system/timers.ts";
+import {MiniDialog} from "../client/MiniDialog.ts";
+import {MiniGlkOte} from "../client/MiniGlkOte.ts";
+import {WindowMessageHandler} from "../client/client.ts";
 
 (async () => {
     const app = LazyMap.create()
@@ -19,6 +22,9 @@ import {SystemTimers} from "../system/timers.ts";
         .set('crypto', instance(crypto))
         .set('CustomEvent', instance(CustomEvent))
         .set('history', instance(history))
+        .set('messageHandler', constructor(WindowMessageHandler))
+        .set('Dialog', constructor(MiniDialog))
+        .set('GlkOte', constructor(MiniGlkOte))
         .set('HTMLElement', instance(HTMLElement))
         .set('HTMLImageElement', instance(HTMLImageElement))
         .set('HTMLDivElement', instance(HTMLDivElement))

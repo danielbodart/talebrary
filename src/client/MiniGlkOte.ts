@@ -1,30 +1,35 @@
 import type {Logger, MessageHandler, Metrics, SpecialResponseMessage, UpdateMessage} from "./types.ts";
 import type {MiniDialog} from "./MiniDialog.ts";
+import type {Dependency} from "../yadic/mod.ts";
+
+export interface MiniGlkOteDependencies extends
+    Dependency<'messageHandler', MessageHandler>, Dependency<'logger', Logger>
+{}
 
 export class MiniGlkOte {
     private iface: any;
     private dialog?: MiniDialog;
 
-    constructor(private messageHandler: MessageHandler, private logger: Logger) {
+    constructor(private deps: MiniGlkOteDependencies) {
     }
 
     init(iface: any) {
-        this.logger.log('MiniGlkOte.init', iface);
+        this.deps.logger.log('MiniGlkOte.init', iface);
         this.iface = iface;
         this.dialog = iface.Dialog;
-        this.messageHandler.onMessage(message => {
+        this.deps.messageHandler.onMessage(message => {
             if (message.type === 'update') return;
             this.accept(message)
         })
     }
 
     getinterface() {
-        this.logger.log('MiniGlkOte.getinterface');
+        this.deps.logger.log('MiniGlkOte.getinterface');
         return this.iface
     }
 
     accept(data: any) {
-        this.logger.log('MiniGlkOte.accept', data);
+        this.deps.logger.log('MiniGlkOte.accept', data);
         if (data.type === 'init') {
             data.metrics = Object.assign({}, default_metrics, data.metrics)
         }
@@ -35,7 +40,7 @@ export class MiniGlkOte {
     }
 
     update(data: UpdateMessage) {
-        this.logger.log('MiniGlkOte.update', data);
+        this.deps.logger.log('MiniGlkOte.update', data);
         if (data.specialinput && data.specialinput.type === "fileref_prompt") {
             const fileRef = this.dialog!.file_construct_ref(data.specialinput.filetype, data.specialinput.filemode, data.specialinput.gameid);
             const response: SpecialResponseMessage = {
@@ -46,12 +51,12 @@ export class MiniGlkOte {
             };
             this.accept(response)
         } else {
-            this.messageHandler.postMessage(data)
+            this.deps.messageHandler.postMessage(data)
         }
     }
 
     error(msg: any) {
-        this.logger.log('MiniGlkOte.error', msg);
+        this.deps.logger.log('MiniGlkOte.error', msg);
     }
 }
 

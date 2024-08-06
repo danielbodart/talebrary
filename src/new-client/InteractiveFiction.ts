@@ -1,34 +1,55 @@
 import type {Dependency} from "../yadic/mod.ts";
 import {CustomElementDefinition} from "../client/components/CustomElementDefinition.ts";
-import type {Metrics} from "../client/types.ts";
+import {engineMapping} from "../client/types.ts";
+import {get, type Http} from "../http/mod.ts";
+import {MiniDialog} from "../client/MiniDialog.ts";
+import {MiniGlkOte} from "../client/MiniGlkOte.ts";
+import {Buffer} from "buffer/";
+import type {SupportedGameType} from "../types.ts";
 
 
-export interface InteractiveFictionDependencies extends Dependency<'HTMLElement', typeof HTMLElement> {
-}
+export interface InteractiveFictionDependencies extends
+    Dependency<'HTMLElement', typeof HTMLElement>,
+    Dependency<'Dialog', MiniDialog>,
+    Dependency<'GlkOte', MiniGlkOte>,
+    Dependency<'http', Http>
+{}
 
 export class InteractiveFiction {
-    static definition({HTMLElement}: InteractiveFictionDependencies) {
+    static definition({HTMLElement, http, Dialog, GlkOte}: InteractiveFictionDependencies) {
         return new CustomElementDefinition('interactive-fiction', class extends HTMLElement {
             constructor() {
                 super();
                 console.log('InteractiveFiction constructor');
             }
 
-            connectedCallback() {
+            async connectedCallback() {
                 console.log('InteractiveFiction connected');
-                const resizeObserver = new ResizeObserver(() => console.log(this.calculateSize()));
-                resizeObserver.observe(this);
-            }
+                const type = this.getAttribute('type') as SupportedGameType;
+                const story = this.getAttribute('story')!;
+                const prefix = this.getAttribute('prefix') || '';
 
-            private calculateSize(): Partial<Metrics> {
-                const character = this.ownerDocument.createElement('span');
-                character.classList.add('character');
-                character.textContent = 'M';
-                this.append(character);
-                const gridcharwidth = character.offsetWidth;
-                const gridcharheight = character.offsetHeight;
-                // character.remove();
-                return {width: this.offsetWidth, height: this.offsetHeight, gridcharwidth, gridcharheight};
+                const engineName = engineMapping.get(type);
+                if (!engineName) throw new Error('Unsupported engine');
+                const engine = (await import(`${prefix}/emglken/src/${engineName}.js`)).default;
+
+                const wasmResponse = await http(get(`${prefix}/emglken/build/${engineName}-core.wasm`));
+                if (!wasmResponse.ok) throw new Error('Unable to fetch engine wasm');
+
+                const storyResponse = await http(get(story));
+                if (!storyResponse.ok) throw new Error('Unable to fetch story');
+
+                const options = {
+                    Dialog,
+                    Glk: {},
+                    GlkOte,
+                    wasmBinary: Buffer.from(await wasmResponse.arrayBuffer())
+                }
+
+                const vm = await new engine();
+                vm.init(Buffer.from(await storyResponse.arrayBuffer()), options);
+                await vm.start();
+                console.log('InteractiveFiction vm started');
             }
         });
     }
