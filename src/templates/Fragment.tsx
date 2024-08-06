@@ -1,9 +1,0 @@
-import type {CustomElementHandler} from 'typed-html';
-
-export const Fragment: CustomElementHandler = (_attributes, contents: string[]) => {
-    return contents.join('');
-};
-
-export function fragment(html: string, doc: Document = document) {
-    return doc.createRange().createContextualFragment(html);
-}

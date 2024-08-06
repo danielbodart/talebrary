@@ -9,6 +9,7 @@ import {ImageElement} from "./components/ImageElement.ts";
 import {SystemTimers} from "../system/timers.ts";
 import {controlKeys, customElement, realise} from "./misc.tsx";
 import {EventBuilder} from "./EventBuilder.ts";
+import {Elements} from "../templates/elements.ts";
 
 (async () => {
     const story = document.querySelector<HTMLLinkElement>('#story');
@@ -29,8 +30,10 @@ import {EventBuilder} from "./EventBuilder.ts";
         .set('eventBuilder', constructor(EventBuilder))
         .set('customElements', instance(window.customElements))
         .set('CustomEvent', instance(CustomEvent))
+        .set('Node', instance(Node))
         .set('HTMLElement', instance(HTMLElement))
         .set('HTMLImageElement', instance(HTMLImageElement))
+        .set('elements', constructor(Elements))
         .set('Instruction', customElement(Instruction))
         .set('ImageElement', customElement(ImageElement))
         .set('client', client)
