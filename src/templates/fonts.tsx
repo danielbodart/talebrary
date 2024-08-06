@@ -1,6 +1,6 @@
-import type {Elements} from "./elements.ts";
+import type {JSX2DOM} from "../jsx2dom/JSX2DOM.ts";
 
-export const fonts = (elements: Elements) => <>
+export const fonts = (jsx: JSX2DOM) => <>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin"/>
     <link

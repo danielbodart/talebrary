@@ -1,18 +1,18 @@
 import {describe, expect, it} from "bun:test";
 import {parseHTML} from "linkedom";
-import {Elements} from "../../src/templates/elements.ts";
+import {JSX2DOM} from "../../src/jsx2dom/JSX2DOM.ts";
 
-describe("Elements", () => {
+describe("JSX2DOM", () => {
     it("enables JSX and Linkedom to work together without global pollution", async () => {
         const html = parseHTML('...'); // creates html, head, body
-        const elements = new Elements(html)
+        const jsx = new JSX2DOM(html)
         html.document.body.appendChild(<div class="Foo"><input/>Test</div>);
         expect(html.document.body.toString()).toEqual('<body><div class="Foo"><input>Test</div></body>');
     });
 
     it("can create a document from scratch", async () => {
         const html = parseHTML('');
-        const elements = new Elements(html)
+        const jsx = new JSX2DOM(html)
         html.document.appendChild(<html lang="en">
         <head>
             <title>Test</title>
@@ -24,9 +24,9 @@ describe("Elements", () => {
         expect(html.document.toString()).toEqual(`<html lang="en"><head><title>Test</title></head><body><div>Hello</div></body></html>`);
     });
 
-    it("can pass an array od elements through", async () => {
+    it("can pass an array of jsx through", async () => {
         const html = parseHTML('');
-        const elements = new Elements(html)
+        const jsx = new JSX2DOM(html)
         html.document.appendChild(<html lang="en">
         <head>
             {
@@ -40,5 +40,26 @@ describe("Elements", () => {
         </body>
         </html>);
         expect(html.document.head.toString()).toEqual(`<head><title>Test</title><link rel="stylesheet"></head>`);
+    });
+
+    it("can attach an event", async () => {
+        const html = parseHTML('');
+        const jsx = new JSX2DOM(html)
+        let count = 0;
+        html.document.appendChild(<html lang="en">
+        <head>
+            {
+                [
+                    <title>Test</title>,
+                    <link rel="stylesheet"/>
+                ]
+            }
+        </head>
+        <body onclick={() => count++}>
+        </body>
+        </html>);
+        expect(count).toEqual(0);
+        html.document.body.click();
+        expect(count).toEqual(1);
     });
 });

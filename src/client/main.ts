@@ -9,7 +9,7 @@ import {ImageElement} from "./components/ImageElement.ts";
 import {SystemTimers} from "../system/timers.ts";
 import {controlKeys, customElement, realise} from "./misc.tsx";
 import {EventBuilder} from "./EventBuilder.ts";
-import {Elements} from "../templates/elements.ts";
+import {JSX2DOM} from "../jsx2dom/JSX2DOM.ts";
 
 (async () => {
     const story = document.querySelector<HTMLLinkElement>('#story');
@@ -33,7 +33,7 @@ import {Elements} from "../templates/elements.ts";
         .set('Node', instance(Node))
         .set('HTMLElement', instance(HTMLElement))
         .set('HTMLImageElement', instance(HTMLImageElement))
-        .set('elements', constructor(Elements))
+        .set('jsx', constructor(JSX2DOM))
         .set('Instruction', customElement(Instruction))
         .set('ImageElement', customElement(ImageElement))
         .set('client', client)

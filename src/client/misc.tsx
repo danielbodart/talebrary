@@ -1,7 +1,7 @@
 import {type BufferImage, isLineData, type LineData} from "./types.ts";
 import {capitalWords, wordCount} from "../system/Strings.ts";
 import type {CustomElementDefinition} from "./components/CustomElementDefinition.ts";
-import type {Elements} from "../templates/elements.ts";
+import type {JSX2DOM} from "../jsx2dom/JSX2DOM.ts";
 
 export function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     return content.filter<LineData>(isLineData).map(line => {
@@ -14,7 +14,7 @@ export function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
     });
 }
 
-export function instructions(elements: Elements, line: LineData, maxLength: number = 4) {
+export function instructions(jsx: JSX2DOM, line: LineData, maxLength: number = 4) {
     if (line.style === 'normal') {
         return replace(capitalWords, line.text, match => match.toString().length >= 3 && wordCount(match.toString()) <= maxLength ?
             <x-instruction>{match}</x-instruction> : match);
@@ -45,7 +45,7 @@ export function replace<A, B>(regex: RegExp, value: string, replacer: (match: Re
 }
 
 
-export function group(elements: Elements, html: HTMLElement[], classes: string[]) {
+export function group(jsx: JSX2DOM, html: HTMLElement[], classes: string[]) {
     // TODO work out why this is needed
     const works = Array.from((<>{html}</>).children);
     const chunks = splitWhen(works, (e: Element) => {

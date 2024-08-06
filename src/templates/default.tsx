@@ -3,15 +3,15 @@ import {footer} from "./footer.tsx";
 import {html5} from "./LinkedomHelpers.ts";
 
 export function defaultTemplate(document: Document) {
-    return html5(elements =>
+    return html5(jsx =>
         <html lang="en">
         <head>
-            {header(elements)}
+            {header(jsx)}
             {document.head.children}
         </head>
         <body class={document.body.className} is={document.body.getAttribute('is') || ''}>
         {document.body.children}
-        {footer(elements)}
+        {footer(jsx)}
         </body>
         </html>);
 }
