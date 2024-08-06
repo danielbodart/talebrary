@@ -1,5 +1,5 @@
 import {type BufferImage, isLineData, type LineData} from "./types.ts";
-import {wordCount} from "../system/Strings.ts";
+import {capitalWords, wordCount} from "../system/Strings.ts";
 import type {CustomElementDefinition} from "./components/CustomElementDefinition.ts";
 import type {Elements} from "../templates/elements.ts";
 
@@ -15,11 +15,10 @@ export function cleanLineData(content: (LineData | BufferImage)[]): LineData[] {
 }
 
 export function instructions(elements: Elements, line: LineData, maxLength: number = 4) {
-    // TODO
-    // if (line.style === 'normal') {
-    //     return line.text.replace(capitalWords, match => match.length >= 3 && wordCount(match) <= maxLength ?
-    //         <x-instruction>{match}</x-instruction> : match);
-    // }
+    if (line.style === 'normal') {
+        return replace(capitalWords, line.text, match => match.toString().length >= 3 && wordCount(match.toString()) <= maxLength ?
+            <x-instruction>{match}</x-instruction> : match);
+    }
     if (line.style === "header" || line.style === 'subheader' || line.style === 'emphasized') {
         if (wordCount(line.text) <= maxLength) {
             return <x-instruction>{line.text}</x-instruction>
@@ -28,8 +27,28 @@ export function instructions(elements: Elements, line: LineData, maxLength: numb
     return line.text;
 }
 
-export function group(elements: Elements, html: DocumentFragment, classes: string[]) {
-    const chunks = splitWhen(Array.from(html.children), (e: Element) => {
+export function replace<A>(regex: RegExp, value: string, replacer: (match: RegExpExecArray) => A): (A | string)[];
+export function replace<A, B>(regex: RegExp, value: string, replacer: (match: RegExpExecArray) => A, nonMatchedReplacer: (a: string) => B): (A | B)[];
+export function replace<A, B>(regex: RegExp, value: string, replacer: (match: RegExpExecArray) => A, nonMatchedReplacer: (a: string) => any = (value) => value): (A | B)[] {
+    const result: (A | B)[] = [];
+
+    let position = 0;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(value)) != null) {
+        result.push(nonMatchedReplacer(value.substring(position, match.index)));
+        result.push(replacer(match));
+        position = regex.lastIndex;
+    }
+    result.push(nonMatchedReplacer(value.substring(position)));
+
+    return result;
+}
+
+
+export function group(elements: Elements, html: HTMLElement[], classes: string[]) {
+    // TODO work out why this is needed
+    const works = Array.from((<>{html}</>).children);
+    const chunks = splitWhen(works, (e: Element) => {
         return e.previousElementSibling instanceof HTMLElement && (e.previousElementSibling.classList.contains('normal') || e.previousElementSibling.classList.contains('input')) &&
             e instanceof HTMLElement && (e.classList.contains('header') || e.classList.contains('subheader')) &&
             e.nextElementSibling instanceof HTMLElement && e.nextElementSibling.classList.contains('normal');
