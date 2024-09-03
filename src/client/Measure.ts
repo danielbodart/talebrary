@@ -23,9 +23,9 @@ export function calculateMaxSize({window}: Dependency<'window', Window>): Measur
     const grid = window.document.createElement('div');
     grid.classList.add('window', 'grid');
     grid.style.display = 'none';
-    document.body.appendChild(grid);
+    window.document.body.appendChild(grid);
     const char = charWidthHeight(window.document, grid);
-    document.body.removeChild(grid);
+    window.document.body.removeChild(grid);
 
     const card = window.document.querySelector<HTMLElement>('.card')!;
     const maxWidth = Math.min(window.innerWidth, card.offsetWidth);

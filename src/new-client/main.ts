@@ -8,6 +8,8 @@ import {SystemTimers} from "../system/timers.ts";
 import {MiniDialog} from "../client/MiniDialog.ts";
 import {MiniGlkOte} from "../client/MiniGlkOte.ts";
 import {WindowMessageHandler} from "../client/client.ts";
+import {InteractiveFictionHandler} from "./InteractiveFictionHandler.ts";
+import type {Metrics} from "../client/types.ts";
 
 (async () => {
     const app = LazyMap.create()
@@ -25,6 +27,8 @@ import {WindowMessageHandler} from "../client/client.ts";
         .set('messageHandler', constructor(WindowMessageHandler))
         .set('Dialog', constructor(MiniDialog))
         .set('GlkOte', constructor(MiniGlkOte))
+        .set('ifHandler', constructor(InteractiveFictionHandler))
+        .set('metrics', () => ({width:80, height: 20} as Partial<Metrics>))
         .set('HTMLElement', instance(HTMLElement))
         .set('HTMLImageElement', instance(HTMLImageElement))
         .set('HTMLDivElement', instance(HTMLDivElement))
