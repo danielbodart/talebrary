@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMRect to Range</title>
+    <style>
+        #content {
+            position: absolute;
+            top: 50px;
+            z-index: -1;
+            font-family: monospace;
+            font-size: 16px;
+            width: 50%;
+            height: 50%;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            overflow-y: clip;
+            opacity: 0;
+        }
+
+        .highlight {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+<div id="content"></div>
+<p id="result"></p>
+
+<script>
+    const content = document.getElementById('content');
+    const result = document.getElementById('result');
+    const text = 'M'.repeat(1600);
+    content.textContent = text;
+
+    function detectHyphenation() {
+        const range = document.createRange();
+        range.selectNodeContents(content);
+        const rects = Array.from(range.getClientRects()).filter(rect => rect.bottom <= content.offsetTop + content.offsetHeight);
+        const [firstLineRect] = rects;
+        const firstLineRange = getRangeForRect(firstLineRect);
+        const chars = firstLineRange.toString();
+        result.textContent = `box: ${chars.length} ${rects.length}`;
+    }
+
+    function offset(document, x, y) {
+        if ('caretPositionFromPoint' in document) {
+            const range = document.caretPositionFromPoint(x, y);
+            return {offsetNode: range.offsetNode, offset: range.offset};
+        } else if (document.caretRangeFromPoint) {
+            const range = document.caretRangeFromPoint(x, y);
+            return {offsetNode: range.startContainer, offset: range.startOffset};
+        }
+    }
+
+    function getRangeForRect(rect) {
+        const startRange = offset(document, rect.left, rect.top);
+        const endRange = offset(document, rect.right - 1, rect.bottom - 1);
+
+        const range = document.createRange();
+        range.setStart(startRange.offsetNode, startRange.offset);
+        range.setEnd(endRange.offsetNode, endRange.offset);
+        return range;
+    }
+
+    // Call the function initially and on window resize
+    detectHyphenation();
+    window.addEventListener('resize', detectHyphenation);
+</script>
+</body>
+</html>

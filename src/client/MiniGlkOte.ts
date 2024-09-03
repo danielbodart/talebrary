@@ -60,7 +60,7 @@ export class MiniGlkOte {
     }
 }
 
-const default_metrics: Metrics = {
+export const default_metrics: Metrics = {
     width: 80,
     height: 50,
     buffercharheight: 1,
