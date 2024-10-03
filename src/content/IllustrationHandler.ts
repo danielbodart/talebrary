@@ -11,7 +11,7 @@ export interface IllustrationDependencies extends Dependency<'ai', Ai>,
     Dependency<'stableDiffusion', StableDiffusion> {
 }
 
-export function _try<R>(fun: () => R | undefined, rejected:(e: unknown | undefined) => R): R {
+export function _try<R>(fun: () => R | undefined, rejected: (e: unknown | undefined) => R): R {
     try {
         const result = fun();
         if (typeof result == 'undefined') return rejected(undefined);
@@ -39,13 +39,22 @@ export class IllustrationHandler {
 
         if (model.startsWith('llama+')) {
             const result = await this.deps.ai.run('@cf/meta/llama-3.2-3b-instruct' as any, generateIllustrationPrompt(data)) as any;
-            const prompt = _try(() => JSON.parse(result.response), (e) => ({status: 500, statusText: 'Expected JSON response', reason: String(e)}));
+            const prompt = _try(() => JSON.parse(result.response), (e) => ({
+                status: 500,
+                statusText: 'Expected JSON response',
+                reason: String(e)
+            }));
             if (prompt.status) {
                 return new Response(prompt, {status: prompt.status, statusText: prompt.statusText});
             }
 
-            const imageModel = model.endsWith('flux') ? '@cf/black-forest-labs/flux-1-schnell' : '@cf/bytedance/stable-diffusion-xl-lightning' as any;
-            const image = await this.deps.ai.run(imageModel, prompt);
+            if (model.endsWith('flux')) {
+                const image = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell' as any, prompt);
+                console.log('image', JSON.stringify(image));
+                return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
+            }
+
+            const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt);
             return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
         }
 
