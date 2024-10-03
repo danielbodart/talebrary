@@ -38,7 +38,7 @@ export class IllustrationHandler {
         const data = JSON.parse(rawPrompt);
 
         if (model === 'llama+stable-diffusion') {
-            const result = await this.deps.ai.run('@cf/meta/llama-3.1-8b-instruct' as any, generateIllustrationPrompt(data)) as any;
+            const result = await this.deps.ai.run('@cf/meta/llama-3.2-3b-instruct' as any, generateIllustrationPrompt(data)) as any;
             const prompt = _try(() => JSON.parse(result.response), (e) => ({status: 500, statusText: 'Expected JSON response', reason: String(e)}));
             if (prompt.status) {
                 return new Response(prompt, {status: prompt.status, statusText: prompt.statusText});
