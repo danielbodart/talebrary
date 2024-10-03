@@ -37,14 +37,15 @@ export class IllustrationHandler {
 
         const data = JSON.parse(rawPrompt);
 
-        if (model === 'llama+stable-diffusion') {
+        if (model.startsWith('llama+')) {
             const result = await this.deps.ai.run('@cf/meta/llama-3.2-3b-instruct' as any, generateIllustrationPrompt(data)) as any;
             const prompt = _try(() => JSON.parse(result.response), (e) => ({status: 500, statusText: 'Expected JSON response', reason: String(e)}));
             if (prompt.status) {
                 return new Response(prompt, {status: prompt.status, statusText: prompt.statusText});
             }
 
-            const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt);
+            const imageModel = model.endsWith('flux') ? '@cf/black-forest-labs/flux-1-schnell' : '@cf/bytedance/stable-diffusion-xl-lightning' as any;
+            const image = await this.deps.ai.run(imageModel, prompt);
             return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
         }
 
