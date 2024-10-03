@@ -50,8 +50,7 @@ export class IllustrationHandler {
 
             if (model.endsWith('flux')) {
                 const image = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell' as any, prompt);
-                console.log('image', JSON.stringify(image));
-                return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
+                return new Response(JSON.stringify(image) as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
             }
 
             const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt);
