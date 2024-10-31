@@ -23,6 +23,10 @@ export function _try<R>(fun: () => R | undefined, rejected: (e: unknown | undefi
 }
 
 
+async function decodeBase64(value: string) {
+    return await (await fetch("data:application/octet;base64," + value)).arrayBuffer();
+}
+
 export class IllustrationHandler {
     constructor(private deps: IllustrationDependencies) {
     }
@@ -51,7 +55,7 @@ export class IllustrationHandler {
 
             if (model.endsWith('flux')) {
                 const result = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell' as any, prompt) as any as FluxResponse;
-                const image = Buffer.from(result.image, 'base64');
+                const image = await decodeBase64(result.image);
                 return new Response(image as any, {
                     headers: {
                         'content-type': 'image/jpeg',
@@ -73,7 +77,7 @@ export class IllustrationHandler {
         }
 
         const response = await this.deps.ai.run(model, {prompt}) as any;
-        const image = model.includes('flux') ? response : Buffer.from(response.image, 'base64');
+        const image = model.includes('flux') ? await decodeBase64(response.image) : response;
         return new Response(image, {headers: {'content-type': 'image/jpeg'}});
     }
 }
