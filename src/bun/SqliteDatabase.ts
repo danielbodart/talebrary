@@ -1,8 +1,12 @@
 import {Database, Statement} from "bun:sqlite";
-import type {D1Database, D1ExecResult, D1PreparedStatement, D1Response, D1Result} from "@cloudflare/workers-types";
+import type {D1Database, D1ExecResult, D1PreparedStatement, D1Result} from "@cloudflare/workers-types";
 
 export class SqlitePrepareStatement implements D1PreparedStatement {
     constructor(private statement: Statement, private values: unknown[] = []) {
+    }
+
+    run<T = Record<string, unknown>>(): Promise<D1Result<T>> {
+        throw new Error("Method not implemented.");
     }
 
     bind(...values: unknown[]): D1PreparedStatement {
@@ -13,10 +17,6 @@ export class SqlitePrepareStatement implements D1PreparedStatement {
     first<T = Record<string, unknown>>(): Promise<T | null>;
     async first(_colName?: unknown): Promise<any> {
         return this.statement.get(...this.values);
-    }
-
-    run(): Promise<D1Response> {
-        throw new Error("Method not implemented.");
     }
 
     async all<T = Record<string, unknown>>(): Promise<D1Result<T>> {

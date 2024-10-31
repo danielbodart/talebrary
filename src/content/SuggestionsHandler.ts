@@ -1,4 +1,4 @@
-import type {Ai, AiTextGenerationOutput} from "@cloudflare/workers-types";
+import type {Ai} from "@cloudflare/workers-types";
 
 import {Uri} from "../http/Uri.ts";
 import {suggestionsPrompt} from "../prompts/SuggestionsPrompt.ts";
@@ -20,7 +20,7 @@ export class SuggestionsHandler {
         const data = JSON.parse(rawPrompt);
         const prompt = suggestionsPrompt(data);
 
-        const output: AiTextGenerationOutput = await this.ai.run(model, prompt);
+        const output = await this.ai.run(model, prompt as any) as any;
         if (!('response' in output)) return new Response('Unsupported response', {status: 404});
 
         try {
