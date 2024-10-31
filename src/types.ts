@@ -95,3 +95,12 @@ export interface ScopedPrompt extends PromptProperties {
 }
 
 export type TextGenerationPrompt = UnscopedPrompt | ScopedPrompt;
+
+export interface FluxRequest {
+    prompt: string;
+    num_steps: number; // default: 4, max: 8, type: integer
+}
+
+export interface FluxResponse {
+    image: string; // base64 encoded image
+}

@@ -3,7 +3,7 @@
   "module": "src/cloudflare/app.ts",
   "type": "module",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240502.0",
+    "@cloudflare/workers-types": "^4.20241022.0",
     "@types/bun": "latest",
     "@types/mute-stream": "^0.0.4",
     "lightningcss-cli": "^1.25.1",

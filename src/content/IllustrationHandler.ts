@@ -6,6 +6,7 @@ import type {Dependency} from "../yadic/mod.ts";
 import type {StableDiffusion} from "../stability-ai/StableDiffusion.ts";
 import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
+import type {FluxResponse} from "../types.ts";
 
 export interface IllustrationDependencies extends Dependency<'ai', Ai>,
     Dependency<'stableDiffusion', StableDiffusion> {
@@ -38,7 +39,7 @@ export class IllustrationHandler {
         const data = JSON.parse(rawPrompt);
 
         if (model.startsWith('llama+')) {
-            const result = await this.deps.ai.run('@cf/meta/llama-3.2-3b-instruct' as any, generateIllustrationPrompt(data)) as any;
+            const result = await this.deps.ai.run('@cf/meta/llama-3.2-3b-instruct' as any, generateIllustrationPrompt(data) as any) as any;
             const prompt = _try(() => JSON.parse(result.response), (e) => ({
                 status: 500,
                 statusText: 'Expected JSON response',
@@ -49,8 +50,15 @@ export class IllustrationHandler {
             }
 
             if (model.endsWith('flux')) {
-                const image = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell' as any, prompt);
-                return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt, 'type': typeof image}});
+                const result = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell' as any, prompt) as any as FluxResponse;
+                const image = Buffer.from(result.image, 'base64');
+                return new Response(image as any, {
+                    headers: {
+                        'content-type': 'image/jpeg',
+                        'description': prompt.prompt,
+                        'type': typeof image
+                    }
+                });
             }
 
             const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt);
@@ -64,7 +72,8 @@ export class IllustrationHandler {
             return new Response(image, {headers: {'content-type': 'image/jpeg'}});
         }
 
-        const image = await this.deps.ai.run(model, {prompt});
+        const response = await this.deps.ai.run(model, {prompt}) as any;
+        const image = model.includes('flux') ? response : Buffer.from(response.image, 'base64');
         return new Response(image, {headers: {'content-type': 'image/jpeg'}});
     }
 }
