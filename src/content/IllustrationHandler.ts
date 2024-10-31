@@ -55,7 +55,7 @@ export class IllustrationHandler {
 
             if (model.endsWith('flux')) {
                 const result = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell' as any, prompt) as any as FluxResponse;
-                console.log('FLUX', prompt, result);
+                console.log('FLUX', 'prompt', prompt, 'result', result.image ? {image: 'base64 encoded image'} : result);
                 const image = await decodeBase64(result.image);
                 return new Response(image as any, {
                     headers: {
