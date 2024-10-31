@@ -24,7 +24,7 @@ export function _try<R>(fun: () => R | undefined, rejected: (e: unknown | undefi
 
 
 async function decodeBase64(value: string) {
-    return await (await fetch("data:application/octet;base64," + value)).arrayBuffer();
+    return await (await fetch(`data:application/octet;base64,${value}`)).arrayBuffer();
 }
 
 export class IllustrationHandler {

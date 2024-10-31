@@ -209,8 +209,8 @@ export class UpdateRenderer {
 
     models = [
         // '@cf/bytedance/stable-diffusion-xl-lightning',
-        'llama+stable-diffusion'
-        // 'llama+flux'
+        'llama+stable-diffusion',
+        'llama+flux'
     ];
 
     updateInput(updates: (CharInput | LineInput)[]) {
