@@ -23,6 +23,7 @@ export class DumbAi {
             case "@cf/meta/llama-3-8b-instruct-awq":
             case "@cf/meta/llama-3.1-8b-instruct":
             case "@cf/meta/llama-3.2-3b-instruct":
+            case "@cf/meta/llama-3.3-70b-instruct-fp8-fast":
                 return {response: JSON.stringify(this.instructions(prompt as ScopedPrompt))};
             default:
                 throw new Error(`Model ${model} not found`);
