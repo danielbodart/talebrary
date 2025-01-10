@@ -1,4 +1,4 @@
-bun 1.1.7
-nodejs 20.12.2
+bun 1.1.43
+nodejs 22.13.0
 rclone 1.66.0
 watchexec 2.1.2
