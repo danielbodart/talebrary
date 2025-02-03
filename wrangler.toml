@@ -1,4 +1,4 @@
-compatibility_date = "2024-09-02"
+compatibility_date = "2025-02-03"
 name = "talebrary"
 main = "src/cloudflare/app.ts"
 
