@@ -8,7 +8,8 @@ import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
 import type {FluxResponse} from "../types.ts";
 
-export interface IllustrationDependencies extends Dependency<'ai', Ai>,
+export interface IllustrationDependencies extends
+    Dependency<'ai', Ai>,
     Dependency<'stableDiffusion', StableDiffusion> {
 }
 

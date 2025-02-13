@@ -37,11 +37,11 @@ export function chain<T extends object[]>(...objects: T): Chain<T> {
 export class LazyMap {
     private deps: this;
 
-    private constructor(parent?: LazyMap) {
+    private constructor(parent?: object) {
         this.deps = parent ? chain(this, parent) : this;
     }
 
-    static create<P extends LazyMap>(parent?: P): LazyMap & P {
+    static create<P>(parent?: P): LazyMap & P {
         return new LazyMap(parent as any) as any;
     }
 

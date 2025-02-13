@@ -5,7 +5,7 @@ import {md5} from "../system/digest.ts";
 import {CloudflareSender} from "./CloudflareSender.ts";
 
 function app(env: Env) {
-    const app = application(client, env.db, env.r2, md5, env.ai, env);
+    const app = application({http: client, digest: md5, ...env});
     // Route events to a queue instead of using setInterval as that does not seem work in Cloudflare Workers
     return env.events ? app.set('eventSender', _ => new CloudflareSender(env.events)) : app;
 }

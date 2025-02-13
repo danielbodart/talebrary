@@ -17,7 +17,7 @@ import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {HoneycombSender} from "./events/HoneycombSender.ts";
 import {EventHandler} from "./events/EventHandler.ts";
-import {alias, instance, constructor, LazyMap} from "./yadic/mod.ts";
+import {alias, constructor, LazyMap, type Dependency} from "./yadic/mod.ts";
 import {StableDiffusion, type StableDiffusionConfig} from "./stability-ai/StableDiffusion.ts";
 
 export interface HoneycombConfig {
@@ -39,17 +39,18 @@ export interface Env extends Config {
     events: Queue
 }
 
+export interface ApplicationDependencies extends
+    Dependency<'http', Http>,
+    Dependency<'db', D1Database>,
+    Dependency<'r2', R2Bucket>,
+    Dependency<'digest', Digest>,
+    Dependency<'ai', Ai>,
+    Config {
+}
 
-export function application(http: Http, db: D1Database, r2: R2Bucket, digest: Digest, ai: Ai, config: Config) {
-    return LazyMap.create()
-        .set('STABLE_DIFFUSION_API_KEY', instance(config.STABLE_DIFFUSION_API_KEY))
-        .set('HONEYCOMB_API_KEY', instance(config.HONEYCOMB_API_KEY))
-        .set('HONEYCOMB_BATCH_SIZE', instance(config.HONEYCOMB_BATCH_SIZE))
-        .set('db', instance(db))
-        .set('http', instance(http))
-        .set('r2', instance(r2))
-        .set('digest', instance(digest))
-        .set('ai', instance(ai))
+
+export function application(deps: ApplicationDependencies) {
+    return LazyMap.create(deps)
         .set('stableDiffusion', constructor(StableDiffusion))
         .set('clock', constructor(SystemClock))
         .set('timers', constructor(SystemTimers))
