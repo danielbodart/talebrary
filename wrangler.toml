@@ -32,3 +32,8 @@ queue = "events"
 max_batch_size = 50
 max_batch_timeout = 1
 
+[[workflows]]
+name = "talebrary"
+binding = "WORKFLOW"
+class_name = "CloudflareWorkflow"
+script_name = "src/cloudflare/CloudflareWorkflow.ts"
