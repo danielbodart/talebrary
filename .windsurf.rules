@@ -1,3 +1,13 @@
+# Assistant Behavior Rules
+
+When helping with this project:
+
+1. Stay Focused:
+   - Only implement what was explicitly requested
+   - Do not add "helpful" extra features or rules
+   - If you think something additional would be helpful, ask first
+   - Never silently include unrequested changes
+
 # Command Execution Rules
 
 When executing commands in this project:
@@ -19,3 +29,13 @@ When executing commands in this project:
    - Use `./run wrangler deploy` instead of `wrangler deploy`
 
 4. Other commands that are not defined in either script can be run normally.
+
+# Configuration Rules
+
+When making configuration changes:
+
+1. Documentation First:
+   - Always search for and read the latest documentation
+   - Verify exact syntax and options available
+   - Never assume or make up configuration syntax
+   - If documentation is unclear or unavailable, explicitly state this
