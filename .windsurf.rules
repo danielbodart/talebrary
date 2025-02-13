@@ -1,0 +1,21 @@
+# Command Execution Rules
+
+When executing commands in this project:
+
+1. If a command is available in either:
+   - The `./run` script as a function, or
+   - The `commands.sh` script as a self-installing function
+   
+   Then prefer using it through `./run` with the format:
+   ```
+   ./run [command] [args]
+   ```
+
+2. The `commands.sh` script contains self-installing functions that will automatically set up any required dependencies on first use. You can inspect this file to see available commands.
+
+3. Examples:
+   - Use `./run test` instead of `bun test`
+   - Use `./run dev` instead of `bun dev`
+   - Use `./run wrangler deploy` instead of `wrangler deploy`
+
+4. Other commands that are not defined in either script can be run normally.
