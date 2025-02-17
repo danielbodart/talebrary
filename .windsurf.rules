@@ -8,6 +8,12 @@ When helping with this project:
    - If you think something additional would be helpful, ask first
    - Never silently include unrequested changes
 
+2. Read Documentation First:
+   - Always search for and read the latest documentation
+   - Verify exact syntax and options available
+   - Never assume or make up configuration syntax
+   - If documentation is unclear or unavailable, explicitly state this
+
 # Command Execution Rules
 
 When executing commands in this project:
@@ -25,17 +31,25 @@ When executing commands in this project:
 
 3. Examples:
    - Use `./run test` instead of `bun test`
-   - Use `./run dev` instead of `bun dev`
+   - Use `./run bun ` instead of `bun test`
    - Use `./run wrangler deploy` instead of `wrangler deploy`
 
 4. Other commands that are not defined in either script can be run normally.
 
-# Configuration Rules
+# Code Quality Rules
 
-When making configuration changes:
+When making TypeScript code changes:
 
-1. Documentation First:
-   - Always search for and read the latest documentation
-   - Verify exact syntax and options available
-   - Never assume or make up configuration syntax
-   - If documentation is unclear or unavailable, explicitly state this
+1. TypeScript Compilation Check:
+   - Run `./run check` to check for compilation errors
+   - Review and report any type errors found
+   - Do not proceed with changes if compilation fails
+   - Ensure all type definitions are properly resolved
+
+# Dependency Management Rules
+
+When working with dependencies:
+
+1. Always check `package.json` first and use existing libraries where possible
+2. Never add new dependencies without explicit user approval
+3. When suggesting a new dependency, provide clear justification for why existing libraries cannot meet the need
