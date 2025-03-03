@@ -1,3 +1,5 @@
+@Web
+
 # Core Rules
 
 1. Communication
@@ -9,24 +11,29 @@
 
 2. Documentation First
    - Search and read latest documentation before making suggestions
+   - If you can't find documentation look for the source code and read that
    - Verify exact syntax and options
    - State explicitly if documentation is unclear or unavailable
+   - Never make up syntax or options
+   - Always cite at least one source for each suggestion
 
 3. Implementation
    - Only implement explicitly requested features
-   - Ask before adding extras or new dependencies
-   - Check `package.json` first for existing libraries
-   - Verify documentation before making changes
+   - Check `package.json` for existing libraries and prefer them over adding new ones
+   - Always ask before adding new libraries
    - Run `./run check` for TypeScript changes
 
 4. Testing
    - Maintain existing tests, never delete without approval
    - Add tests for new code
    - Use in-memory test doubles over mocks
-   - Cover happy path and edge cases
    - Maintain contract tests across interfaces
+   - Run `./run test` (all) or `./run test [specific test file]`
 
 5. Command Execution
    - Use `./run [command] [args]` when available
-   - Check `commands.sh` for self-installing functions
+   - Check `./run` and `commands.sh` for already available commands
    - Examples: `./run test`, `./run wrangler deploy`
+
+
+On the first start of every chat, tell me the number of Core Rules that have been read

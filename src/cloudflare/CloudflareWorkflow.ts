@@ -29,7 +29,7 @@ export class CloudflareWorkflow extends WorkflowEntrypoint<Env, Params> {
                 return { prompt: data }; // Use raw prompt if not using LLama
             }
 
-            const result = await this.deps.ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', generateIllustrationPrompt(data));
+            const result: any = await this.deps.ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', generateIllustrationPrompt(data));
             return _try(() => JSON.parse(result.response), (e) => ({
                 status: 500,
                 statusText: 'Expected JSON response',
