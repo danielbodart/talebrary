@@ -1,5 +1,5 @@
 import type {EventSender} from "./EventSender.ts";
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 
 export class EventHandler {
     constructor(deps: Dependency<'eventSender', EventSender>, private sender = deps.eventSender) {

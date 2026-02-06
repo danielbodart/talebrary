@@ -16,7 +16,8 @@ import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {EventHandler} from "./events/EventHandler.ts";
-import {constructor, LazyMap, type Dependency} from "./yadic/mod.ts";
+import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface ApplicationDependencies extends
     Dependency<'http', Http>,

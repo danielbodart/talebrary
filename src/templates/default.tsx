@@ -10,8 +10,7 @@ export function defaultTemplate(document: Document) {
             {document.head.children}
         </head>
         <body class={document.body.className} is={document.body.getAttribute('is') || ''}>
-        {document.body.children}
-        {footer(jsx)}
+        <>{document.body.children}{footer(jsx)}</>
         </body>
         </html>);
 }

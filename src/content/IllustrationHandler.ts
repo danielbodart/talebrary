@@ -1,7 +1,7 @@
 import type {Ai} from "@cloudflare/workers-types";
 import {Uri} from "../http/Uri.ts";
 
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
 import type {FluxResponse} from "../types.ts";

@@ -1,4 +1,4 @@
-import {constructor, instance, LazyMap} from "../yadic/mod.ts";
+import {constructor, instance, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import {SystemClock} from "../system/clock.ts";
 import {ImageElement} from "../components/ImageElement.ts";
 

@@ -1,4 +1,4 @@
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
 import {createImageUrl, extractDataFromCard, getParams} from "./shared.ts";
 import type {Clock} from "../system/clock.ts";

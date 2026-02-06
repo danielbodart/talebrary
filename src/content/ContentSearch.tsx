@@ -2,7 +2,7 @@ import {D1GameFinder, type GameInfo} from "../cloudflare/D1GameFinder.ts";
 import {roundStep, wellFormed} from "../templates/misc.ts";
 import {Uri} from "../http/Uri.ts";
 
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
 
 export class ContentSearch {
@@ -29,7 +29,7 @@ export function render(search: string, games: GameInfo[]): string {
             <div class="window grid">
                 <div class="card input-control">
                     <form class="input">
-                        <input name="search" type="text" maxlength="256" value={search} autofocus="autofocus"/>
+                        <input name="search" type="text" maxlength={256} value={search} autofocus={true}/>
                     </form>
                 </div>
             </div>

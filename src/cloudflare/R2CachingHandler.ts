@@ -3,7 +3,7 @@ import type {R2Bucket} from "@cloudflare/workers-types";
 import {toResponse} from "./ToResponse.ts";
 import type {Digest} from "../system/digest.ts";
 
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 import {detectMimeType} from "../http/DetectMimeType.ts";
 
 

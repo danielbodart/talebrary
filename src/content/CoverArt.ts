@@ -4,7 +4,7 @@ import type {D1GameFinder} from "../cloudflare/D1GameFinder.ts";
 import {IllustrationHandler} from "./IllustrationHandler.ts";
 import type {Describable} from "../types.ts";
 
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 
 
 export interface CoverArtDeps extends Dependency<'http', Http>,

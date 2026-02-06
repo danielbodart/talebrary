@@ -1,5 +1,5 @@
 import {Uri} from "../http/Uri.ts";
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 import type {Clock} from "../system/clock.ts";
 import {CustomElementDefinition} from "./CustomElementDefinition.ts";
 

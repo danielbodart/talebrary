@@ -1,4 +1,4 @@
-import type {JSX2DOM} from "../jsx2dom/JSX2DOM.ts";
+import type {JSX2DOM} from "@bodar/jsx2dom/JSX2DOM.ts";
 
 export const fonts = (jsx: JSX2DOM) => <>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>

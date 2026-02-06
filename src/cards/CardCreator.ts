@@ -1,4 +1,4 @@
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
 import {Arrays} from "../system/Arrays.ts";
 import {type CardData, createImageUrl} from "./shared.ts";

@@ -24,7 +24,7 @@ function clean() {
 }
 
 function check() {
-  bun run --bun tsc --noEmit
+  bun run --bun tsgo --noEmit
 }
 
 function test() {

@@ -1,7 +1,7 @@
 import type {D1GameFinder, GameStory} from "../cloudflare/D1GameFinder.ts";
 import {Uri} from "../http/Uri.ts";
 import {compactText, wellFormed} from "../templates/misc.ts";
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
 
 export class ContentHandler {

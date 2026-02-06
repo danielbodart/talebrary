@@ -1,7 +1,7 @@
 import type {D1Database} from "@cloudflare/workers-types";
 import type {SupportedGameType} from "../types.ts";
 
-import type {Dependency} from "../yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface GameBase {
     id: string;

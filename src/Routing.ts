@@ -5,7 +5,7 @@ import {toResponse} from "./cloudflare/ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {EventHandler} from "./events/EventHandler.ts";
-import type {Dependency} from "./yadic/mod.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface RouterDependencies extends
     Dependency<'r2', R2Bucket>,
