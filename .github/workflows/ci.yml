@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./run ci
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RCLONE_CONFIG_CLOUDFLARE_ACCESS_KEY_ID: ${{ secrets.RCLONE_CONFIG_CLOUDFLARE_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_CLOUDFLARE_SECRET_ACCESS_KEY: ${{ secrets.RCLONE_CONFIG_CLOUDFLARE_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_CLOUDFLARE_ENDPOINT: ${{ secrets.RCLONE_CONFIG_CLOUDFLARE_ENDPOINT }}
