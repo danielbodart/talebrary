@@ -4,15 +4,14 @@ export class Suggestions extends HTMLElement {
     connectedCallback() {
         this.classList.add('suggestions');
 
-        const observer = new IntersectionObserver(
-            (entries) => entries.forEach(entry => {
-                (entry.target as HTMLElement).classList.toggle('hidden', entry.intersectionRatio < 1);
-            }),
-            {root: this}
-        );
+        const hideOverflow = () => Array.from(this.children).forEach(child => {
+            const el = child as HTMLElement;
+            el.classList.toggle('hidden', el.offsetTop + el.offsetHeight > this.clientHeight);
+        });
 
-        Array.from(this.children).forEach(child => observer.observe(child));
-
-        new ResizeObserver(() => requestAnimationFrame(() => binPack(this))).observe(this);
+        new ResizeObserver(() => requestAnimationFrame(() => {
+            binPack(this);
+            hideOverflow();
+        })).observe(this);
     }
 }
