@@ -13,3 +13,4 @@ wrangler-local.toml
 .env
 *.png
 tools
+.playwright-mcp/
