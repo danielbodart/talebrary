@@ -7,13 +7,14 @@
     "@types/bun": "^1.2.2",
     "@types/mute-stream": "^0.0.4",
     "lightningcss-cli": "^1.29.1",
-    "onchange": "^7.1.0"
+    "onchange": "^7.1.0",
+    "wrangler": "^4.63.0"
   },
   "peerDependencies": {
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@bodar/wasiglk": "npm:@jsr/bodar__wasiglk",
+    "@bodar/wasiglk": "npm:@jsr/bodar__wasiglk@0.78.6",
     "@jsr/bodar__wasiglk": "0.76.4",
     "fast-xml-parser": "^4.5.1",
     "file-type": "^20.0.1",

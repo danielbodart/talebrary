@@ -55,11 +55,12 @@ export class D1GameFinder {
                              WHERE l.gameid = g.id
                                AND f.externid IN
                                    ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                                    'tads2', 'tads3')
+                                    'alan2', 'alan3', 'agt', 'advsys')
                                AND (' ' || f.extension || ' ' LIKE
                                     '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
                                                    INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
-                                    ' %')) AS playable
+                                    ' %')
+                               AND l.url NOT LIKE '%.z6') AS playable
                      FROM ranks r JOIN games g ON g.id = r.id
                  ),
                  game_reviews AS (
@@ -95,10 +96,12 @@ export class D1GameFinder {
                      join filetypes f on l.fmtid = f.id
             where g.id = ?
               and f.externid IN
-                  ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift', 'tads2', 'tads3')
+                  ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
+                   'alan2', 'alan3', 'agt', 'advsys')
               and (' ' || f.extension || ' ' LIKE
                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7), INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
                    ' %')
+              and l.url NOT LIKE '%.z6'
             order by l.displayorder asc
             limit 1
         `;
