@@ -48,7 +48,7 @@ export class IllustrationHandler {
                 reason: String(e)
             }));
             if (prompt.status) {
-                return new Response(prompt, {status: prompt.status, statusText: prompt.statusText});
+                return new Response(JSON.stringify(prompt), {status: prompt.status, statusText: prompt.statusText});
             }
 
             if (model.endsWith('flux')) {

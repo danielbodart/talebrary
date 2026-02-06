@@ -21,12 +21,16 @@
    - Only implement explicitly requested features
    - Check `package.json` for existing libraries and prefer them over adding new ones
    - Always ask before adding new libraries
+   - Use async/await unless you need to do something special with Promises
    - Run `./run check` for TypeScript changes
 
 4. Testing
    - Maintain existing tests, never delete without approval
    - Add tests for new code
    - Use in-memory test doubles over mocks
+   - Never use mocks, especially not for HTTP
+   - HTTP is a pure function (request in, response out) — inject it as a dependency, never mock it
+   - In tests, use Http as a simple lambda — no servers or network needed
    - Maintain contract tests across interfaces
    - Run `./run test` (all) or `./run test [specific test file]`
 
