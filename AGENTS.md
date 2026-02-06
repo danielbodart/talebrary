@@ -33,7 +33,7 @@
 5. Command Execution
    - Use `./run [command] [args]` when available
    - Check `./run` and `commands.sh` for already available commands
-   - Examples: `./run test`, `./run wrangler deploy`
+   - Examples: `./run test`, `./run deploy`
 
 
 On the first start of every chat, tell me the number of Core Rules that have been read
