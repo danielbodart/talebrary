@@ -4,6 +4,7 @@ import {capitalWords, wordCount} from "../system/Strings.ts";
 
 export class BufferWindow extends HTMLElement {
     private sceneDetector = new SceneDetector();
+    private lastRawText = '';
 
     updateContent(content: ProcessedContentSpan[], clear: boolean) {
         // Remove intro card when game content arrives
@@ -11,7 +12,16 @@ export class BufferWindow extends HTMLElement {
 
         if (clear) {
             this.replaceChildren();
+            this.lastRawText = '';
         }
+
+        // Check if previous content ended at a paragraph boundary (newline or empty)
+        const prevText = this.lastRawText.replace(/>\s*$/, '');
+        const prevEndedParagraph = prevText === '' || prevText.endsWith('\n');
+
+        // Track raw text for next call
+        const lastTextSpan = [...content].reverse().find(s => s.type === 'text');
+        if (lastTextSpan?.text) this.lastRawText = lastTextSpan.text;
 
         // Split multi-line text spans into one span per line
         const split = content.flatMap(s =>
@@ -32,7 +42,10 @@ export class BufferWindow extends HTMLElement {
             const firstIsHeader = firstNewCard[0]?.style === 'header' || firstNewCard[0]?.style === 'subheader';
             const lastHasNormal = lastSection.querySelector('.normal') !== null;
 
-            if (!firstIsHeader || !lastHasNormal) {
+            // Only start a new card for a header when previous content ended at a paragraph boundary.
+            // Inline subheaders (e.g. "land" in "You going to land any time soon?") arrive as separate
+            // spans but should merge into the current card, not start a new one.
+            if (!firstIsHeader || !lastHasNormal || !prevEndedParagraph) {
                 for (const span of firstNewCard) {
                     this.appendSpan(lastSection, span);
                 }
