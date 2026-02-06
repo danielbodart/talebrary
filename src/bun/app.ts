@@ -1,6 +1,5 @@
 import {serve} from "bun";
 import {application} from "../Application.ts";
-import {crossOriginIsolation} from "../http/CrossOriginIsolation.ts";
 import {talebrary} from "./SqliteDatabase.ts";
 import {localhostHandler} from "./FileHandler.ts";
 import {FolderBucket} from "./buckets/FolderBucket.ts";
@@ -17,7 +16,7 @@ const deps = {
     ai: new DumbAi() as any,
 };
 const app = application(deps);
-const handler = crossOriginIsolation(req => app.handler(req));
+const handler = (req: Request) => app.handler(req);
 
 const server = serve({
     fetch: handler,
