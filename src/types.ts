@@ -8,7 +8,9 @@ export type SupportedGameType =
     | 'alan2'
     | 'alan3'
     | 'agt'
-    | 'advsys';
+    | 'advsys'
+    | 'tads2'
+    | 'tads3';
 
 export interface Describable {
     title: string;

@@ -55,7 +55,7 @@ export class D1GameFinder {
                              WHERE l.gameid = g.id
                                AND f.externid IN
                                    ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                                    'alan2', 'alan3', 'agt', 'advsys')
+                                    'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')
                                AND (' ' || f.extension || ' ' LIKE
                                     '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
                                                    INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
@@ -97,7 +97,7 @@ export class D1GameFinder {
             where g.id = ?
               and f.externid IN
                   ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                   'alan2', 'alan3', 'agt', 'advsys')
+                   'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')
               and (' ' || f.extension || ' ' LIKE
                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7), INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
                    ' %')
