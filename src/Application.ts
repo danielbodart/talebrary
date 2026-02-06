@@ -1,4 +1,4 @@
-import {Ai, D1Database, type Queue, R2Bucket} from "@cloudflare/workers-types";
+import {Ai, D1Database, R2Bucket} from "@cloudflare/workers-types";
 import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
 import {type Http} from "./http/mod.ts";
@@ -15,28 +15,13 @@ import {story} from "./content/Story.ts";
 import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
-import {HoneycombSender} from "./events/HoneycombSender.ts";
 import {EventHandler} from "./events/EventHandler.ts";
-import {alias, constructor, LazyMap, type Dependency} from "./yadic/mod.ts";
-import {StableDiffusion, type StableDiffusionConfig} from "./stability-ai/StableDiffusion.ts";
+import {constructor, LazyMap, type Dependency} from "./yadic/mod.ts";
 
-export interface HoneycombConfig {
-    HONEYCOMB_API_KEY: string;
-    HONEYCOMB_BATCH_SIZE: number;
-}
-
-export interface Config extends HoneycombConfig, StableDiffusionConfig {
-}
-
-export const DEFAULT_CONFIG = {
-    HONEYCOMB_BATCH_SIZE: 50
-}
-
-export interface Env extends Config {
+export interface Env {
     db: D1Database;
     r2: R2Bucket;
     ai: Ai;
-    events: Queue
 }
 
 export interface ApplicationDependencies extends
@@ -44,18 +29,15 @@ export interface ApplicationDependencies extends
     Dependency<'db', D1Database>,
     Dependency<'r2', R2Bucket>,
     Dependency<'digest', Digest>,
-    Dependency<'ai', Ai>,
-    Config {
+    Dependency<'ai', Ai> {
 }
 
 
 export function application(deps: ApplicationDependencies) {
     return LazyMap.create(deps)
-        .set('stableDiffusion', constructor(StableDiffusion))
         .set('clock', constructor(SystemClock))
         .set('timers', constructor(SystemTimers))
-        .set('honeycomb', constructor(HoneycombSender))
-        .set('eventSender', alias('honeycomb'))
+        .set('eventSender', _ => ({ send: async () => {} }))
         .set('events', constructor(EventHandler))
         .set('finder', constructor(D1GameFinder))
         .set('search', constructor(ContentSearch))

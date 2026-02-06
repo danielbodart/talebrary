@@ -119,8 +119,6 @@ function check-rclone() {
 
 function deploy() {
   check
-  echo ${HONEYCOMB_API_KEY?Required} | bunx wrangler secret put HONEYCOMB_API_KEY
-  echo ${STABLE_DIFFUSION_API_KEY?Required} | bunx wrangler secret put STABLE_DIFFUSION_API_KEY
   bunx wrangler deploy
   check-rclone
   rclone --config rclone.conf copy www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60" -v

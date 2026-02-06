@@ -1,5 +1,5 @@
 import {serve} from "bun";
-import {application, DEFAULT_CONFIG} from "../Application.ts";
+import {application} from "../Application.ts";
 import {crossOriginIsolation} from "../http/CrossOriginIsolation.ts";
 import {talebrary} from "./SqliteDatabase.ts";
 import {localhostHandler} from "./FileHandler.ts";
@@ -15,9 +15,6 @@ const deps = {
     r2,
     digest: md5,
     ai: new DumbAi() as any,
-    HONEYCOMB_API_KEY: process.env.HONEYCOMB_API_KEY!,
-    STABLE_DIFFUSION_API_KEY: process.env.STABLE_DIFFUSION_API_KEY!,
-    ...DEFAULT_CONFIG
 };
 const app = application(deps);
 const handler = crossOriginIsolation(req => app.handler(req));

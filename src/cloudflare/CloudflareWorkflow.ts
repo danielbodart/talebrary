@@ -53,19 +53,6 @@ export class CloudflareWorkflow extends WorkflowEntrypoint<Env, Params> {
                 };
             }
 
-            if (model.startsWith('sd3')) {
-                const image = await this.deps.stableDiffusion.run({
-                    prompt: description.prompt,
-                    model,
-                    output_format: "jpeg"
-                });
-                return {
-                    image,
-                    contentType: 'image/jpeg',
-                    description: description.prompt
-                };
-            }
-
             // Default to Stable Diffusion XL Lightning
             const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', description);
             return {

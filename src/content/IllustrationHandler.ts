@@ -3,14 +3,12 @@ import type {Ai} from "@cloudflare/workers-types";
 import {Uri} from "../http/Uri.ts";
 
 import type {Dependency} from "../yadic/mod.ts";
-import type {StableDiffusion} from "../stability-ai/StableDiffusion.ts";
 import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
 import type {FluxResponse} from "../types.ts";
 
 export interface IllustrationDependencies extends
-    Dependency<'ai', Ai>,
-    Dependency<'stableDiffusion', StableDiffusion> {
+    Dependency<'ai', Ai> {
 }
 
 export function _try<R>(fun: () => R | undefined, rejected: (e: unknown | undefined) => R): R {
@@ -73,14 +71,8 @@ export class IllustrationHandler {
 
         const prompt = illustrationPrompt(path, data);
 
-        if (model.startsWith('sd3')) {
-            const image = await this.deps.stableDiffusion.run({prompt, model, output_format: "jpeg"});
-            return new Response(image, {headers: {'content-type': 'image/jpeg'}});
-        }
-
         const response = await this.deps.ai.run(model, {prompt}) as any;
         const image = model.includes('flux') ? await decodeBase64(response.image) : response;
         return new Response(image, {headers: {'content-type': 'image/jpeg'}});
     }
 }
-

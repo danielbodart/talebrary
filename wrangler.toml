@@ -20,17 +20,7 @@ preview_bucket_name = 'talebrary'
 binding = "ai"
 
 # CUT HERE
-# Everything after this line will be removed when running wrangler dev as queues arn't supported yet
-# And they don't ignore them either
-[production]
-[[queues.producers]]
-queue = "events"
-binding = "events"
-
-[[queues.consumers]]
-queue = "events"
-max_batch_size = 50
-max_batch_timeout = 1
+# Everything after this line will be removed when running wrangler dev
 
 [[workflows]]
 name = "talebrary"
