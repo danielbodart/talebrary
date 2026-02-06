@@ -1,4 +1,0 @@
-@layer normalise, variables, components, overrides;
-
-@import url('../normalize.css') layer(normalise);
-@import url('../variables.css') layer(variables);

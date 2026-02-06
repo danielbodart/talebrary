@@ -5,8 +5,13 @@ export type SupportedGameType =
     | 'blorb/glulx'
     | 'hugo'
     | 'adrift'
-    | 'tads2'
-    | 'tads3';
+    | 'alan2'
+    | 'alan3'
+    | 'agt'
+    | 'advsys'
+    | 'level9'
+    | 'magnetic'
+    | 'scott';
 
 export interface Describable {
     title: string;

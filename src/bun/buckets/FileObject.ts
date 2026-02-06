@@ -43,6 +43,10 @@ export class FileObject implements R2ObjectBody {
         return this.response.blob() as any;
     }
 
+    async bytes(): Promise<Uint8Array> {
+        return new Uint8Array(await this.response.arrayBuffer());
+    }
+
     version: string = '1';
 
     get size(): number {

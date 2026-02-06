@@ -1,5 +1,6 @@
 import type {MessageBatch} from "@cloudflare/workers-types";
 import {application, type Env} from "../Application.ts";
+import {crossOriginIsolation} from "../http/CrossOriginIsolation.ts";
 import {client} from "../http/mod.ts";
 import {md5} from "../system/digest.ts";
 import {CloudflareSender} from "./CloudflareSender.ts";
@@ -12,7 +13,8 @@ function app(env: Env) {
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
-        return app(env).handler(request as any) as any;
+        const handler = crossOriginIsolation(req => app(env).handler(req as any) as any);
+        return handler(request);
     },
 
     async queue(batch: MessageBatch<object>, env: Env): Promise<any> {

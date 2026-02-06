@@ -37,7 +37,7 @@ export function render(game: GameStory): string {
                 <div class="author">{wellFormed(game.author)}</div>
             </div>
         </main>
-        <script type="module" src="/client/main.js"></script>
+        <script type="module" src="/player/main.js"></script>
         </body>
         </html>);
 }

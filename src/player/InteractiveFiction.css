@@ -1,0 +1,29 @@
+interactive-fiction {
+    height: 100vh;
+
+    grid-window {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1;
+
+        section:first-child {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            margin-top: calc(var(--border-size) * -1);
+            text-align: center;
+            white-space: pre;
+            font-family: "Inconsolata", monospace;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+            font-variation-settings: "wdth" 75;
+        }
+    }
+
+    buffer-window section.card:first-child {
+        margin-top: calc(18px + var(--border-size) + var(--padding));
+    }
+}

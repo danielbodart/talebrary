@@ -1,5 +1,5 @@
 import type {Dependency} from "../yadic/mod.ts";
-import {CustomElementDefinition} from "../client/components/CustomElementDefinition.ts";
+import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
 import {createImageUrl, extractDataFromCard, getParams} from "./shared.ts";
 import type {Clock} from "../system/clock.ts";
 

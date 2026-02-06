@@ -1,10 +1,10 @@
 import {constructor, instance, LazyMap} from "../yadic/mod.ts";
 import {SystemClock} from "../system/clock.ts";
-import {ImageElement} from "../client/components/ImageElement.ts";
+import {ImageElement} from "../components/ImageElement.ts";
 
 import {CardCreator} from "./CardCreator.ts";
 import {PlayingCard} from "./PlayingCard.ts";
-import {customElement, realise} from "../client/misc.tsx";
+import {customElement, realise} from "../components/misc.ts";
 
 (async () => {
     const app = LazyMap.create()

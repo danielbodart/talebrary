@@ -1,5 +1,5 @@
 import type {Dependency} from "../yadic/mod.ts";
-import {CustomElementDefinition} from "../client/components/CustomElementDefinition.ts";
+import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
 import {Arrays} from "../system/Arrays.ts";
 import {type CardData, createImageUrl} from "./shared.ts";
 

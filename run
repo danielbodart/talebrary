@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -Eeo pipefail
 shopt -s globstar
-. commands.sh
+. bootstrap.sh
+
+if [[ -f .env ]]; then
+  set -a
+  source .env
+  set +a
+fi
 
 function version() {
   export BRANCH=${CIRCLE_BRANCH-$(git rev-parse --abbrev-ref HEAD)}
@@ -33,11 +39,26 @@ function dev() {
   test --watch
 }
 
+function copy-wasiglk() {
+  local src="./node_modules/@bodar/wasiglk/wasm"
+  local dest="./www/wasiglk"
+  mkdir -p "${dest}"
+  cp "${src}"/*.wasm "${dest}/"
+}
+
+function bundle-worker() {
+  bun build ./node_modules/@bodar/wasiglk/src/worker/worker.ts \
+    --outfile ./www/wasiglk/worker.js \
+    --target browser --format esm --minify
+}
+
 function build-client() {
+  copy-wasiglk
+  bundle-worker
   local option=${1}
   local src="./src"
   local dest="./www"
-  local folders=("new-client" "client" "cards")
+  local folders=("player" "cards")
 
   local bun_prefix=""
   local bg_suffix=""

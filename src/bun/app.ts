@@ -1,5 +1,6 @@
 import {serve} from "bun";
 import {application, DEFAULT_CONFIG} from "../Application.ts";
+import {crossOriginIsolation} from "../http/CrossOriginIsolation.ts";
 import {talebrary} from "./SqliteDatabase.ts";
 import {localhostHandler} from "./FileHandler.ts";
 import {FolderBucket} from "./buckets/FolderBucket.ts";
@@ -19,11 +20,10 @@ const deps = {
     ...DEFAULT_CONFIG
 };
 const app = application(deps);
+const handler = crossOriginIsolation(req => app.handler(req));
 
 const server = serve({
-    async fetch(req) {
-        return app.handler(req);
-    },
+    fetch: handler,
 });
 
 console.log('Listening on', server.url.toString());

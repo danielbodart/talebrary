@@ -1,5 +1,5 @@
 import {Database, Statement} from "bun:sqlite";
-import type {D1Database, D1ExecResult, D1PreparedStatement, D1Result} from "@cloudflare/workers-types";
+import type {D1Database, D1DatabaseSession, D1ExecResult, D1PreparedStatement, D1Result, D1SessionBookmark, D1SessionConstraint} from "@cloudflare/workers-types";
 
 export class SqlitePrepareStatement implements D1PreparedStatement {
     constructor(private statement: Statement, private values: unknown[] = []) {
@@ -45,6 +45,10 @@ export class SqliteDatabase implements D1Database {
     }
 
     batch<T = unknown>(_ignore: D1PreparedStatement[]): Promise<D1Result<T>[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    withSession(_constraintOrBookmark?: D1SessionBookmark | D1SessionConstraint): D1DatabaseSession {
         throw new Error("Method not implemented.");
     }
 

@@ -101,7 +101,7 @@ body.search {
     box-shadow: 0px 0px var(--border-size-large) var(--eerie-black);
 }
 
-.story .card:first-child {
+.story .card:first-child, buffer-window > .card:first-child {
     margin-top: calc(18px + var(--border-size) + var(--padding));
 }
 
@@ -312,7 +312,7 @@ img[state=failed] + div {
     border-top: none !important;
 }
 
-.title, div.header:first-child, div.subheader:first-child, img + div.header, img + div.subheader, div.suggestions {
+.title, div.header:first-child, div.subheader:first-child, img + div.header, img + div.subheader, .suggestions {
     font-family: "League Spartan", sans-serif;
     font-optical-sizing: auto;
     font-weight: 700;
@@ -332,11 +332,11 @@ img[state=failed] + div {
     justify-content: space-evenly;
 }
 
-.title:first-child, div.header:first-child, div.subheader:first-child, div.suggestions:first-child {
+.title:first-child, div.header:first-child, div.subheader:first-child, .suggestions:first-child {
     border-top: none;
 }
 
-.title:last-child, div.header:last-child, div.subheader:last-child, div.suggestions:last-child {
+.title:last-child, div.header:last-child, div.subheader:last-child, .suggestions:last-child {
     border-bottom: none;
 }
 
@@ -344,16 +344,16 @@ img[state=failed] + div {
     font-weight: 700;
 }
 
-.window.buffer x-instruction {
+.window.buffer x-instruction, buffer-window x-instruction {
     cursor: pointer;
     font-weight: 700;
 }
 
-.buffer x-instruction:hover {
+.buffer x-instruction:hover, buffer-window x-instruction:hover {
     text-decoration: underline;
 }
 
-div.suggestions {
+.suggestions {
     margin-top: 10px;
     display: flex;
     flex-wrap: wrap;
@@ -365,7 +365,7 @@ div.suggestions {
     padding-left: 44px;
 }
 
-div.suggestions::before {
+.suggestions::before {
     content: "";
     display: inline-block;
     background-image: url('icons/lightbulb-regular.svg');
@@ -380,7 +380,7 @@ div.suggestions::before {
     margin-left: 10px;
 }
 
-div.suggestions x-instruction {
+.suggestions x-instruction {
     border: 2px solid var(--white-smoke);
     border-radius: 7px;
     padding: 6px 7px 6px 6px;
@@ -388,11 +388,11 @@ div.suggestions x-instruction {
     text-align: center;
 }
 
-div.suggestions x-instruction.hidden {
+.suggestions x-instruction.hidden {
     visibility: hidden;
 }
 
-div.suggestions x-instruction:hover {
+.suggestions x-instruction:hover {
     text-decoration: none;
     background-color: var(--white-smoke);
     color: var(--eerie-black);
@@ -408,7 +408,8 @@ div.suggestions x-instruction:hover {
         display: none;
     }
 
-    .buffer > .card > div:not(.rating) {
+    .buffer > .card > div:not(.rating),
+    buffer-window > .card > div:not(.rating) {
         padding: 10px 10px 0 10px;
         hyphens: auto;
         hyphenate-limit-chars: 6 3 2;
@@ -421,7 +422,11 @@ div.suggestions x-instruction:hover {
     .buffer > .card > div:last-child,
     .buffer > .card > .title,
     .buffer > .card > .author,
-    .buffer > .card > .input {
+    .buffer > .card > .input,
+    buffer-window > .card > div:last-child,
+    buffer-window > .card > .title,
+    buffer-window > .card > .author,
+    buffer-window > .card > .input {
         padding-bottom: 10px;
     }
 }
@@ -501,7 +506,7 @@ div.suggestions x-instruction:hover {
     border-radius: 40px;
 }
 
-.window.grid {
+.window.grid, grid-window {
     position: fixed;
     top: 0;
     left: 0;
@@ -509,14 +514,14 @@ div.suggestions x-instruction:hover {
     z-index: 1;
 }
 
-.grid .card:first-child {
+.grid .card:first-child, grid-window .card:first-child {
     display: flex;
     align-items: center;
     flex-direction: column;
     margin-top: calc(var(--border-size) * -1);
 }
 
-.grid .card:first-child, .buffer div.preformatted {
+.grid .card:first-child, grid-window .card:first-child, .buffer div.preformatted {
     text-align: center;
     white-space: pre;
     font-family: "Inconsolata", monospace;

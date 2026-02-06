@@ -1,0 +1,137 @@
+section {
+    display: block;
+    margin: var(--padding-large) auto;
+    min-width: 300px;
+    max-width: 600px;
+    background: linear-gradient(to bottom, var(--lion), var(--caf-noir));
+    border-radius:  var(--border-size);
+    border:  var(--border-size) ridge var(--sunset);
+    position: relative;
+    color: var(--white-smoke);
+    font-family: Arial, sans-serif;
+    text-align: justify;
+    box-shadow: 0px 0px var(--border-size-large) var(--eerie-black);
+
+    > *:not(.image) {
+        padding: 10px;
+        border-top: var(--border-size-small) ridge var(--sunset);
+    }
+
+    > *:first-child {
+        border-top: none;
+    }
+
+    .image {
+        display: block;
+        width: 100%;
+        min-height: 50%;
+        aspect-ratio: 1 / 1;
+        flex-shrink: 0;
+        object-fit: contain;
+        background-color: #000;
+        background-image: url(/icons/loader.svg);
+        background-size: 100px 100px;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    img[state=failed] {
+        display: none !important;
+    }
+
+    img[state=failed] + div {
+        border-top: none !important;
+    }
+
+    .title {
+        font-size: 1.5rem;
+        line-height: normal;
+        margin: 0;
+    }
+
+    .title, .author {
+        text-align: center;
+    }
+
+    .title, .subheader:first-child, img + .subheader, .suggestions {
+        font-family: "League Spartan", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 700;
+        font-style: normal;
+        background-color: var(--eerie-black);
+        color: var(--white-smoke);
+        border-top: var(--border-size-small) ridge var(--sunset);
+        border-bottom: var(--border-size-small) ridge var(--sunset);
+    }
+
+    .title:first-child, .subheader:first-child, .suggestions:first-child {
+        border-top: none;
+    }
+
+    .title:last-child, .subheader:last-child, .suggestions:last-child {
+        border-bottom: none;
+    }
+
+    .title, .subheader:first-child, img + .subheader {
+        font-size: 1.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+
+    x-instruction {
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    x-instruction:hover {
+        text-decoration: underline;
+    }
+
+    .suggestions {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        position: relative;
+        max-height: calc((10px * 3) + (32px * 3) + (6px * 2));
+        box-sizing: border-box;
+        overflow: hidden;
+        padding-left: 44px;
+    }
+
+    .suggestions::before {
+        content: "";
+        display: inline-block;
+        background-image: url(/icons/lightbulb-regular.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+        height: 100%;
+        width: 24px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin-left: 10px;
+    }
+
+    .suggestions x-instruction {
+        border: 2px solid var(--white-smoke);
+        border-radius: 7px;
+        padding: 6px 7px 6px 6px;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    .suggestions x-instruction.hidden {
+        visibility: hidden;
+        display: inline;
+    }
+
+    .suggestions x-instruction:hover {
+        text-decoration: none;
+        background-color: var(--white-smoke);
+        color: var(--eerie-black);
+    }
+}
