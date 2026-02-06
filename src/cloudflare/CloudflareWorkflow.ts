@@ -1,5 +1,4 @@
-import type { Params } from "@cloudflare/workers-types";
-import type {Env} from "../Application.ts";
+import type {Params} from "@cloudflare/workers-types";
 // @ts-ignore
 import {WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep} from "cloudflare:workers";
 import type {IllustrationDependencies} from "../content/IllustrationHandler.ts";

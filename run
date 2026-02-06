@@ -103,8 +103,7 @@ function start() {
 function startw() {
   check
   build-client
-  sed -n '/# CUT HERE/q;p' wrangler.toml > wrangler-local.toml
-  bunx wrangler -c wrangler-local.toml dev --remote --port 3000
+  bunx wrangler dev --remote --port 3000
 }
 
 function tail() {

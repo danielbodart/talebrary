@@ -1,12 +1,4 @@
-import type {
-    Blob,
-    Headers,
-    R2Checksums,
-    R2HTTPMetadata,
-    R2ObjectBody,
-    R2Range,
-    ReadableStream
-} from "@cloudflare/workers-types";
+import type {Blob, Headers, R2Checksums, R2HTTPMetadata, R2ObjectBody, R2Range, ReadableStream} from "@cloudflare/workers-types";
 import {type BunFile} from "bun";
 import {Strings} from "./Strings.ts";
 

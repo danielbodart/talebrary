@@ -1,4 +1,4 @@
-import {application, type Env} from "../Application.ts";
+import {application} from "../Application.ts";
 import {crossOriginIsolation} from "../http/CrossOriginIsolation.ts";
 import {client} from "../http/mod.ts";
 import {md5} from "../system/digest.ts";

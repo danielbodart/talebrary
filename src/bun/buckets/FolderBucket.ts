@@ -1,18 +1,4 @@
-import type {
-    Blob,
-    Headers,
-    R2Bucket,
-    R2Conditional,
-    R2GetOptions,
-    R2ListOptions,
-    R2MultipartOptions,
-    R2MultipartUpload,
-    R2Object,
-    R2ObjectBody,
-    R2Objects,
-    R2PutOptions,
-    ReadableStream
-} from "@cloudflare/workers-types";
+import type {Blob, Headers, R2Bucket, R2Conditional, R2GetOptions, R2ListOptions, R2MultipartOptions, R2MultipartUpload, R2Object, R2ObjectBody, R2Objects, R2PutOptions, ReadableStream} from "@cloudflare/workers-types";
 import {file} from "bun";
 import {setAttribute} from "./attributes.ts";
 import {FileObject} from "./FileObject.ts";

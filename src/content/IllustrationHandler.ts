@@ -1,5 +1,4 @@
 import type {Ai} from "@cloudflare/workers-types";
-
 import {Uri} from "../http/Uri.ts";
 
 import type {Dependency} from "../yadic/mod.ts";

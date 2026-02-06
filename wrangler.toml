@@ -19,9 +19,6 @@ preview_bucket_name = 'talebrary'
 [ai]
 binding = "ai"
 
-# CUT HERE
-# Everything after this line will be removed when running wrangler dev
-
 [[workflows]]
 name = "talebrary"
 binding = "WORKFLOW"

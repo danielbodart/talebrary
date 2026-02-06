@@ -1,4 +1,4 @@
-import {Ai, D1Database, R2Bucket} from "@cloudflare/workers-types";
+import type {Ai, D1Database, R2Bucket} from "@cloudflare/workers-types";
 import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
 import {type Http} from "./http/mod.ts";
@@ -17,12 +17,6 @@ import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {EventHandler} from "./events/EventHandler.ts";
 import {constructor, LazyMap, type Dependency} from "./yadic/mod.ts";
-
-export interface Env {
-    db: D1Database;
-    r2: R2Bucket;
-    ai: Ai;
-}
 
 export interface ApplicationDependencies extends
     Dependency<'http', Http>,
