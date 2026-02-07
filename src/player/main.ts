@@ -13,12 +13,13 @@ if (!story) throw new Error("Could not find story");
 
 const storyUrl = story.href;
 
-// Fetch story to detect format (needed to determine interpreter WASM URL)
 const storyResponse = await fetch(storyUrl);
 if (!storyResponse.ok) throw new Error(`Failed to load story: ${storyResponse.status}`);
 const storyData = new Uint8Array(await storyResponse.arrayBuffer());
-const formatInfo = detectFormat(storyUrl, storyData);
-console.log('[player] Format detected:', formatInfo, 'interpreterUrl:', `/wasiglk/${formatInfo.interpreter}.wasm`);
+
+// Use server-provided game type when available, fall back to auto-detection
+const interpreter = interpreterFor(story.dataset.type) ?? detectFormat(storyUrl, storyData).interpreter;
+console.log('[player] Interpreter:', interpreter, 'type:', story.dataset.type);
 
 customElements.define('x-image', ImageElement, {extends: 'img'});
 customElements.define('x-instruction', Instruction);
@@ -34,11 +35,11 @@ const ifEl = document.querySelector<InteractiveFiction>('interactive-fiction')
 if (!ifEl.parentElement) document.body.appendChild(ifEl);
 
 document.addEventListener(InstructionEventName, (ev: Event) => {
-    const {text, partial} = (ev as CustomEvent<InstructionDetail>).detail;
+    const {text, partial, completions} = (ev as CustomEvent<InstructionDetail>).detail;
     const input = document.querySelector<UserInput>('user-input');
     if (!input) return;
     if (partial) {
-        input.setPrefix(text);
+        input.setPrefix(text, completions);
     } else {
         input.appendText(text);
     }
@@ -49,8 +50,26 @@ controlKeys(document);
 const client = await createClient({
     storyData,
     workerUrl: '/wasiglk/worker.js',
-    interpreterUrl: `/wasiglk/${formatInfo.interpreter}.wasm`,
+    interpreterUrl: `/wasiglk/${interpreter}.wasm`,
     filesystem: 'auto',
 });
 
 ifEl.run(client);
+
+function interpreterFor(type: string | undefined): string | undefined {
+    const map: Record<string, string> = {
+        'zcode': 'fizmo',
+        'blorb/zcode': 'fizmo',
+        'glulx': 'glulxe',
+        'blorb/glulx': 'glulxe',
+        'hugo': 'hugo',
+        'adrift': 'scare',
+        'alan2': 'alan2',
+        'alan3': 'alan3',
+        'agt': 'agility',
+        'advsys': 'advsys',
+        'tads2': 'tads2',
+        'tads3': 'tads3',
+    };
+    return type ? map[type] : undefined;
+}
