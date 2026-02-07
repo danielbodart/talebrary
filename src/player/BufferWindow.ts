@@ -4,33 +4,15 @@ import {capitalWords, wordCount} from "../system/Strings.ts";
 
 export class BufferWindow extends HTMLElement {
     private sceneDetector = new SceneDetector();
-    private lastRawText = '';
 
     updateContent(content: ProcessedContentSpan[], clear: boolean) {
         // Remove intro card when game content arrives
         document.querySelector('main.story')?.remove();
 
-        if (clear) {
-            this.replaceChildren();
-            this.lastRawText = '';
-        }
+        if (clear) this.replaceChildren();
 
-        // Check if previous content ended at a paragraph boundary (newline or empty)
-        const prevText = this.lastRawText.replace(/>\s*$/, '');
-        const prevEndedParagraph = prevText === '' || prevText.endsWith('\n');
-
-        // Track raw text for next call
-        const lastTextSpan = [...content].reverse().find(s => s.type === 'text');
-        if (lastTextSpan?.text) this.lastRawText = lastTextSpan.text;
-
-        // Split multi-line text spans into one span per line
-        const split = content.flatMap(s =>
-            s.type === 'text' && s.text?.includes('\n')
-                ? s.text.split('\n').map(line => ({...s, text: line}))
-                : [s]
-        );
-
-        const lines = split.filter(s => s.type === 'text' && s.text?.trim() && s.text.trim() !== '>');
+        // Group spans into lines (split on newlines), then lines into cards
+        const lines = this.groupIntoLines(content);
         if (lines.length === 0) return;
 
         const cards = this.groupIntoCards(lines);
@@ -39,15 +21,12 @@ export class BufferWindow extends HTMLElement {
         const lastSection = this.querySelector<HTMLElement>('section.card:last-of-type');
         if (lastSection && cards.length > 0) {
             const firstNewCard = cards[0];
-            const firstIsHeader = firstNewCard[0]?.style === 'header' || firstNewCard[0]?.style === 'subheader';
+            const firstIsHeader = firstNewCard[0]?.[0]?.style === 'header' || firstNewCard[0]?.[0]?.style === 'subheader';
             const lastHasNormal = lastSection.querySelector('.normal') !== null;
 
-            // Only start a new card for a header when previous content ended at a paragraph boundary.
-            // Inline subheaders (e.g. "land" in "You going to land any time soon?") arrive as separate
-            // spans but should merge into the current card, not start a new one.
-            if (!firstIsHeader || !lastHasNormal || !prevEndedParagraph) {
-                for (const span of firstNewCard) {
-                    this.appendSpan(lastSection, span);
+            if (!firstIsHeader || !lastHasNormal) {
+                for (const line of firstNewCard) {
+                    this.appendLine(lastSection, line);
                 }
                 lastSection.classList.add('scroll');
                 cards.shift();
@@ -57,8 +36,8 @@ export class BufferWindow extends HTMLElement {
         for (const card of cards) {
             const section = document.createElement('section');
             section.classList.add('card', 'scroll');
-            for (const span of card) {
-                this.appendSpan(section, span);
+            for (const line of card) {
+                this.appendLine(section, line);
             }
             this.appendChild(section);
         }
@@ -66,25 +45,75 @@ export class BufferWindow extends HTMLElement {
         this.scrollToLatest();
     }
 
-    private appendSpan(section: HTMLElement, span: ProcessedContentSpan) {
-        const div = document.createElement('div');
-        div.className = span.style ?? 'normal';
-        if (span.style === 'normal' || !span.style) {
-            div.append(...this.createInstructions(span.text ?? ''));
+    private appendLine(section: HTMLElement, line: ProcessedContentSpan[]) {
+        if (line.length === 1) {
+            const span = line[0];
+            const div = document.createElement('div');
+            div.className = span.style ?? 'normal';
+            if (span.style === 'normal' || !span.style) {
+                div.append(...this.createInstructions(span.text ?? ''));
+            } else {
+                div.textContent = span.text ?? '';
+            }
+            section.appendChild(div);
         } else {
-            div.textContent = span.text ?? '';
+            // Multiple spans on one line — wrap in div with inline spans (like old UpdateRenderer)
+            const div = document.createElement('div');
+            div.className = 'normal';
+            for (const span of line) {
+                const el = document.createElement('span');
+                el.className = span.style ?? 'normal';
+                if (span.style === 'normal' || !span.style) {
+                    el.append(...this.createInstructions(span.text ?? ''));
+                } else {
+                    el.textContent = span.text ?? '';
+                }
+                div.appendChild(el);
+            }
+            section.appendChild(div);
         }
-        section.appendChild(div);
     }
 
-    private groupIntoCards(lines: ProcessedContentSpan[]): ProcessedContentSpan[][] {
-        const cards: ProcessedContentSpan[][] = [];
+    /** Split content on newlines into lines, where each line is an array of inline spans. */
+    private groupIntoLines(content: ProcessedContentSpan[]): ProcessedContentSpan[][] {
+        const lines: ProcessedContentSpan[][] = [];
         let current: ProcessedContentSpan[] = [];
 
+        for (const span of content) {
+            if (span.type !== 'text') continue;
+            const text = span.text ?? '';
+            if (!text.includes('\n')) {
+                if (text.trim() && text.trim() !== '>') current.push(span);
+                continue;
+            }
+            const parts = text.split('\n');
+            for (let i = 0; i < parts.length; i++) {
+                if (i > 0 && current.length > 0) {
+                    lines.push(current);
+                    current = [];
+                }
+                const part = parts[i];
+                if (part.trim() && part.trim() !== '>') {
+                    current.push({...span, text: part});
+                }
+            }
+        }
+        if (current.length > 0) lines.push(current);
+
+        return lines;
+    }
+
+    /** Group lines into cards, splitting when a header follows normal content. */
+    private groupIntoCards(lines: ProcessedContentSpan[][]): ProcessedContentSpan[][][] {
+        const cards: ProcessedContentSpan[][][] = [];
+        let current: ProcessedContentSpan[][] = [];
+
         for (const line of lines) {
-            const isHeader = line.style === 'header' || line.style === 'subheader';
+            const isHeader = line[0]?.style === 'header' || line[0]?.style === 'subheader';
             if (isHeader && current.length > 0) {
-                const prevHasNormal = current.some(l => l.style === 'normal' || l.style === 'input' || !l.style);
+                const prevHasNormal = current.some(l =>
+                    l.some(s => s.style === 'normal' || s.style === 'input' || !s.style)
+                );
                 if (prevHasNormal) {
                     cards.push(current);
                     current = [];
