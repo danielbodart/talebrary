@@ -13,6 +13,7 @@ export const imageModels = {
         '@cf/leonardo/lucid-origin',
         '@cf/black-forest-labs/flux-1-schnell',
         '@cf/leonardo/phoenix-1.0',
+        '@cf/black-forest-labs/flux-2-klein-9b',
     ],
 } as const;
 
