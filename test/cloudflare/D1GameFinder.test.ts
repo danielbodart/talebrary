@@ -68,6 +68,15 @@ describe("D1GameFinder", () => {
         expect(result.length).toEqual(20);
     });
 
+    test("can find by ids", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findByIds(['fft6pu91j85y4acv']);
+        expect(result).toBeArray();
+        expect(result.length).toBeGreaterThanOrEqual(1);
+        expect(result[0].id).toEqual('fft6pu91j85y4acv');
+        expect(result[0].playable).toEqual(1);
+    });
+
     test("can get tads3 game by id", async () => {
         const finder = new D1GameFinder({db});
         const result = await finder.get('qpecxgjpxnvw50xq');

@@ -15,10 +15,18 @@ export interface CuratedCategory extends Category {
     type: 'top-rated' | 'recent';
 }
 
-export type AnyCategory = GenreCategory | CuratedCategory;
+export interface HandPickedCategory extends Category {
+    games: string[];
+}
+
+export type AnyCategory = GenreCategory | CuratedCategory | HandPickedCategory;
 
 export function isGenreCategory(c: AnyCategory): c is GenreCategory {
     return 'genre' in c;
+}
+
+export function isHandPickedCategory(c: AnyCategory): c is HandPickedCategory {
+    return 'games' in c;
 }
 
 export interface Wing {
@@ -148,6 +156,27 @@ export const collections: Wing = {
             illustration: {
                 title: 'Recent Arrivals',
                 description: 'A new releases shelf with modern books, fresh and contemporary, warm welcoming display.',
+            },
+        },
+        {
+            id: 'classics',
+            title: 'Classics',
+            games: [
+                'fft6pu91j85y4acv', // Adventure (Colossal Cave)
+                '0dbnusxunq7fw5ro', // Zork I
+                'yzzm4puxyjakk8c4', // Zork II
+                'vrsot1zgy1wfcdru', // Zork III
+                'xe6kb3cuqwie2q38', // Planetfall
+                'ouv80gvsl32xlion', // The Hitchhiker's Guide to the Galaxy
+                'j18kjz80hxjtyayw', // Trinity
+                '4h62dvooeg9ajtfa', // A Mind Forever Voyaging
+                'vu4xhul3abknifcr', // Enchanter
+                'z02joykzh66wfhcl', // Wishbringer
+            ],
+            narrative: 'These weathered volumes occupy a place of honour in the library. The earliest works of interactive fiction, they laid the foundations for everything that followed. From the depths of the Great Underground Empire to the echoing caverns of Colossal Cave, these are the stories that started it all.',
+            illustration: {
+                title: 'Classics Collection',
+                description: 'An ancient, revered section of the library with worn leather-bound volumes on ornate wooden shelves. Brass plaques, candlelight, a sense of history and reverence.',
             },
         },
     ],

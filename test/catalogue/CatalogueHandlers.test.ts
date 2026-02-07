@@ -73,6 +73,14 @@ describe("CatalogueHandlers", () => {
             expect(html).toContain('class="play"');
         });
 
+        test("renders classics collection with hand-picked games", async () => {
+            const response = await handler.handle(new Request("http://test/catalogue/collections/classics"));
+            expect(response.status).toBe(200);
+            const html = await response.text();
+            expect(html).toContain("Classics");
+            expect(html).toContain("weathered volumes");
+        });
+
         test("returns 404 for unknown wing", async () => {
             const response = await handler.handle(new Request("http://test/catalogue/unknown/fantasy"));
             expect(response.status).toBe(404);

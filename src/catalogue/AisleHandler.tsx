@@ -1,7 +1,7 @@
 import {type D1GameFinder, type GameInfo} from "../cloudflare/D1GameFinder.ts";
 import {roundStep, wellFormed} from "../templates/misc.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
-import {type AnyCategory, findCategory, findWing, isGenreCategory, type Wing} from "./CatalogueConfig.ts";
+import {type AnyCategory, findCategory, findWing, isGenreCategory, isHandPickedCategory, type Wing} from "./CatalogueConfig.ts";
 import {Uri} from "../http/Uri.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
@@ -27,6 +27,9 @@ export class AisleHandler {
     private async findGames(category: AnyCategory): Promise<GameInfo[]> {
         if (isGenreCategory(category)) {
             return this.finder.findByGenre(category.genre);
+        }
+        if (isHandPickedCategory(category)) {
+            return this.finder.findByIds(category.games);
         }
         switch (category.type) {
             case 'top-rated':

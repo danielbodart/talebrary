@@ -174,6 +174,38 @@ export class D1GameFinder {
         return (await this.db.prepare(sql).all()).results as any;
     }
 
+    async findByIds(ids: string[]): Promise<GameInfo[]> {
+        const placeholders = ids.map((_, i) => `?${i + 1}`).join(', ');
+        const sql = `
+            WITH filtered_games AS (
+                SELECT g.id,
+                       0 AS rank,
+                       0 AS boost,
+                       g.title,
+                       g.author,
+                       g.desc AS description,
+                       ${playableSubquery} AS playable
+                FROM games g
+                WHERE g.id IN (${placeholders})
+            ),
+            ${gameReviewsCte}
+            SELECT fg.id,
+                   gr.rating,
+                   fg.rank,
+                   fg.boost,
+                   gr.rating AS score,
+                   fg.title,
+                   fg.author,
+                   fg.description,
+                   fg.playable
+            FROM filtered_games fg
+                     JOIN game_reviews gr USING (id)
+            WHERE fg.playable = 1
+            ORDER BY gr.rating DESC;
+        `;
+        return (await this.db.prepare(sql).bind(...ids).all()).results as any;
+    }
+
     async get(id: string): Promise<GameStory | null | undefined> {
         const sql = `
             select g.id, g.title, g.author, g.desc as description, l.url, f.externid as type, g.coverart
