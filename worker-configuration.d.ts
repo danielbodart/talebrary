@@ -12,6 +12,7 @@ declare namespace Cloudflare {
 		RCLONE_CONFIG_CLOUDFLARE_SECRET_ACCESS_KEY: string;
 		RCLONE_CONFIG_CLOUDFLARE_ENDPOINT: string;
 		WORKFLOW: Workflow /* CloudflareWorkflow from src/cloudflare/CloudflareWorkflow.ts */;
+		IFARCHIVE_PROXY: DurableObjectNamespace /* IfArchiveProxy from src/cloudflare/IfArchiveProxy.ts */;
 	}
 }
 interface Env extends Cloudflare.Env {}

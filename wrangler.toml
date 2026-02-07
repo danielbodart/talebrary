@@ -19,6 +19,14 @@ preview_bucket_name = 'talebrary'
 [ai]
 binding = "ai"
 
+[[durable_objects.bindings]]
+name = "IFARCHIVE_PROXY"
+class_name = "IfArchiveProxy"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["IfArchiveProxy"]
+
 [[workflows]]
 name = "talebrary"
 binding = "WORKFLOW"

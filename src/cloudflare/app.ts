@@ -1,9 +1,11 @@
 import {application} from "../Application.ts";
-import {client} from "../http/mod.ts";
 import {md5} from "../system/digest.ts";
+import {ifArchiveHttp} from "./IfArchiveHttp.ts";
+
+export {IfArchiveProxy} from "./IfArchiveProxy.ts";
 
 function app(env: Env) {
-    return application({http: client, digest: md5, ...env});
+    return application({http: ifArchiveHttp(env.IFARCHIVE_PROXY), digest: md5, ...env});
 }
 
 export default {
