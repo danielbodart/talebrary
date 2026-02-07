@@ -80,6 +80,11 @@ section {
         justify-content: space-evenly;
     }
 
+    .input {
+        opacity: 0.6;
+        font-style: italic;
+    }
+
     x-instruction {
         cursor: pointer;
         font-weight: 700;

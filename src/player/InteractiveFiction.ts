@@ -75,12 +75,12 @@ export class InteractiveFiction extends HTMLElement {
             (el as BufferWindow).updateContent(content, clear);
         } else if ('updateGridContent' in el) {
             (el as GridWindow).updateGridContent(content);
-        }
-    }
-
-    private getGridRoomTitle(): string | undefined {
-        for (const win of this.windows.values()) {
-            if ('roomTitle' in win) return (win as GridWindow).roomTitle || undefined;
+            const title = (el as GridWindow).roomTitle;
+            if (title) {
+                for (const win of this.windows.values()) {
+                    if ('gridTitle' in win) (win as BufferWindow).gridTitle = title;
+                }
+            }
         }
     }
 
@@ -93,11 +93,11 @@ export class InteractiveFiction extends HTMLElement {
 
         const input = document.createElement('user-input') as UserInput;
         input.configure(update, (value: string) => {
+            if ('echoInput' in el) (el as BufferWindow).echoInput(value);
             this.client?.sendInput(value);
         });
         if ('detectScene' in el) {
-            const gridTitle = this.getGridRoomTitle();
-            (el as BufferWindow).detectScene(gridTitle);
+            (el as BufferWindow).detectScene();
         }
 
         el.appendChild(input);

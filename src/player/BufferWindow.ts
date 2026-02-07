@@ -4,6 +4,7 @@ import {capitalWords, wordCount} from "../system/Strings.ts";
 
 export class BufferWindow extends HTMLElement {
     private sceneDetector = new SceneDetector();
+    gridTitle = '';
 
     updateContent(content: ProcessedContentSpan[], clear: boolean) {
         // Remove intro card when game content arrives
@@ -15,6 +16,7 @@ export class BufferWindow extends HTMLElement {
         const lines = this.groupIntoLines(content);
         if (lines.length === 0) return;
 
+        this.promoteGridTitleLines(lines);
         const cards = this.groupIntoCards(lines);
 
         // Merge first new card with last existing card if appropriate
@@ -126,6 +128,16 @@ export class BufferWindow extends HTMLElement {
         return cards;
     }
 
+    /** When a single-span line matches the grid window's room title, promote it to subheader. */
+    private promoteGridTitleLines(lines: ProcessedContentSpan[][]) {
+        if (!this.gridTitle) return;
+        for (const line of lines) {
+            if (line.length === 1 && line[0].text?.trim() === this.gridTitle) {
+                line[0] = {...line[0], style: 'subheader'};
+            }
+        }
+    }
+
     private createInstructions(text: string): (HTMLElement | string)[] {
         const result: (HTMLElement | string)[] = [];
         let position = 0;
@@ -152,10 +164,19 @@ export class BufferWindow extends HTMLElement {
         return result;
     }
 
-    detectScene(gridTitle?: string) {
+    echoInput(text: string) {
+        const lastSection = this.querySelector<HTMLElement>('section.card:last-of-type');
+        if (!lastSection) return;
+        const div = document.createElement('div');
+        div.className = 'input';
+        div.textContent = `> ${text}`;
+        lastSection.appendChild(div);
+    }
+
+    detectScene() {
         const lastCard = this.querySelector<HTMLElement>('section.card:last-of-type');
         if (!lastCard) return;
-        this.sceneDetector.detect(lastCard, gridTitle);
+        this.sceneDetector.detect(lastCard);
     }
 
     private scrollToLatest() {

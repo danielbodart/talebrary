@@ -25,7 +25,9 @@ export class GridWindow extends HTMLElement {
     get roomTitle(): string {
         const firstLine = this.lineElements[0];
         if (!firstLine) return '';
-        return firstLine.textContent?.trim() ?? '';
+        const text = firstLine.textContent ?? '';
+        const parts = text.split(/\s{2,}/);
+        return parts[0]?.trim() ?? '';
     }
 
     updateGridContent(content: ProcessedContentSpan[]) {

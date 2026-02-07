@@ -4,23 +4,20 @@ import {collapseSuggestions} from "./PrefixTree.ts";
 
 export class SceneDetector {
     private models = ['llama+stable-diffusion'];
-    private lastGridTitle = '';
 
-    detect(card: HTMLElement, gridTitle?: string) {
+    detect(card: HTMLElement) {
         const hasHeader = card.querySelector('.header, .subheader');
         const hasNormal = card.querySelector('.normal');
         const hasImage = card.querySelector('.image');
         const hasInput = card.querySelector('user-input');
 
-        const hasScene = hasHeader || (gridTitle && gridTitle !== this.lastGridTitle);
-        if (!hasScene || !hasNormal || hasImage || hasInput) return;
-        if (gridTitle) this.lastGridTitle = gridTitle;
+        if (!hasHeader || !hasNormal || hasImage || hasInput) return;
 
         const path = window.location.pathname;
         const [, , id] = path.split('/');
         if (!id) return;
 
-        const current = this.extractScene(card, gridTitle);
+        const current = this.extractScene(card);
         const data: SceneContext = {
             story: {
                 title: document.title,
@@ -67,11 +64,11 @@ export class SceneDetector {
         navigator.sendBeacon('/events', JSON.stringify(event));
     }
 
-    private extractScene(card: HTMLElement, gridTitle?: string): Describable {
+    private extractScene(card: HTMLElement): Describable {
         const titleEl = card.querySelector<HTMLElement>('.header, .subheader');
         const normalEls = Array.from(card.querySelectorAll<HTMLElement>(':scope > .normal'));
         return {
-            title: titleEl?.innerText ?? gridTitle ?? '',
+            title: titleEl?.innerText ?? '',
             description: normalEls.map(e => e.innerText).join(' '),
         };
     }
