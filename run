@@ -124,6 +124,14 @@ function pull() {
   rclone --config rclone.conf copy cloudflare:talebrary/cards/art www/cards/art --metadata -v
 }
 
+function evals() {
+  bun run evals/run-evals.ts "$@"
+}
+
+function evals-ui() {
+  bun run evals/serve-evals.ts
+}
+
 function ci() {
   check
   build-client

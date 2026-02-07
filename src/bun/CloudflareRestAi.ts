@@ -8,13 +8,16 @@ export class CloudflareRestAi {
     }
 
     async run(model: string, input: any): Promise<any> {
+        const {body, contentType} = this.buildBody(model, input);
+        const headers: Record<string, string> = {
+            'Authorization': `Bearer ${this.apiToken}`,
+        };
+        if (contentType) headers['Content-Type'] = contentType;
+
         const request = new Request(`${this.baseUrl}/${model}`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${this.apiToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(input),
+            headers,
+            body,
         });
 
         const response = await this.http(request);
@@ -24,17 +27,40 @@ export class CloudflareRestAi {
             throw new Error(`Cloudflare AI API error ${response.status}: ${text}`);
         }
 
-        const contentType = response.headers.get('content-type') ?? '';
-        console.log('CloudflareRestAi', model, 'content-type:', contentType, 'status:', response.status);
-        if (contentType.includes('image/')) {
+        const responseContentType = response.headers.get('content-type') ?? '';
+        console.log('CloudflareRestAi', model, 'content-type:', responseContentType, 'status:', response.status);
+        if (responseContentType.includes('image/')) {
             return new Uint8Array(await response.arrayBuffer());
         }
 
         const json: any = await response.json();
         const result = json.result;
+        if (result?.image && typeof result.image === 'string') {
+            return Uint8Array.from(atob(result.image), c => c.charCodeAt(0));
+        }
         if (result?.response && typeof result.response !== 'string') {
+            if (Array.isArray(result.response.choices)) {
+                return result.response;
+            }
             result.response = JSON.stringify(result.response);
         }
         return result;
+    }
+
+    private buildBody(model: string, input: any): {body: BodyInit; contentType: string | null} {
+        if (!model.includes('flux-2-klein')) {
+            return {body: JSON.stringify(input), contentType: 'application/json'};
+        }
+
+        const form = new FormData();
+        for (const [key, value] of Object.entries(input)) {
+            if (key.startsWith('input_image_') && typeof value === 'string') {
+                const bytes = Uint8Array.from(atob(value), c => c.charCodeAt(0));
+                form.append(key, new Blob([bytes]));
+            } else {
+                form.append(key, String(value));
+            }
+        }
+        return {body: form, contentType: null};
     }
 }

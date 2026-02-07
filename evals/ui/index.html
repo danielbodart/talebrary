@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talebrary Evals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+    <header>
+        <h1>Talebrary <span class="accent">Evals</span></h1>
+    </header>
+
+    <nav id="tabs">
+        <button class="tab active" data-panel="text">Text</button>
+        <button class="tab" data-panel="images">Images</button>
+        <button class="tab" data-panel="img2img">Img2Img</button>
+        <button class="tab" data-panel="summary">Summary</button>
+        <div class="run-selector">
+            <select id="run-select"></select>
+        </div>
+    </nav>
+
+    <main>
+        <div id="text" class="panel active"></div>
+        <div id="images" class="panel"></div>
+        <div id="img2img" class="panel"></div>
+        <div id="summary" class="panel"></div>
+    </main>
+
+    <dialog id="lightbox">
+        <img id="lightbox-img" alt="">
+    </dialog>
+
+    <script src="/main.js" type="module"></script>
+</body>
+</html>
