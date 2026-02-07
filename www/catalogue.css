@@ -43,11 +43,7 @@
     color: var(--eerie-black);
 }
 
-/* --- Search form on atrium --- */
-
-.catalogue .input-control {
-    margin-top: calc(var(--padding-large) * -1 + 2px);
-}
+/* --- Search form --- */
 
 /* --- Sticky location bar (aisle pages) --- */
 

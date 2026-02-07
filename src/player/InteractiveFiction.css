@@ -26,4 +26,15 @@ interactive-fiction {
     buffer-window section.card:first-child {
         margin-top: calc(18px + var(--border-size) + var(--padding));
     }
+
+    user-input {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        margin: 0 auto;
+        min-width: 300px;
+        max-width: calc(600px + var(--border-size) * 2);
+    }
 }

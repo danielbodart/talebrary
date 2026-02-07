@@ -30,27 +30,31 @@ function render(wing: Wing): string {
         </head>
         <body>
         <main class="story catalogue">
-            <div class="window buffer">
+            <div class="window grid">
                 <div class="card">
-                    <img class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
-                    <div class="title">{wing.title}</div>
-                </div>
-                <div class="card">
-                    <div class="header">{wing.title}</div>
-                    <div class="normal">{wing.narrative}</div>
-                    <div class="suggestions nav">
-                        <x-instruction>search...</x-instruction>
-                        <a href="/catalogue">go back</a>
-                        {wing.categories.map(cat =>
-                            <a href={`/catalogue/${wing.id}/${cat.id}`}>go {cat.id}</a>
-                        )}
+                    <div class="breadcrumb">
+                        <a href="/catalogue">Atrium</a>
+                        <span class="sep">{'\u203A'}</span>
+                        <span class="current">{wing.title}</span>
                     </div>
                 </div>
-                <div class="card input-control">
-                    <form class="input" action="/content">
-                        <input type="text" maxlength={256} name="search"/>
-                    </form>
+            </div>
+            <div class="card scene-card">
+                <img class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
+                <div class="title">{wing.title}</div>
+                <div class="normal">{wing.narrative}</div>
+                <div class="suggestions nav">
+                    <x-instruction>search...</x-instruction>
+                    <a href="/catalogue">go back</a>
+                    {wing.categories.map(cat =>
+                        <a href={`/catalogue/${wing.id}/${cat.id}`}>go {cat.id}</a>
+                    )}
                 </div>
+            </div>
+            <div class="card input-control">
+                <form class="input" action="/content">
+                    <input type="text" maxlength={256} name="search"/>
+                </form>
             </div>
         </main>
         </body>

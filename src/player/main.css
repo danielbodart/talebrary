@@ -30,7 +30,7 @@
         background-size: cover;
         background-position: center bottom;
         margin: 0;
-        padding: 0;
+        padding: 0 0 80px;
         display: flex;
         flex-direction: column;
         align-items: center;
