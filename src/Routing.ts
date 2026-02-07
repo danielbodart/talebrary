@@ -31,7 +31,7 @@ export class Routing {
         const uri = new Uri(request.url);
         const [, section, id, subsection] = uri.path.split('/')
 
-        if (!section || section === 'catalogue') {
+        if (!section || (section === 'catalogue' && !id?.includes('.'))) {
             if (!id) return this.deps.atrium.handle(request);
             if (!subsection) return this.deps.wing.handle(request);
             return this.deps.aisle.handle(request);

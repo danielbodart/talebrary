@@ -7,3 +7,9 @@ interface HTMLMetaElement {
 interface HTMLElement {
     is: string;
 }
+
+namespace JSX {
+    interface IntrinsicElements {
+        'x-instruction': HtmlTag;
+    }
+}

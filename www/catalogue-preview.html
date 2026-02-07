@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue Design Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inconsolata:wdth,wght@75,200..900&family=League+Spartan:wght@100..900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/card.css">
+    <link rel="stylesheet" href="/catalogue.css">
+    <style>
+        /* Preview navigation between the three demos */
+        .preview-nav {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .preview-nav a {
+            font-family: "League Spartan", sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 14px;
+            background: var(--eminence);
+            border: 2px solid var(--purpureus);
+            border-radius: 7px;
+            color: var(--white-smoke);
+            text-decoration: none;
+            text-align: center;
+        }
+        .preview-nav a:hover {
+            background: var(--purpureus);
+        }
+        .preview-nav a.active {
+            background: var(--sunset);
+            color: var(--eerie-black);
+            border-color: var(--lion);
+        }
+
+        /* Hide all demos by default, show one at a time */
+        .demo { display: none; }
+        .demo:target { display: block; }
+        /* Show atrium by default when no hash */
+        .demo:first-of-type { display: block; }
+        .demo:first-of-type:has(~ .demo:target) { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================
+     DEMO 1: THE ATRIUM (Homepage)
+     ============================================================ -->
+<div class="demo" id="atrium">
+<main class="story catalogue">
+    <div class="window buffer">
+        <div class="card">
+            <img class="image" src="/library.jpeg" loading="lazy" alt="" aria-hidden="true">
+            <div class="title">The Talebrary Athenaeum</div>
+        </div>
+        <div class="card">
+            <div class="header">The Atrium</div>
+            <div class="normal">You find yourself standing in the atrium of a vast library. Before you stands the
+                librarian, ready to help you find whatever adventure you require. To either side, grand archways
+                lead to different wings of the collection. A brass plaque on the wall reads:
+                <em>"Over 3,000 playable adventures await within."</em>
+            </div>
+            <div class="suggestions nav">
+                <a href="#wing"><x-instruction>Genre Wings</x-instruction></a>
+                <a href="#wing"><x-instruction>Special Collections</x-instruction></a>
+                <a href="#wing"><x-instruction>Discovery Lab</x-instruction></a>
+            </div>
+        </div>
+        <div class="card input-control">
+            <form class="input" action="/content">
+                <input type="text" maxlength="256" name="search" placeholder="">
+            </form>
+        </div>
+    </div>
+</main>
+</div>
+
+<!-- ============================================================
+     DEMO 2: WING PAGE (Category of Categories)
+     ============================================================ -->
+<div class="demo" id="wing">
+<main class="story catalogue">
+    <div class="window buffer">
+        <div class="card">
+            <img class="image" src="/library.jpeg" loading="lazy" alt="" aria-hidden="true">
+            <div class="title">Genre Wings</div>
+        </div>
+        <div class="card">
+            <div class="header">The Genre Hall</div>
+            <div class="normal">You step through the eastern archway into a vast hall lined with towering shelves.
+                Each aisle is marked with a bronze plaque denoting a different genre of interactive fiction.
+                The air smells of old paper and possibility. Somewhere deeper in the stacks,
+                you can hear the faint turning of pages.
+            </div>
+            <div class="suggestions nav">
+                <a href="#atrium"><x-instruction>Return to Atrium</x-instruction></a>
+                <a href="#aisle"><x-instruction>Fantasy Aisle</x-instruction></a>
+                <a href="#aisle"><x-instruction>Horror Aisle</x-instruction></a>
+                <a href="#aisle"><x-instruction>Science Fiction Aisle</x-instruction></a>
+                <a href="#aisle"><x-instruction>Mystery Aisle</x-instruction></a>
+                <a href="#aisle"><x-instruction>Humor Aisle</x-instruction></a>
+                <a href="#aisle"><x-instruction>Slice of Life Aisle</x-instruction></a>
+                <a href="#aisle"><x-instruction>Surreal Aisle</x-instruction></a>
+                <a href="#aisle"><x-instruction>Historical Aisle</x-instruction></a>
+            </div>
+        </div>
+    </div>
+</main>
+</div>
+
+<!-- ============================================================
+     DEMO 3: AISLE PAGE (Category with Game Results)
+     ============================================================ -->
+<div class="demo" id="aisle">
+<main class="story catalogue">
+    <!-- Sticky location bar -->
+    <div class="window grid">
+        <div class="card">
+            <div class="breadcrumb">
+                <a href="#atrium">Atrium</a>
+                <span class="sep">&rsaquo;</span>
+                <a href="#wing">Genre Wings</a>
+                <span class="sep">&rsaquo;</span>
+                <span class="current">Fantasy Aisle</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scene intro -->
+    <div class="card scene-card">
+        <img class="image" src="/library.jpeg" loading="lazy" alt="" aria-hidden="true">
+        <div class="title">Fantasy Aisle</div>
+        <div class="normal">Dragons, wizards, and ancient artifacts line these shelves. Stories of
+            magic and heroic quests await those brave enough to open these covers. The spines
+            shimmer faintly in the lamplight, each one a doorway to another world.
+        </div>
+        <div class="suggestions nav">
+            <a href="#wing"><x-instruction>Return to Genre Wings</x-instruction></a>
+            <a href="#aisle"><x-instruction>Horror Aisle</x-instruction></a>
+            <a href="#aisle"><x-instruction>Science Fiction Aisle</x-instruction></a>
+        </div>
+    </div>
+
+    <!-- Game results -->
+    <div class="window buffer">
+        <div class="card">
+            <div class="rating" aria-label="Rating" role="img">4.5</div>
+            <img class="image" src="/library.jpeg" loading="lazy" alt="" aria-hidden="true">
+            <div class="title">Lost Pig</div>
+            <div class="author">Admiral Jota</div>
+            <div class="description">Pig lost! Boss say that it Grunk fault. Say Grunk go find pig. Grunk not know where pig go...</div>
+            <a class="play" href="#">Play</a>
+        </div>
+
+        <div class="card">
+            <div class="rating" aria-label="Rating" role="img">4.8</div>
+            <img class="image" src="/library.jpeg" loading="lazy" alt="" aria-hidden="true">
+            <div class="title">Counterfeit Monkey</div>
+            <div class="author">Emily Short</div>
+            <div class="description">Anglophone Atlantis has been taken over by the Bureau of Orthography, which controls the island through the power of language...</div>
+            <a class="play" href="#">Play</a>
+        </div>
+
+        <div class="card">
+            <div class="rating" aria-label="Rating" role="img">4.3</div>
+            <img class="image" src="/library.jpeg" loading="lazy" alt="" aria-hidden="true">
+            <div class="title">Anchorhead</div>
+            <div class="author">Michael Gentry</div>
+            <div class="description">You take a deep breath of salty air as you step out of the car and survey your new home...</div>
+            <a class="play" href="#">Play</a>
+        </div>
+    </div>
+</main>
+</div>
+
+<!-- Preview navigation -->
+<nav class="preview-nav">
+    <a href="#atrium">Atrium</a>
+    <a href="#wing">Wing</a>
+    <a href="#aisle">Aisle</a>
+</nav>
+
+<script>
+    // Register custom elements for bin-pack behavior
+    class PreviewSuggestions extends HTMLElement {
+        connectedCallback() {
+            this.classList.add('suggestions');
+        }
+    }
+    class PreviewInstruction extends HTMLElement {
+        constructor() {
+            super();
+            this.style.cursor = 'pointer';
+        }
+    }
+    customElements.define('x-suggestions', PreviewSuggestions);
+    customElements.define('x-instruction', PreviewInstruction);
+</script>
+
+</body>
+</html>

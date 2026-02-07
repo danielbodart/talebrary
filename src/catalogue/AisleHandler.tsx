@@ -49,6 +49,7 @@ function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
             <title>{category.title} - {wing.title} - Talebrary</title>
             <meta name="template" content="card"/>
             <link rel="stylesheet" href="/catalogue.css"/>
+            <script src="/catalogue/main.js" type="module"></script>
         </head>
         <body>
         <main class="story catalogue">
@@ -69,6 +70,7 @@ function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
                 <div class="title">{category.title}</div>
                 <div class="normal">{category.narrative}</div>
                 <div class="suggestions nav">
+                    <x-instruction>search...</x-instruction>
                     <a href={`/catalogue/${wing.id}`}>go back</a>
                     {wing.categories
                         .filter(c => c.id !== category.id)
@@ -76,6 +78,12 @@ function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
                         .map(c => <a href={`/catalogue/${wing.id}/${c.id}`}>go {c.id}</a>
                         )}
                 </div>
+            </div>
+
+            <div class="card input-control">
+                <form class="input" action="/content">
+                    <input type="text" maxlength={256} name="search"/>
+                </form>
             </div>
 
             <div class="window buffer">

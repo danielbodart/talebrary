@@ -58,7 +58,7 @@ function build-client() {
   local option=${1}
   local src="./src"
   local dest="./www"
-  local folders=("player" "cards")
+  local folders=("player" "cards" "catalogue")
 
   local bun_prefix=""
   local bg_suffix=""

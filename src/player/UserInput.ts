@@ -70,6 +70,13 @@ export class UserInput extends HTMLElement {
         }
     }
 
+    setPrefix(text: string) {
+        if (this.inputEl) {
+            this.inputEl.value = `${text} `;
+            this.inputEl.focus({preventScroll: true});
+        }
+    }
+
     override focus() {
         this.inputEl?.focus({preventScroll: true});
     }

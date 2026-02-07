@@ -23,7 +23,8 @@
     background-image: url('icons/dungeon-solid.svg');
 }
 
-.catalogue .suggestions.nav a {
+.catalogue .suggestions.nav a,
+.catalogue .suggestions.nav x-instruction {
     border: 2px solid var(--white-smoke);
     border-radius: 7px;
     padding: 6px 7px 6px 6px;
@@ -35,7 +36,8 @@
     font-weight: 700;
 }
 
-.catalogue .suggestions.nav a:hover {
+.catalogue .suggestions.nav a:hover,
+.catalogue .suggestions.nav x-instruction:hover {
     text-decoration: none;
     background-color: var(--white-smoke);
     color: var(--eerie-black);

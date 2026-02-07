@@ -14,6 +14,7 @@ function render(): string {
             <title>The Talebrary Athenaeum</title>
             <meta name="template" content="card"/>
             <link rel="stylesheet" href="/catalogue.css"/>
+            <script src="/catalogue/main.js" type="module"></script>
         </head>
         <body>
         <main class="story catalogue">
@@ -30,6 +31,7 @@ function render(): string {
                         {' '}<em>"Over 3,000 playable adventures await within."</em>
                     </div>
                     <div class="suggestions nav">
+                        <x-instruction>search...</x-instruction>
                         {CATALOGUE.map(wing =>
                             <a href={`/catalogue/${wing.id}`}>go {wing.id}</a>
                         )}

@@ -5,7 +5,7 @@ import {GridWindow} from "./GridWindow.ts";
 import {UserInput} from "./UserInput.ts";
 import {Suggestions} from "./Suggestions.ts";
 import {ImageElement} from "./ImageElement.ts";
-import {Instruction, InstructionEventName} from "./Instruction.ts";
+import {type InstructionDetail, Instruction, InstructionEventName} from "./Instruction.ts";
 import {controlKeys} from "./controlKeys.ts";
 
 const story = document.querySelector<HTMLLinkElement>('#story');
@@ -34,9 +34,14 @@ const ifEl = document.querySelector<InteractiveFiction>('interactive-fiction')
 if (!ifEl.parentElement) document.body.appendChild(ifEl);
 
 document.addEventListener(InstructionEventName, (ev: Event) => {
-    const detail = (ev as CustomEvent<{text: string}>).detail;
+    const {text, partial} = (ev as CustomEvent<InstructionDetail>).detail;
     const input = document.querySelector<UserInput>('user-input');
-    if (input) input.appendText(detail.text);
+    if (!input) return;
+    if (partial) {
+        input.setPrefix(text);
+    } else {
+        input.appendText(text);
+    }
 });
 
 controlKeys(document);

@@ -26,6 +26,7 @@ function render(wing: Wing): string {
             <title>{wing.title} - Talebrary</title>
             <meta name="template" content="card"/>
             <link rel="stylesheet" href="/catalogue.css"/>
+            <script src="/catalogue/main.js" type="module"></script>
         </head>
         <body>
         <main class="story catalogue">
@@ -38,11 +39,17 @@ function render(wing: Wing): string {
                     <div class="header">{wing.title}</div>
                     <div class="normal">{wing.narrative}</div>
                     <div class="suggestions nav">
+                        <x-instruction>search...</x-instruction>
                         <a href="/catalogue">go back</a>
                         {wing.categories.map(cat =>
                             <a href={`/catalogue/${wing.id}/${cat.id}`}>go {cat.id}</a>
                         )}
                     </div>
+                </div>
+                <div class="card input-control">
+                    <form class="input" action="/content">
+                        <input type="text" maxlength={256} name="search"/>
+                    </form>
                 </div>
             </div>
         </main>
