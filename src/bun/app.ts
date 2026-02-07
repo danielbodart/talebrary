@@ -7,8 +7,9 @@ import {md5} from "./digest.ts";
 import {DumbAi} from "./DumbAi.ts";
 import {CloudflareRestAi} from "./CloudflareRestAi.ts";
 import {client} from "../http/mod.ts";
+import {withProxy} from "./withProxy.ts";
 
-const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN} = process.env;
+const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, PROXY_URL, PROXY_TOKEN} = process.env;
 
 function ai(): any {
     if (CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_API_TOKEN) {
@@ -21,8 +22,15 @@ function ai(): any {
 
 const root = `${import.meta.dir}/../../www/`;
 const r2 = new FolderBucket(root);
+
+let http = localhostHandler(root);
+if (PROXY_URL && PROXY_TOKEN) {
+    console.log('Using IF Archive proxy via', PROXY_URL);
+    http = withProxy(http, PROXY_URL, PROXY_TOKEN);
+}
+
 const deps = {
-    http: localhostHandler(root),
+    http,
     db: talebrary(),
     r2,
     digest: md5,
