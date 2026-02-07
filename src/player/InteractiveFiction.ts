@@ -78,6 +78,12 @@ export class InteractiveFiction extends HTMLElement {
         }
     }
 
+    private getGridRoomTitle(): string | undefined {
+        for (const win of this.windows.values()) {
+            if ('roomTitle' in win) return (win as GridWindow).roomTitle || undefined;
+        }
+    }
+
     private updateInput(update: InputRequestClientUpdate) {
         // Remove any existing input
         this.querySelectorAll('user-input').forEach(el => el.remove());
@@ -90,7 +96,8 @@ export class InteractiveFiction extends HTMLElement {
             this.client?.sendInput(value);
         });
         if ('detectScene' in el) {
-            (el as BufferWindow).detectScene();
+            const gridTitle = this.getGridRoomTitle();
+            (el as BufferWindow).detectScene(gridTitle);
         }
 
         el.appendChild(input);

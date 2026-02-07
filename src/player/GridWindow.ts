@@ -22,6 +22,12 @@ export class GridWindow extends HTMLElement {
         }
     }
 
+    get roomTitle(): string {
+        const firstLine = this.lineElements[0];
+        if (!firstLine) return '';
+        return firstLine.textContent?.trim() ?? '';
+    }
+
     updateGridContent(content: ProcessedContentSpan[]) {
         // Grid content arrives as flat spans - render into first line
         const elements: HTMLElement[] = [];

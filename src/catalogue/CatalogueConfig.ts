@@ -167,7 +167,6 @@ export const collections: Wing = {
                 'yzzm4puxyjakk8c4', // Zork II
                 'vrsot1zgy1wfcdru', // Zork III
                 'xe6kb3cuqwie2q38', // Planetfall
-                'ouv80gvsl32xlion', // The Hitchhiker's Guide to the Galaxy
                 'j18kjz80hxjtyayw', // Trinity
                 '4h62dvooeg9ajtfa', // A Mind Forever Voyaging
                 'vu4xhul3abknifcr', // Enchanter

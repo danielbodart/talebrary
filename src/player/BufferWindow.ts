@@ -152,10 +152,10 @@ export class BufferWindow extends HTMLElement {
         return result;
     }
 
-    detectScene() {
+    detectScene(gridTitle?: string) {
         const lastCard = this.querySelector<HTMLElement>('section.card:last-of-type');
         if (!lastCard) return;
-        this.sceneDetector.detect(lastCard);
+        this.sceneDetector.detect(lastCard, gridTitle);
     }
 
     private scrollToLatest() {
