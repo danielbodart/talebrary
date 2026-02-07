@@ -14,3 +14,12 @@ wrangler-local.toml
 *.png
 tools
 .playwright-mcp/
+
+# build-client outputs
+www/player/main.js
+www/player/main.css
+www/cards/main.js
+www/cards/main.css
+www/catalogue/main.js
+www/catalogue/main.css
+www/wasiglk/
