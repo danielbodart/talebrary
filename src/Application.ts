@@ -16,6 +16,9 @@ import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {EventHandler} from "./events/EventHandler.ts";
+import {AtriumHandler} from "./catalogue/AtriumHandler.tsx";
+import {WingHandler} from "./catalogue/WingHandler.tsx";
+import {AisleHandler} from "./catalogue/AisleHandler.tsx";
 import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
@@ -42,6 +45,9 @@ export function application(deps: ApplicationDependencies) {
         .set('art', deps => new R2CachingHandler(deps, request => deps.illustration.handle(request)))
         .set('suggestions', constructor(SuggestionsHandler))
         .decorate('suggestions', deps => new R2CachingHandler(deps, request => deps.suggestions.handle(request)))
+        .set('atrium', constructor(AtriumHandler))
+        .set('wing', constructor(WingHandler))
+        .set('aisle', constructor(AisleHandler))
         .set('content', constructor(ContentHandler))
         .set('handler', constructor(Routing))
         .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request)))

@@ -1,0 +1,100 @@
+import {type D1GameFinder, type GameInfo} from "../cloudflare/D1GameFinder.ts";
+import {roundStep, wellFormed} from "../templates/misc.ts";
+import {html5} from "../templates/LinkedomHelpers.ts";
+import {type AnyCategory, findCategory, findWing, isGenreCategory, type Wing} from "./CatalogueConfig.ts";
+import {Uri} from "../http/Uri.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
+
+export class AisleHandler {
+    constructor(deps: Dependency<'finder', D1GameFinder>, private finder = deps.finder) {
+    }
+
+    async handle(request: Request): Promise<Response> {
+        const {path} = new Uri(request.url);
+        const [, , wingId, categoryId] = path.split('/');
+
+        const wing = findWing(wingId);
+        if (!wing) return new Response('Not Found', {status: 404});
+
+        const category = findCategory(wing, categoryId);
+        if (!category) return new Response('Not Found', {status: 404});
+
+        const games = await this.findGames(category);
+
+        return new Response(render(wing, category, games), {status: 200, headers: {'Content-Type': 'text/html'}});
+    }
+
+    private async findGames(category: AnyCategory): Promise<GameInfo[]> {
+        if (isGenreCategory(category)) {
+            return this.finder.findByGenre(category.genre);
+        }
+        switch (category.type) {
+            case 'top-rated':
+                return this.finder.findTopRated();
+            case 'recent':
+                return this.finder.findRecent();
+        }
+    }
+}
+
+function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
+    const illustrationUrl = `/cards/art?prompt=${encodeURIComponent(JSON.stringify({
+        story: {title: 'The Talebrary Athenaeum', description: 'A vast library of interactive fiction games'},
+        scene: category.illustration,
+    }))}`;
+
+    return html5(jsx =>
+        <html lang="en">
+        <head>
+            <title>{category.title} - {wing.title} - Talebrary</title>
+            <meta name="template" content="card"/>
+            <link rel="stylesheet" href="/catalogue.css"/>
+        </head>
+        <body>
+        <main class="story catalogue">
+            <div class="window grid">
+                <div class="card">
+                    <div class="breadcrumb">
+                        <a href="/catalogue">Atrium</a>
+                        <span class="sep">{'\u203A'}</span>
+                        <a href={`/catalogue/${wing.id}`}>{wing.title}</a>
+                        <span class="sep">{'\u203A'}</span>
+                        <span class="current">{category.title}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card scene-card">
+                <img class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
+                <div class="title">{category.title}</div>
+                <div class="normal">{category.narrative}</div>
+                <div class="suggestions nav">
+                    <a href={`/catalogue/${wing.id}`}>go back</a>
+                    {wing.categories
+                        .filter(c => c.id !== category.id)
+                        .slice(0, 2)
+                        .map(c => <a href={`/catalogue/${wing.id}/${c.id}`}>go {c.id}</a>
+                        )}
+                </div>
+            </div>
+
+            <div class="window buffer">
+                {games.map(game =>
+                    <div class="card">
+                        <div class="rating" aria-label="Rating" role="img">{roundStep(game.rating, 0.5)}</div>
+                        <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt=""
+                             aria-hidden="true"></img>
+                        <div class="title">{wellFormed(game.title)}</div>
+                        <div class="author">{wellFormed(game.author)}</div>
+                        {game.description ? <div class="description">{wellFormed(game.description)}</div> : ''}
+                        {game.playable ?
+                            <a class="play" href={`/content/${game.id}/`}>Play</a> :
+                            <a class="play">Play</a>
+                        }
+                    </div>
+                )}
+            </div>
+        </main>
+        </body>
+        </html>);
+}

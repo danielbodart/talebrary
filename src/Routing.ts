@@ -5,6 +5,9 @@ import {toResponse} from "./cloudflare/ToResponse.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {EventHandler} from "./events/EventHandler.ts";
+import type {AtriumHandler} from "./catalogue/AtriumHandler.tsx";
+import type {WingHandler} from "./catalogue/WingHandler.tsx";
+import type {AisleHandler} from "./catalogue/AisleHandler.tsx";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface RouterDependencies extends
@@ -15,7 +18,10 @@ export interface RouterDependencies extends
     Dependency<'content', ContentHandler>,
     Dependency<'art', R2CachingHandler>,
     Dependency<'suggestions', R2CachingHandler>,
-    Dependency<'events', EventHandler> {}
+    Dependency<'events', EventHandler>,
+    Dependency<'atrium', AtriumHandler>,
+    Dependency<'wing', WingHandler>,
+    Dependency<'aisle', AisleHandler> {}
 
 export class Routing {
     constructor(private deps: RouterDependencies) {
@@ -24,6 +30,12 @@ export class Routing {
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
         const [, section, id, subsection] = uri.path.split('/')
+
+        if (!section || section === 'catalogue') {
+            if (!id) return this.deps.atrium.handle(request);
+            if (!subsection) return this.deps.wing.handle(request);
+            return this.deps.aisle.handle(request);
+        }
 
         if (section === 'content') {
             if (subsection === 'cover-art') {

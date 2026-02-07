@@ -44,6 +44,30 @@ describe("D1GameFinder", () => {
         } as any);
     });
 
+    test("can find by genre", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findByGenre('Fantasy');
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+        expect(result[0].playable).toEqual(1);
+        expect(result[0].rating).toBeGreaterThan(0);
+    });
+
+    test("can find top rated", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findTopRated();
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+        expect(result[0].rating).toBeGreaterThanOrEqual(result[1].rating);
+    });
+
+    test("can find recent", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findRecent();
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+    });
+
     test("can get tads3 game by id", async () => {
         const finder = new D1GameFinder({db});
         const result = await finder.get('qpecxgjpxnvw50xq');

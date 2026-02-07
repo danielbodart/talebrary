@@ -18,9 +18,10 @@ export function templateHandler(http: Http): Http {
 
         const contentType = response.headers.get('content-type');
         if ((contentType && contentType.includes('html')) || new Uri(request.url).path.endsWith('.html')) {
-            const {document} = parseHTML(await response.text());
+            const text = await response.text();
+            const {document} = parseHTML(text);
             const name = document.querySelector('meta[name=template]')?.getAttribute('content');
-            if (!name || !(name in templates)) return response;
+            if (!name || !(name in templates)) return new Response(text, response);
             const template = templates[name];
             return new Response(template(document), response)
         }

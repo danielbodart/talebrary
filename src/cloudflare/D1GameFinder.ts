@@ -24,6 +24,42 @@ export interface GameStory extends GameBase {
     type: SupportedGameType
 }
 
+const supportedFormats = `('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
+                    'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')`;
+
+const playableSubquery = `(SELECT CASE WHEN count(*) > 0 THEN 1 ELSE 0 END
+                FROM gamelinks l
+                         JOIN filetypes f ON l.fmtid = f.id
+                WHERE l.gameid = g.id
+                  AND f.externid IN ${supportedFormats}
+                  AND (' ' || f.extension || ' ' LIKE
+                       '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
+                                      INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
+                       ' %')
+                  AND l.url NOT LIKE '%.z6')`;
+
+const gameReviewsCte = `game_reviews AS (
+                SELECT g.id, avg(r.rating) AS rating
+                FROM filtered_games g
+                         JOIN reviews r ON g.id = r.gameid
+                GROUP BY g.id
+            )`;
+
+const selectGameInfo = `SELECT fg.id,
+                   gr.rating,
+                   fg.rank,
+                   fg.boost,
+                   fg.rank + fg.boost + gr.rating AS score,
+                   fg.title,
+                   fg.author,
+                   fg.description,
+                   fg.playable
+            FROM filtered_games fg
+                     JOIN game_reviews gr USING (id)
+            WHERE fg.playable = 1
+            ORDER BY score DESC
+            LIMIT 20;`;
+
 export class D1GameFinder {
     constructor(deps: Dependency<'db', D1Database>, private db = deps.db) {
     }
@@ -39,41 +75,60 @@ export class D1GameFinder {
                 FROM games_search s
                 WHERE ?1 <> '' AND games_search = ?1
             ),
-                 filtered_games AS (
-                     SELECT g.id,
-                            r.rank,
-                            CASE
-                                WHEN lower(g.title) = lower(?1) THEN 3
-                                ELSE 0
-                                END AS boost,
-                            g.title,
-                            g.author,
-                            g.desc AS description,
-                            (SELECT CASE WHEN count(*) > 0 THEN 1 ELSE 0 END
-                             FROM gamelinks l
-                                      JOIN filetypes f ON l.fmtid = f.id
-                             WHERE l.gameid = g.id
-                               AND f.externid IN
-                                   ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                                    'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')
-                               AND (' ' || f.extension || ' ' LIKE
-                                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
-                                                   INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
-                                    ' %')
-                               AND l.url NOT LIKE '%.z6') AS playable
-                     FROM ranks r JOIN games g ON g.id = r.id
-                 ),
-                 game_reviews AS (
-                     SELECT g.id, avg(r.rating) AS rating
-                     FROM filtered_games g
-                              JOIN reviews r ON g.id = r.gameid
-                     GROUP BY g.id
-                 )
+            filtered_games AS (
+                SELECT g.id,
+                       r.rank,
+                       CASE WHEN lower(g.title) = lower(?1) THEN 3 ELSE 0 END AS boost,
+                       g.title,
+                       g.author,
+                       g.desc AS description,
+                       ${playableSubquery} AS playable
+                FROM ranks r JOIN games g ON g.id = r.id
+            ),
+            ${gameReviewsCte}
+            ${selectGameInfo}
+        `;
+        const statement = this.db.prepare(sql).bind(search ?? '');
+        return (await statement.all()).results as any;
+    }
+
+    async findByGenre(genre: string): Promise<GameInfo[]> {
+        const sql = `
+            WITH filtered_games AS (
+                SELECT g.id,
+                       0 AS rank,
+                       0 AS boost,
+                       g.title,
+                       g.author,
+                       g.desc AS description,
+                       ${playableSubquery} AS playable
+                FROM games g
+                WHERE g.genre = ?1
+            ),
+            ${gameReviewsCte}
+            ${selectGameInfo}
+        `;
+        return (await this.db.prepare(sql).bind(genre).all()).results as any;
+    }
+
+    async findTopRated(): Promise<GameInfo[]> {
+        const sql = `
+            WITH filtered_games AS (
+                SELECT g.id,
+                       0 AS rank,
+                       0 AS boost,
+                       g.title,
+                       g.author,
+                       g.desc AS description,
+                       ${playableSubquery} AS playable
+                FROM games g
+            ),
+            ${gameReviewsCte}
             SELECT fg.id,
                    gr.rating,
                    fg.rank,
                    fg.boost,
-                   fg.rank + fg.boost + gr.rating AS score,
+                   gr.rating AS score,
                    fg.title,
                    fg.author,
                    fg.description,
@@ -81,11 +136,42 @@ export class D1GameFinder {
             FROM filtered_games fg
                      JOIN game_reviews gr USING (id)
             WHERE fg.playable = 1
-            ORDER BY score DESC
+            ORDER BY gr.rating DESC
             LIMIT 20;
         `;
-        const statement = this.db.prepare(sql).bind(search ?? '');
-        return (await statement.all()).results as any;
+        return (await this.db.prepare(sql).all()).results as any;
+    }
+
+    async findRecent(): Promise<GameInfo[]> {
+        const sql = `
+            WITH filtered_games AS (
+                SELECT g.id,
+                       0 AS rank,
+                       0 AS boost,
+                       g.title,
+                       g.author,
+                       g.desc AS description,
+                       ${playableSubquery} AS playable
+                FROM games g
+                WHERE g.published IS NOT NULL
+            ),
+            ${gameReviewsCte}
+            SELECT fg.id,
+                   gr.rating,
+                   fg.rank,
+                   fg.boost,
+                   gr.rating AS score,
+                   fg.title,
+                   fg.author,
+                   fg.description,
+                   fg.playable
+            FROM filtered_games fg
+                     JOIN game_reviews gr USING (id)
+            WHERE fg.playable = 1
+            ORDER BY fg.id DESC
+            LIMIT 20;
+        `;
+        return (await this.db.prepare(sql).all()).results as any;
     }
 
     async get(id: string): Promise<GameStory | null | undefined> {
@@ -95,9 +181,7 @@ export class D1GameFinder {
                      join gamelinks l on g.id = l.gameid
                      join filetypes f on l.fmtid = f.id
             where g.id = ?
-              and f.externid IN
-                  ('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                   'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')
+              and f.externid IN ${supportedFormats}
               and (' ' || f.extension || ' ' LIKE
                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7), INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
                    ' %')
