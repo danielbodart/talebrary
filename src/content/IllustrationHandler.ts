@@ -42,7 +42,10 @@ export class IllustrationHandler {
 
         if (model.startsWith('llama+')) {
             const result = await this.deps.ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast' as any, generateIllustrationPrompt(data) as any) as any;
-            const prompt = _try(() => JSON.parse(result.response), (e) => ({
+            const prompt = _try(() => {
+                const response = result.response;
+                return typeof response === 'string' ? JSON.parse(response) : response;
+            }, (e) => ({
                 status: 500,
                 statusText: 'Expected JSON response',
                 reason: String(e)

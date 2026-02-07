@@ -23,7 +23,8 @@ export class SuggestionsHandler {
         if (!('response' in output)) return new Response('Unsupported response', {status: 404});
 
         try {
-            const json = JSON.parse(output.response!);
+            const response = output.response;
+            const json = typeof response === 'string' ? JSON.parse(response) : response;
             return new Response(JSON.stringify(json), {
                 headers: {
                     "content-type": "application/json",
