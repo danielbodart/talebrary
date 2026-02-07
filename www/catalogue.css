@@ -45,74 +45,13 @@
 
 /* --- Search form --- */
 
-/* --- Sticky location bar (aisle pages) --- */
-
-.catalogue .window.grid {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
-}
-
-.catalogue .window.grid .card {
-    margin-top: calc(var(--border-size) * -1);
-    padding: 8px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-family: "League Spartan", sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    background: var(--eerie-black);
-    min-width: unset;
-    text-align: left;
-    gap: 10px;
-}
-
-.catalogue .window.grid .card .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    min-width: 0;
-}
-
-.catalogue .window.grid .card .breadcrumb a {
-    color: var(--sunset);
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-.catalogue .window.grid .card .breadcrumb a:hover {
-    text-decoration: underline;
-}
-
-.catalogue .window.grid .card .breadcrumb .sep {
-    color: var(--dim-gray);
-    font-size: 0.8em;
-}
-
-.catalogue .window.grid .card .breadcrumb .current {
-    color: var(--white-smoke);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /* --- Scene card: push below sticky bar --- */
 
 .catalogue .scene-card {
-    margin-top: calc(18px + var(--border-size) + var(--padding));
+    margin-top: calc(38px + var(--border-size) + var(--padding));
 }
 
-.catalogue .window.grid + .scene-card {
-    margin-top: calc(50px + var(--border-size) + var(--padding));
-}
-
-/* --- Atrium/wing first card spacing --- */
-
-.catalogue .window.buffer .card:first-child,
-.catalogue .card:first-child {
-    margin-top: calc(18px + var(--border-size) + var(--padding));
+.catalogue .window.grid + .scene-card,
+.catalogue .window.grid + .window.buffer .card:first-child {
+    margin-top: calc(56px + var(--border-size) + var(--padding));
 }

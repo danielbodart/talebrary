@@ -18,25 +18,18 @@
     --dark-pastel-green: #4cb944;
     --tomato: #f06543;
 
-    --border-size: 16px;
+    --border-size: 10px;
     --border-size-small: round(calc(var(--border-size) * 0.625), 1px);
     --border-size-large: round(calc(var(--border-size) * 1.25), 1px);
 
-    --padding: 20px;
+    --padding: 10px;
     --padding-small: round(calc(var(--padding) / 2), 1px);
     --padding-large: round(calc(var(--padding) * 1.5), 1px);
 }
 
-@media (max-width: 652px /* 600 + (border-size * 2) + () */) {
-    :root {
-        --border-size: 10px;
-        --padding: 10px;
-    }
-}
-
 :root {
     scroll-behavior: smooth;
-    scroll-padding-top: calc(18px + var(--border-size) + var(--padding) );
+    scroll-padding-top: calc(38px + var(--border-size) + var(--padding));
     scroll-padding-bottom: var(--padding);
     scrollbar-color: var(--lion) transparent;
 }
@@ -68,7 +61,7 @@ main.story {
 }
 
 body.search {
-    padding: 60px;
+    padding: 0;
 }
 
 .results .card {
@@ -101,16 +94,12 @@ body.search {
     box-shadow: 0px 0px var(--border-size-large) var(--eerie-black);
 }
 
-.story .card:first-child, buffer-window > .card:first-child {
-    margin-top: calc(18px + var(--border-size) + var(--padding));
+.story .card:first-child {
+    margin-top: calc(38px + var(--border-size) + var(--padding));
 }
 
 .search .card {
-    margin: calc(var(--padding) + 18px) auto;
-}
-
-.search .card:first-child {
-    margin-top: 100px;
+    margin: 40px auto;
 }
 
 .card:not(:has(*)) {
@@ -149,10 +138,6 @@ body.search {
 
 .input:has(input[data-type=char])::before {
     background-image: url('icons/keyboard-solid.svg');
-}
-
-.search .input {
-    width: calc(100% - 20px);
 }
 
 .search .input::before {
@@ -256,7 +241,7 @@ body.search {
 
 .rating {
     position: absolute;
-    top: -8px;
+    top: calc(var(--border-size) / -2);
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     height: 40px;
@@ -281,11 +266,11 @@ body.search {
 
 .rating:after {
     position: absolute;
-    top: -4px;
-    left: -4px;
+    top: calc(var(--border-size) / -4);
+    left: calc(var(--border-size) / -4);
     content: '';
-    height: calc(100% - 12px);
-    width: calc(100% - 12px);
+    height: calc(100% - var(--border-size) * 0.75);
+    width: calc(100% - var(--border-size) * 0.75);
     border: var(--border-size-small) ridge var(--sunset);
     transform: rotateX(45deg) rotateZ(45deg);
 }
@@ -496,7 +481,7 @@ img[state=failed] + div {
     font-style: normal;
     font-size: 1.3em;
     position: absolute;
-    bottom: -8px;
+    bottom: calc(var(--border-size) / -2);
     left: 50%;
     transform: translateX(-50%) translateY(50%);
     height: 30px;
@@ -532,22 +517,79 @@ img[state=failed] + div {
     border-radius: 40px;
 }
 
-.window.grid, grid-window {
+/* --- Full-width nav bar --- */
+
+.window.grid {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1;
+    z-index: 20;
 }
 
-.grid .card:first-child, grid-window .card:first-child {
+.window.grid .card {
+    margin-top: calc(var(--border-size) * -1);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: "League Spartan", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: var(--eerie-black);
+    min-width: unset;
+    max-width: none;
+    text-align: left;
+    gap: 10px;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-radius: 0;
+    box-shadow: none;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+}
+
+.window.grid .card .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.window.grid .card .breadcrumb a {
+    color: var(--sunset);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.window.grid .card .breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.window.grid .card .breadcrumb .sep {
+    color: var(--dim-gray);
+    font-size: 0.8em;
+}
+
+.window.grid .card .breadcrumb .current {
+    color: var(--white-smoke);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Grid status window (game player) --- */
+
+grid-window .card:first-child {
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin-top: calc(var(--border-size) * -1);
 }
 
-.grid .card:first-child, grid-window .card:first-child, .buffer div.preformatted {
+grid-window .card:first-child, .buffer div.preformatted {
     text-align: center;
     white-space: pre;
     font-family: "Inconsolata", monospace;

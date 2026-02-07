@@ -22,23 +22,28 @@ export function render(search: string, games: GameInfo[]): string {
         <html lang="en">
         <head>
             <meta name="template" content="card"/>
+            <link rel="stylesheet" href="/catalogue.css"/>
             <title>Search results</title>
         </head>
         <body>
-        <main class="search">
+        <main class="search catalogue">
             <div class="window grid">
-                <div class="card input-control">
-                    <form class="input">
-                        <input name="search" type="text" maxlength={256} value={search} autofocus={true}/>
-                    </form>
+                <div class="card">
+                    <div class="breadcrumb">
+                        <a href="/catalogue">Atrium</a>
+                        <span class="sep">{'\u203A'}</span>
+                        <span class="current">Search</span>
+                    </div>
                 </div>
             </div>
             <div class="window buffer">
                 {games.map((game) =>
                     <div class="card">
                         <div class="rating" aria-label="Rating" role="img">{roundStep(game.rating, 0.5)}</div>
-                        <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt=""
-                             aria-hidden="true"></img>
+                        <a href={game.playable ? `/content/${game.id}/` : undefined}>
+                            <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt=""
+                                 aria-hidden="true"></img>
+                        </a>
                         <div class="title">{wellFormed(game.title)}</div>
                         <div class="author">{wellFormed(game.author)}</div>
                         {game.description ? <div class="description">{wellFormed(game.description)}</div> : ''}
@@ -51,6 +56,11 @@ export function render(search: string, games: GameInfo[]): string {
 
                     </div>
                 )}
+            </div>
+            <div class="card input-control">
+                <form class="input" action="/content">
+                    <input name="search" type="search" maxlength={256} value={search} autofocus={true}/>
+                </form>
             </div>
         </main>
         </body>

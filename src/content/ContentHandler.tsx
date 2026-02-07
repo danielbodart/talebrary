@@ -30,6 +30,17 @@ export function render(game: GameStory): string {
                   crossorigin="crossorigin"/>
         </head>
         <body>
+        <div class="window grid">
+            <div class="card">
+                <div class="breadcrumb">
+                    <a href="/catalogue">Atrium</a>
+                    <span class="sep">{'\u203A'}</span>
+                    <a href="/content">Search</a>
+                    <span class="sep">{'\u203A'}</span>
+                    <span class="current">{wellFormed(game.title)}</span>
+                </div>
+            </div>
+        </div>
         <main class="story">
             <div class="card">
                 <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy"></img>

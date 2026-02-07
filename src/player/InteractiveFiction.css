@@ -3,16 +3,18 @@ interactive-fiction {
 
     grid-window {
         position: fixed;
-        top: 0;
+        top: calc(38px + var(--padding));
         left: 0;
-        width: 100%;
-        z-index: 1;
+        right: 0;
+        z-index: 10;
+        margin: 0 auto;
+        min-width: 300px;
+        max-width: calc(600px + var(--border-size) * 2);
 
         section:first-child {
             display: flex;
             align-items: center;
             flex-direction: column;
-            margin-top: calc(var(--border-size) * -1);
             text-align: center;
             white-space: pre;
             font-family: "Inconsolata", monospace;
@@ -24,7 +26,7 @@ interactive-fiction {
     }
 
     buffer-window section.card:first-child {
-        margin-top: calc(18px + var(--border-size) + var(--padding));
+        margin-top: calc(38px + 38px + var(--border-size) * 3 + var(--padding) * 2);
     }
 
     user-input {
