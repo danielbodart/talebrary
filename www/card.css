@@ -172,6 +172,32 @@ body.search {
     margin-left: 10px;
 }
 
+.completions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px;
+    background-color: var(--eerie-black);
+    font-family: "League Spartan", sans-serif;
+    font-weight: 700;
+    border-bottom: var(--border-size-small) ridge var(--sunset);
+}
+
+.completions x-instruction {
+    border: 2px solid var(--white-smoke);
+    border-radius: 7px;
+    padding: 4px 8px;
+    text-align: center;
+    cursor: pointer;
+    flex-grow: 1;
+    color: var(--white-smoke);
+}
+
+.completions x-instruction:hover {
+    background-color: var(--white-smoke);
+    color: var(--eerie-black);
+}
+
 .input-control form input {
     font-family: "League Spartan", sans-serif;
     font-optical-sizing: auto;

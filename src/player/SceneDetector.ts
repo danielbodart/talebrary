@@ -1,5 +1,6 @@
 import type {Describable, SceneContext, Suggestions} from "../types.ts";
 import {Arrays} from "../system/Arrays.ts";
+import {collapseSuggestions} from "./PrefixTree.ts";
 
 export class SceneDetector {
     private models = ['llama+stable-diffusion'];
@@ -44,11 +45,15 @@ export class SceneDetector {
             .then(response => {
                 if (!response.ok) return;
                 response.json().then((json: Suggestions) => {
-                    const result = Arrays.unique([...json.commands, ...json.nouns, ...json.actions]);
+                    const unique = Arrays.unique([...json.commands, ...json.nouns, ...json.actions]);
+                    const collapsed = collapseSuggestions(unique);
                     const suggestions = document.createElement('x-suggestions');
-                    for (const action of result) {
+                    for (const {text, completions} of collapsed) {
                         const instruction = document.createElement('x-instruction');
-                        instruction.textContent = action;
+                        instruction.textContent = text;
+                        if (completions.length > 0) {
+                            instruction.dataset.completions = JSON.stringify(completions);
+                        }
                         suggestions.appendChild(instruction);
                     }
                     card.appendChild(suggestions);
