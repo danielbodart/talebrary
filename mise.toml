@@ -1,0 +1,5 @@
+[tools]
+bun = "1.2.2"
+node = "22.13.1"
+rclone = "1.66.0"
+watchexec = "2.1.2"
