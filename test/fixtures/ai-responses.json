@@ -1,0 +1,224 @@
+{
+  "suggestions": [
+    {
+      "input": {
+        "title": "The Atrium",
+        "description": "You find your self standing in the atrium of a huge library, in front of you stands the librarian, ready to help you find whatever adventure you require. To either side of him are row apon row of bookcases. On his desk is half eaten sandwich, the desk has a single draw.  To the east is the reading room"
+      },
+      "prompt": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a interactive fiction copilot API. You must follow the following steps:\n1. Identity nouns in the input text\n2. Identify if people are present in the scene \n3. Filter the commands list to actions that might be helpful give the nouns identified in 1\n4. Create some suggest actions that combine the command with a single noun. These actions are normally just 2 words, max 4\n5. Return all 4 in a JSON response\n\ncommands list: [\"ask\",\"give\",\"talk\",\"tell\",\"show\",\"north\",\"east\",\"south\",\"west\",\"up\",\"down\",\"in\",\"out\",\"go\",\"look\",\"examine\",\"inventory\",\"take\",\"drop\",\"open\",\"put\",\"pull\",\"push\",\"turn\",\"feel\",\"about\",\"info\",\"help\",\"again\",\"restore\",\"save\",\"quit\",\"eat\",\"drink\",\"climb\",\"wave\",\"fill\",\"wear\",\"smell\",\"off\",\"on\",\"listen\",\"turn\",\"dig\",\"burn\",\"enter\",\"look\",\"under\",\"search\",\"unlock\",\"with\",\"break\",\"jump\",\"sleep\",\"pray\",\"wake\",\"curse\",\"sing\",\"undo\",\"throw\"]\n\nExample request:\n\n{\"title\":\"The Atrium\",\"description\":\"You find your self standing in the atrium of a huge library, in front of you stands the librarian, ready to help you find whatever adventure you require. To either side of him are row apon row of bookcases. On his desk is half eaten sandwich, the desk has a single draw.  To the east is the reading room\"}\n\nExample response: \n\n{\"people\":true,\"nouns\":[\"atrium\",\"library\",\"librarian\",\"bookcases\",\"desk\",\"sandwich\",\"room\"],\"commands\":[\"examine\",\"talk to\",\"take\",\"eat\",\"east\"],\"actions\":[\"examine atrium\",\"examine library\",\"talk to librarian\",\"examine bookcases\",\"examine desk\",\"open draw\",\"go east\"]}\n\nDo not use commands not in the list. \nDo not use nouns not identified from the input. \nDo not add extra human readable comments before or after the JSON response"
+          },
+          {
+            "role": "user",
+            "content": "{\"title\":\"The Atrium\",\"description\":\"You find your self standing in the atrium of a huge library, in front of you stands the librarian, ready to help you find whatever adventure you require. To either side of him are row apon row of bookcases. On his desk is half eaten sandwich, the desk has a single draw.  To the east is the reading room\"}"
+          }
+        ]
+      },
+      "output": {
+        "response": "{\"people\":true,\"nouns\":[\"atrium\",\"library\",\"librarian\",\"bookcases\",\"desk\",\"sandwich\",\"draw\",\"room\"],\"commands\":[\"examine\",\"talk\",\"take\",\"eat\",\"go\",\"open\"],\"actions\":[\"examine atrium\",\"talk to librarian\",\"examine bookcases\",\"take sandwich\",\"open draw\",\"go east\"]}",
+        "tool_calls": [],
+        "usage": {
+          "prompt_tokens": 530,
+          "completion_tokens": 69,
+          "total_tokens": 599
+        }
+      },
+      "capturedAt": "2026-02-07T16:32:07.504Z"
+    },
+    {
+      "input": {
+        "title": "Dark Cave",
+        "description": "You are in a dark cave. Water drips from the ceiling. To the north, a faint light glimmers."
+      },
+      "prompt": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a interactive fiction copilot API. You must follow the following steps:\n1. Identity nouns in the input text\n2. Identify if people are present in the scene \n3. Filter the commands list to actions that might be helpful give the nouns identified in 1\n4. Create some suggest actions that combine the command with a single noun. These actions are normally just 2 words, max 4\n5. Return all 4 in a JSON response\n\ncommands list: [\"ask\",\"give\",\"talk\",\"tell\",\"show\",\"north\",\"east\",\"south\",\"west\",\"up\",\"down\",\"in\",\"out\",\"go\",\"look\",\"examine\",\"inventory\",\"take\",\"drop\",\"open\",\"put\",\"pull\",\"push\",\"turn\",\"feel\",\"about\",\"info\",\"help\",\"again\",\"restore\",\"save\",\"quit\",\"eat\",\"drink\",\"climb\",\"wave\",\"fill\",\"wear\",\"smell\",\"off\",\"on\",\"listen\",\"turn\",\"dig\",\"burn\",\"enter\",\"look\",\"under\",\"search\",\"unlock\",\"with\",\"break\",\"jump\",\"sleep\",\"pray\",\"wake\",\"curse\",\"sing\",\"undo\",\"throw\"]\n\nExample request:\n\n{\"title\":\"The Atrium\",\"description\":\"You find your self standing in the atrium of a huge library, in front of you stands the librarian, ready to help you find whatever adventure you require. To either side of him are row apon row of bookcases. On his desk is half eaten sandwich, the desk has a single draw.  To the east is the reading room\"}\n\nExample response: \n\n{\"people\":true,\"nouns\":[\"atrium\",\"library\",\"librarian\",\"bookcases\",\"desk\",\"sandwich\",\"room\"],\"commands\":[\"examine\",\"talk to\",\"take\",\"eat\",\"east\"],\"actions\":[\"examine atrium\",\"examine library\",\"talk to librarian\",\"examine bookcases\",\"examine desk\",\"open draw\",\"go east\"]}\n\nDo not use commands not in the list. \nDo not use nouns not identified from the input. \nDo not add extra human readable comments before or after the JSON response"
+          },
+          {
+            "role": "user",
+            "content": "{\"title\":\"Dark Cave\",\"description\":\"You are in a dark cave. Water drips from the ceiling. To the north, a faint light glimmers.\"}"
+          }
+        ]
+      },
+      "output": {
+        "response": "{\"people\":false,\"nouns\":[\"cave\",\"ceiling\",\"water\",\"light\"],\"commands\":[\"go\",\"look\",\"examine\"],\"actions\":[\"go north\",\"examine cave\",\"examine ceiling\",\"examine water\",\"examine light\"]}",
+        "tool_calls": [],
+        "usage": {
+          "prompt_tokens": 483,
+          "completion_tokens": 49,
+          "total_tokens": 532
+        }
+      },
+      "capturedAt": "2026-02-07T16:32:08.881Z"
+    },
+    {
+      "input": {
+        "title": "Ship Deck",
+        "description": "You stand on the deck of a sailing ship. The captain barks orders to his crew. A chest sits near the mast."
+      },
+      "prompt": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a interactive fiction copilot API. You must follow the following steps:\n1. Identity nouns in the input text\n2. Identify if people are present in the scene \n3. Filter the commands list to actions that might be helpful give the nouns identified in 1\n4. Create some suggest actions that combine the command with a single noun. These actions are normally just 2 words, max 4\n5. Return all 4 in a JSON response\n\ncommands list: [\"ask\",\"give\",\"talk\",\"tell\",\"show\",\"north\",\"east\",\"south\",\"west\",\"up\",\"down\",\"in\",\"out\",\"go\",\"look\",\"examine\",\"inventory\",\"take\",\"drop\",\"open\",\"put\",\"pull\",\"push\",\"turn\",\"feel\",\"about\",\"info\",\"help\",\"again\",\"restore\",\"save\",\"quit\",\"eat\",\"drink\",\"climb\",\"wave\",\"fill\",\"wear\",\"smell\",\"off\",\"on\",\"listen\",\"turn\",\"dig\",\"burn\",\"enter\",\"look\",\"under\",\"search\",\"unlock\",\"with\",\"break\",\"jump\",\"sleep\",\"pray\",\"wake\",\"curse\",\"sing\",\"undo\",\"throw\"]\n\nExample request:\n\n{\"title\":\"The Atrium\",\"description\":\"You find your self standing in the atrium of a huge library, in front of you stands the librarian, ready to help you find whatever adventure you require. To either side of him are row apon row of bookcases. On his desk is half eaten sandwich, the desk has a single draw.  To the east is the reading room\"}\n\nExample response: \n\n{\"people\":true,\"nouns\":[\"atrium\",\"library\",\"librarian\",\"bookcases\",\"desk\",\"sandwich\",\"room\"],\"commands\":[\"examine\",\"talk to\",\"take\",\"eat\",\"east\"],\"actions\":[\"examine atrium\",\"examine library\",\"talk to librarian\",\"examine bookcases\",\"examine desk\",\"open draw\",\"go east\"]}\n\nDo not use commands not in the list. \nDo not use nouns not identified from the input. \nDo not add extra human readable comments before or after the JSON response"
+          },
+          {
+            "role": "user",
+            "content": "{\"title\":\"Ship Deck\",\"description\":\"You stand on the deck of a sailing ship. The captain barks orders to his crew. A chest sits near the mast.\"}"
+          }
+        ]
+      },
+      "output": {
+        "response": "{\"people\":true,\"nouns\":[\"deck\",\"ship\",\"captain\",\"crew\",\"mast\",\"chest\"],\"commands\":[\"talk\",\"examine\",\"take\",\"go\",\"open\"],\"actions\":[\"examine deck\",\"talk to captain\",\"examine ship\",\"examine mast\",\"examine chest\",\"open chest\"]}",
+        "tool_calls": [],
+        "usage": {
+          "prompt_tokens": 485,
+          "completion_tokens": 60,
+          "total_tokens": 545
+        }
+      },
+      "capturedAt": "2026-02-07T16:32:10.489Z"
+    },
+    {
+      "input": {
+        "title": "Empty Room",
+        "description": "This is a bare room with white walls. There is nothing here."
+      },
+      "prompt": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a interactive fiction copilot API. You must follow the following steps:\n1. Identity nouns in the input text\n2. Identify if people are present in the scene \n3. Filter the commands list to actions that might be helpful give the nouns identified in 1\n4. Create some suggest actions that combine the command with a single noun. These actions are normally just 2 words, max 4\n5. Return all 4 in a JSON response\n\ncommands list: [\"ask\",\"give\",\"talk\",\"tell\",\"show\",\"north\",\"east\",\"south\",\"west\",\"up\",\"down\",\"in\",\"out\",\"go\",\"look\",\"examine\",\"inventory\",\"take\",\"drop\",\"open\",\"put\",\"pull\",\"push\",\"turn\",\"feel\",\"about\",\"info\",\"help\",\"again\",\"restore\",\"save\",\"quit\",\"eat\",\"drink\",\"climb\",\"wave\",\"fill\",\"wear\",\"smell\",\"off\",\"on\",\"listen\",\"turn\",\"dig\",\"burn\",\"enter\",\"look\",\"under\",\"search\",\"unlock\",\"with\",\"break\",\"jump\",\"sleep\",\"pray\",\"wake\",\"curse\",\"sing\",\"undo\",\"throw\"]\n\nExample request:\n\n{\"title\":\"The Atrium\",\"description\":\"You find your self standing in the atrium of a huge library, in front of you stands the librarian, ready to help you find whatever adventure you require. To either side of him are row apon row of bookcases. On his desk is half eaten sandwich, the desk has a single draw.  To the east is the reading room\"}\n\nExample response: \n\n{\"people\":true,\"nouns\":[\"atrium\",\"library\",\"librarian\",\"bookcases\",\"desk\",\"sandwich\",\"room\"],\"commands\":[\"examine\",\"talk to\",\"take\",\"eat\",\"east\"],\"actions\":[\"examine atrium\",\"examine library\",\"talk to librarian\",\"examine bookcases\",\"examine desk\",\"open draw\",\"go east\"]}\n\nDo not use commands not in the list. \nDo not use nouns not identified from the input. \nDo not add extra human readable comments before or after the JSON response"
+          },
+          {
+            "role": "user",
+            "content": "{\"title\":\"Empty Room\",\"description\":\"This is a bare room with white walls. There is nothing here.\"}"
+          }
+        ]
+      },
+      "output": {
+        "response": "{\"people\":false,\"nouns\":[\"room\",\"walls\"],\"commands\":[\"examine\",\"look\"],\"actions\":[\"examine room\",\"examine walls\",\"look room\",\"look walls\"]}",
+        "tool_calls": [],
+        "usage": {
+          "prompt_tokens": 473,
+          "completion_tokens": 36,
+          "total_tokens": 509
+        }
+      },
+      "capturedAt": "2026-02-07T16:32:11.638Z"
+    }
+  ],
+  "illustrations": [
+    {
+      "input": {
+        "story": {
+          "title": "Adventure",
+          "description": "The original 1976 by William Crowther and Donald Woods. Somewhere nearby is Colossal Cave, where \n        others have found fortunes in treasures and gold, though it is rumored that some who enter are never seen again. \n        Magic is said to work in the cave. "
+        },
+        "scene": {
+          "title": "At End Of Road",
+          "description": "You are standing at the end of a road before a small brick building. Around you is a forest. A small stream flows out of the building and down a gully."
+        }
+      },
+      "prompt": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a interactive fiction copilot API. Your job is process a data object and \n    generate a prompt designed for stable diffusion XL lightning model.\n    \n    The user input will be in JSON format and will contain a story, a scene and an optional previous scene object. Each object will have a title and a description.\n    \n    Your tasks are as follows:\n    \n    1. Examine the scene object and determine if it actually describes a scene that would make a good illustration. If not return the reason why you do not think it is a scene in JSON {status: 404, statusText: \"No Scene Found\", reason: \"Some reason why it is not a scene\"}\n    2. Extract the key concepts from the scene object and use them as the primary components for the prompt.\n    2. Next examine the previous scene if present and make sure the current scene is consistent with the previous scene unless it specifically states otherwise. \n       Example: if the previous scene was a dark forest, the current scene should not be a bright sunny beach unless explicitly described that way.\n       Example: if the previous scene was underground, the current scene should not be outside unless explicitly described that way.\n    3. Next look at the story object and make sure the scene is consistent with the story. The story can be especially useful for determining the overall tone of the scene.\n       Example: if the story is about space travel, and the scene mentions a ship, it is likely a space ship not a boat.\n       Example: if the story is about caves, and the scene mentions passages, it is likely an underground passage not back ally.\n    4. Follow the following Stable diffusion XL rules:\n        a. Be Descriptive, Specific and Explicit\n            Stable Diffusion thrives on detailed and specific prompts. Clearly describe the subject, setting, and any particular elements you want in the image.\n            Stable Diffusion is a small model and can only handle a limited amount of context, so be explicit in your prompt.\n            Example: \"A serene mountain landscape at sunrise, with a clear sky and vibrant colors reflecting on a calm lake.\"\n        b. Use Clear Language and Grammar\n            This helps the model understand and adhere to the prompt better.\n            Example: \"A woman wearing a red dress standing in a field of sunflowers, under a bright blue sky with fluffy white clouds.\"\n        c. Incorporate Style and Medium\n            Specify the artistic style or medium you want the image to emulate. As we are an interactive fiction copilot, the style should be an illustration or graphic novel. Do not request a photograph or realistic painting. \n            Example: \"A vibrant illustration of a futuristic cityscape at night, with neon lights and flying cars, in the style of cyberpunk art.\"\n        d. Be Terse and Avoid Superfluous Words\n            Stable diffusion can get confused with too many tokens or words so be as terse as possible to ensure it focuses on what is important.\n    5. Return the prompt in unscoped JSON format: {prompt: \"your generated prompt here\"}\n            \n            \n    Example \n        Request: {\"story\":{\"title\":\"Adventure\",\"description\":\"The original 1976 by William Crowther and Donald Woods. Somewhere nearby is Colossal Cave, where \\n        others have found fortunes in treasures and gold, though it is rumored that some who enter are never seen again. \\n        Magic is said to work in the cave. \"},\"scene\":{\"title\":\"At End Of Road\",\"description\":\"You are standing at the end of a road before a small brick building. Around you is a forest. A small stream flows out of the building and down a gully.\"}}\n        Response: {\"prompt\":\"Illustration: road end, small brick building, dense forest. Stream from building down gully. Style: vintage adventure game art. Muted colors, hint of magic.\"}\n        \n        \n    Do not add extra human readable comments before or after the JSON response. Return only the JSON object.\n    "
+          },
+          {
+            "role": "user",
+            "content": "{\"story\":{\"title\":\"Adventure\",\"description\":\"The original 1976 by William Crowther and Donald Woods. Somewhere nearby is Colossal Cave, where \\n        others have found fortunes in treasures and gold, though it is rumored that some who enter are never seen again. \\n        Magic is said to work in the cave. \"},\"scene\":{\"title\":\"At End Of Road\",\"description\":\"You are standing at the end of a road before a small brick building. Around you is a forest. A small stream flows out of the building and down a gully.\"}}"
+          }
+        ]
+      },
+      "output": {
+        "response": "{\"prompt\":\"Illustration: a small brick building at the end of a road, surrounded by a dense forest, with a small stream flowing out of the building and down a gully. Style: vintage adventure game art. Muted earthy colors, hint of mysticism.\"}",
+        "tool_calls": [],
+        "usage": {
+          "prompt_tokens": 969,
+          "completion_tokens": 58,
+          "total_tokens": 1027
+        }
+      },
+      "capturedAt": "2026-02-07T16:32:13.331Z"
+    },
+    {
+      "input": {
+        "story": {
+          "title": "Zork",
+          "description": "An underground adventure where you explore the Great Underground Empire"
+        },
+        "scene": {
+          "title": "West of House",
+          "description": "You are standing in an open field west of a white house, with a boarded front door."
+        }
+      },
+      "prompt": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a interactive fiction copilot API. Your job is process a data object and \n    generate a prompt designed for stable diffusion XL lightning model.\n    \n    The user input will be in JSON format and will contain a story, a scene and an optional previous scene object. Each object will have a title and a description.\n    \n    Your tasks are as follows:\n    \n    1. Examine the scene object and determine if it actually describes a scene that would make a good illustration. If not return the reason why you do not think it is a scene in JSON {status: 404, statusText: \"No Scene Found\", reason: \"Some reason why it is not a scene\"}\n    2. Extract the key concepts from the scene object and use them as the primary components for the prompt.\n    2. Next examine the previous scene if present and make sure the current scene is consistent with the previous scene unless it specifically states otherwise. \n       Example: if the previous scene was a dark forest, the current scene should not be a bright sunny beach unless explicitly described that way.\n       Example: if the previous scene was underground, the current scene should not be outside unless explicitly described that way.\n    3. Next look at the story object and make sure the scene is consistent with the story. The story can be especially useful for determining the overall tone of the scene.\n       Example: if the story is about space travel, and the scene mentions a ship, it is likely a space ship not a boat.\n       Example: if the story is about caves, and the scene mentions passages, it is likely an underground passage not back ally.\n    4. Follow the following Stable diffusion XL rules:\n        a. Be Descriptive, Specific and Explicit\n            Stable Diffusion thrives on detailed and specific prompts. Clearly describe the subject, setting, and any particular elements you want in the image.\n            Stable Diffusion is a small model and can only handle a limited amount of context, so be explicit in your prompt.\n            Example: \"A serene mountain landscape at sunrise, with a clear sky and vibrant colors reflecting on a calm lake.\"\n        b. Use Clear Language and Grammar\n            This helps the model understand and adhere to the prompt better.\n            Example: \"A woman wearing a red dress standing in a field of sunflowers, under a bright blue sky with fluffy white clouds.\"\n        c. Incorporate Style and Medium\n            Specify the artistic style or medium you want the image to emulate. As we are an interactive fiction copilot, the style should be an illustration or graphic novel. Do not request a photograph or realistic painting. \n            Example: \"A vibrant illustration of a futuristic cityscape at night, with neon lights and flying cars, in the style of cyberpunk art.\"\n        d. Be Terse and Avoid Superfluous Words\n            Stable diffusion can get confused with too many tokens or words so be as terse as possible to ensure it focuses on what is important.\n    5. Return the prompt in unscoped JSON format: {prompt: \"your generated prompt here\"}\n            \n            \n    Example \n        Request: {\"story\":{\"title\":\"Adventure\",\"description\":\"The original 1976 by William Crowther and Donald Woods. Somewhere nearby is Colossal Cave, where \\n        others have found fortunes in treasures and gold, though it is rumored that some who enter are never seen again. \\n        Magic is said to work in the cave. \"},\"scene\":{\"title\":\"At End Of Road\",\"description\":\"You are standing at the end of a road before a small brick building. Around you is a forest. A small stream flows out of the building and down a gully.\"}}\n        Response: {\"prompt\":\"Illustration: road end, small brick building, dense forest. Stream from building down gully. Style: vintage adventure game art. Muted colors, hint of magic.\"}\n        \n        \n    Do not add extra human readable comments before or after the JSON response. Return only the JSON object.\n    "
+          },
+          {
+            "role": "user",
+            "content": "{\"story\":{\"title\":\"Zork\",\"description\":\"An underground adventure where you explore the Great Underground Empire\"},\"scene\":{\"title\":\"West of House\",\"description\":\"You are standing in an open field west of a white house, with a boarded front door.\"}}"
+          }
+        ]
+      },
+      "output": {
+        "response": "{\"status\":404,\"statusText\":\"No Scene Found\",\"reason\":\"The scene description does not match the story's underground setting, instead describing an open field and a house.\"}",
+        "tool_calls": [],
+        "usage": {
+          "prompt_tokens": 903,
+          "completion_tokens": 42,
+          "total_tokens": 945
+        }
+      },
+      "capturedAt": "2026-02-07T16:32:15.849Z"
+    },
+    {
+      "input": {
+        "story": {
+          "title": "Photopia",
+          "description": "A story about love, loss, and the stars"
+        },
+        "scene": {
+          "title": "On the Red Planet",
+          "description": "The rust-colored landscape stretches endlessly. Two moons hang low."
+        },
+        "previous": {
+          "title": "Launch",
+          "description": "You watched Earth shrink to a blue dot through the porthole."
+        }
+      },
+      "prompt": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a interactive fiction copilot API. Your job is process a data object and \n    generate a prompt designed for stable diffusion XL lightning model.\n    \n    The user input will be in JSON format and will contain a story, a scene and an optional previous scene object. Each object will have a title and a description.\n    \n    Your tasks are as follows:\n    \n    1. Examine the scene object and determine if it actually describes a scene that would make a good illustration. If not return the reason why you do not think it is a scene in JSON {status: 404, statusText: \"No Scene Found\", reason: \"Some reason why it is not a scene\"}\n    2. Extract the key concepts from the scene object and use them as the primary components for the prompt.\n    2. Next examine the previous scene if present and make sure the current scene is consistent with the previous scene unless it specifically states otherwise. \n       Example: if the previous scene was a dark forest, the current scene should not be a bright sunny beach unless explicitly described that way.\n       Example: if the previous scene was underground, the current scene should not be outside unless explicitly described that way.\n    3. Next look at the story object and make sure the scene is consistent with the story. The story can be especially useful for determining the overall tone of the scene.\n       Example: if the story is about space travel, and the scene mentions a ship, it is likely a space ship not a boat.\n       Example: if the story is about caves, and the scene mentions passages, it is likely an underground passage not back ally.\n    4. Follow the following Stable diffusion XL rules:\n        a. Be Descriptive, Specific and Explicit\n            Stable Diffusion thrives on detailed and specific prompts. Clearly describe the subject, setting, and any particular elements you want in the image.\n            Stable Diffusion is a small model and can only handle a limited amount of context, so be explicit in your prompt.\n            Example: \"A serene mountain landscape at sunrise, with a clear sky and vibrant colors reflecting on a calm lake.\"\n        b. Use Clear Language and Grammar\n            This helps the model understand and adhere to the prompt better.\n            Example: \"A woman wearing a red dress standing in a field of sunflowers, under a bright blue sky with fluffy white clouds.\"\n        c. Incorporate Style and Medium\n            Specify the artistic style or medium you want the image to emulate. As we are an interactive fiction copilot, the style should be an illustration or graphic novel. Do not request a photograph or realistic painting. \n            Example: \"A vibrant illustration of a futuristic cityscape at night, with neon lights and flying cars, in the style of cyberpunk art.\"\n        d. Be Terse and Avoid Superfluous Words\n            Stable diffusion can get confused with too many tokens or words so be as terse as possible to ensure it focuses on what is important.\n    5. Return the prompt in unscoped JSON format: {prompt: \"your generated prompt here\"}\n            \n            \n    Example \n        Request: {\"story\":{\"title\":\"Adventure\",\"description\":\"The original 1976 by William Crowther and Donald Woods. Somewhere nearby is Colossal Cave, where \\n        others have found fortunes in treasures and gold, though it is rumored that some who enter are never seen again. \\n        Magic is said to work in the cave. \"},\"scene\":{\"title\":\"At End Of Road\",\"description\":\"You are standing at the end of a road before a small brick building. Around you is a forest. A small stream flows out of the building and down a gully.\"}}\n        Response: {\"prompt\":\"Illustration: road end, small brick building, dense forest. Stream from building down gully. Style: vintage adventure game art. Muted colors, hint of magic.\"}\n        \n        \n    Do not add extra human readable comments before or after the JSON response. Return only the JSON object.\n    "
+          },
+          {
+            "role": "user",
+            "content": "{\"story\":{\"title\":\"Photopia\",\"description\":\"A story about love, loss, and the stars\"},\"scene\":{\"title\":\"On the Red Planet\",\"description\":\"The rust-colored landscape stretches endlessly. Two moons hang low.\"},\"previous\":{\"title\":\"Launch\",\"description\":\"You watched Earth shrink to a blue dot through the porthole.\"}}"
+          }
+        ]
+      },
+      "output": {
+        "response": "{\"prompt\":\"Illustration: vast, rust-colored Martian landscape, two low-hanging moons in the sky. Style: graphic novel, muted red hues, sense of celestial wonder. Inspired by themes of love and loss.\"}",
+        "tool_calls": [],
+        "usage": {
+          "prompt_tokens": 920,
+          "completion_tokens": 46,
+          "total_tokens": 966
+        }
+      },
+      "capturedAt": "2026-02-07T16:32:17.660Z"
+    }
+  ]
+}

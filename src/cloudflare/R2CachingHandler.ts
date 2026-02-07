@@ -8,7 +8,7 @@ import {detectMimeType} from "../http/DetectMimeType.ts";
 
 
 export function unquote(oldEtag: string) {
-    return oldEtag.replace('"', '');
+    return oldEtag.replaceAll('"', '');
 }
 
 export interface R2CachingHandlerDeps extends Dependency<'r2', R2Bucket>,

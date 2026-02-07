@@ -5,6 +5,7 @@ import type {Dependency} from "@bodar/yadic/types.ts";
 import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
 import type {FluxResponse} from "../types.ts";
+import {parseAiJsonResponse} from "../ai/parseAiJsonResponse.ts";
 
 export interface IllustrationDependencies extends
     Dependency<'ai', Ai> {
@@ -43,8 +44,7 @@ export class IllustrationHandler {
         if (model.startsWith('llama+')) {
             const result = await this.deps.ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast' as any, generateIllustrationPrompt(data) as any) as any;
             const prompt = _try(() => {
-                const response = result.response;
-                return typeof response === 'string' ? JSON.parse(response) : response;
+                return parseAiJsonResponse(result);
             }, (e) => ({
                 status: 500,
                 statusText: 'Expected JSON response',
@@ -67,7 +67,7 @@ export class IllustrationHandler {
                 });
             }
 
-            const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt);
+            const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt as any);
             return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
         }
 

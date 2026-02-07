@@ -2,6 +2,7 @@ import type {Ai} from "@cloudflare/workers-types";
 import {Uri} from "../http/Uri.ts";
 import {suggestionsPrompt} from "../prompts/SuggestionsPrompt.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
+import {parseAiJsonResponse} from "../ai/parseAiJsonResponse.ts";
 
 export class SuggestionsHandler {
     constructor(deps: Dependency<'ai', Ai>, private ai: Ai = deps.ai) {
@@ -23,8 +24,7 @@ export class SuggestionsHandler {
         if (!('response' in output)) return new Response('Unsupported response', {status: 404});
 
         try {
-            const response = output.response;
-            const json = typeof response === 'string' ? JSON.parse(response) : response;
+            const json = parseAiJsonResponse(output);
             return new Response(JSON.stringify(json), {
                 headers: {
                     "content-type": "application/json",
