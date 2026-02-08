@@ -60,6 +60,7 @@
    - The `./run` script sources `.env` if present
 
 7. Workflow
+   - When starting fresh work with no outstanding changes, rebase to master first (`git pull --rebase origin master`) to get the latest
    - After pushing, always monitor GitHub Actions with `gh run watch`
    - Use `/frontend-design` skill for any UI work
    - Run `/code-review:code-review-local` before committing significant changes (new endpoints, database changes, major refactors)
