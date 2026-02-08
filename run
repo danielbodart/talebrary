@@ -21,12 +21,12 @@ function check() {
   bun run --bun tsgo --noEmit
 }
 
-function test() {
-  bun test "$@"
+function complexity() {
+  bunx oxlint -c .oxlintrc.json ./src/
 }
 
-function coverage() {
-  test --coverage
+function test() {
+  bun test "$@"
 }
 
 function dev() {
@@ -84,6 +84,7 @@ function build-client() {
 
 function build() {
   check
+  complexity
   build-client "$@"
   test "$@"
 }
@@ -133,9 +134,7 @@ function evals-ui() {
 }
 
 function ci() {
-  check
-  build-client
-  coverage
+  build --coverage
   deploy
 }
 
