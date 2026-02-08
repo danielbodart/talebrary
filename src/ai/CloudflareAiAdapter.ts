@@ -44,8 +44,18 @@ async function normalizeImageResponse(result: any): Promise<Uint8Array> {
 }
 
 function toCloudflareImageInput(model: string, input: ImagePrompt): any {
-    const {sourceImage, ...rest} = input;
-    if (!sourceImage) return rest;
-    if (model.includes('flux-2-klein')) return {...rest, input_image_0: sourceImage};
-    return {...rest, image_b64: sourceImage};
+    const form = new FormData();
+    form.append('prompt', input.prompt);
+    if (input.num_steps) form.append('num_steps', String(input.num_steps));
+
+    if (input.sourceImage) {
+        if (model.includes('flux-2-klein')) {
+            const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
+            form.append('input_image_0', new Blob([bytes]));
+        } else {
+            form.append('image_b64', input.sourceImage);
+        }
+    }
+
+    return {multipart: {body: form, contentType: 'multipart/form-data'}};
 }

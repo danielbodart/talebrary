@@ -64,6 +64,8 @@ aiContractTests("CloudflareAiAdapter (native binding)", () => {
     const nativeBinding = {
         async run(model: string, input: any): Promise<any> {
             if (model.includes('stable-diffusion') || model.includes('flux')) {
+                // Native binding now requires multipart input
+                if (!input.multipart) throw new Error('required properties at \'/\' are \'multipart\'');
                 const bytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
                 return new ReadableStream({
                     start(controller) {
@@ -111,8 +113,14 @@ aiContractTests("CloudflareAiAdapter", () => {
         }
 
         // Text generation: detect suggestion vs illustration by checking prompt content
-        const body = await request.json() as any;
-        const isIllustration = body.messages?.some((m: any) => m.content?.includes('stable diffusion') || m.content?.includes('Stable Diffusion'));
+        const contentType = request.headers.get('content-type') ?? '';
+        let isIllustration: boolean;
+        if (contentType.includes('application/json')) {
+            const body = await request.json() as any;
+            isIllustration = body.messages?.some((m: any) => m.content?.includes('stable diffusion') || m.content?.includes('Stable Diffusion'));
+        } else {
+            isIllustration = false;
+        }
         const responseData = isIllustration ? cannedIllustrationResponse : cannedSuggestionsResponse;
 
         return new Response(JSON.stringify({result: {response: JSON.stringify(responseData)}}), {

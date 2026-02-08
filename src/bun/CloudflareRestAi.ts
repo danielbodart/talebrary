@@ -47,20 +47,10 @@ export class CloudflareRestAi {
         return result;
     }
 
-    private buildBody(model: string, input: any): {body: BodyInit; contentType: string | null} {
-        if (!model.includes('flux-2-klein')) {
-            return {body: JSON.stringify(input), contentType: 'application/json'};
+    private buildBody(_model: string, input: any): {body: BodyInit; contentType: string | null} {
+        if (input.multipart) {
+            return {body: input.multipart.body, contentType: null};
         }
-
-        const form = new FormData();
-        for (const [key, value] of Object.entries(input)) {
-            if (key.startsWith('input_image_') && typeof value === 'string') {
-                const bytes = Uint8Array.from(atob(value), c => c.charCodeAt(0));
-                form.append(key, new Blob([bytes]));
-            } else {
-                form.append(key, String(value));
-            }
-        }
-        return {body: form, contentType: null};
+        return {body: JSON.stringify(input), contentType: 'application/json'};
     }
 }
