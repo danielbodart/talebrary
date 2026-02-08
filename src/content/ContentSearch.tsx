@@ -25,6 +25,7 @@ export function render(search: string, games: GameInfo[]): string {
         <head>
             <meta name="template" content="card"/>
             <link rel="stylesheet" href="/catalogue.css"/>
+            <script src="/catalogue/main.js" type="module"></script>
             <title>Search results</title>
         </head>
         <body>
@@ -45,7 +46,7 @@ export function render(search: string, games: GameInfo[]): string {
                     <div class="card">
                         <div class="rating" aria-label="Rating" role="img">{roundStep(game.rating, 0.5)}</div>
                         <a href={game.playable ? `/content/${game.id}/` : undefined}>
-                            <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt=""
+                            <img is="x-image" reloadable class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt=""
                                  aria-hidden="true"></img>
                         </a>
                         <div class="title">{wellFormed(game.title)}</div>

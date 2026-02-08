@@ -23,6 +23,13 @@ describe("CatalogueHandlers", () => {
             expect(html).toContain("go genres");
             expect(html).toContain("go collections");
         });
+
+        test("illustration uses x-image custom element with reloadable", async () => {
+            const response = await handler.handle(new Request("http://test/catalogue"));
+            const html = await response.text();
+            expect(html).toContain('is="x-image"');
+            expect(html).toContain('reloadable');
+        });
     });
 
     describe("WingHandler", () => {
@@ -63,6 +70,13 @@ describe("CatalogueHandlers", () => {
             expect(html).toContain("Dragons, wizards");
             expect(html).toContain("go back");
             expect(html).toContain('class="play"');
+        });
+
+        test("cover art images use x-image custom element with reloadable", async () => {
+            const response = await handler.handle(new Request("http://test/catalogue/genres/fantasy"));
+            const html = await response.text();
+            expect(html).toContain('is="x-image"');
+            expect(html).toContain('reloadable');
         });
 
         test("renders top-rated collection with games", async () => {

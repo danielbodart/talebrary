@@ -44,7 +44,7 @@ export function render(game: GameStory): string {
         </div>
         <main class="story">
             <div class="card">
-                <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy"></img>
+                <img is="x-image" reloadable class="image" src={`/content/${game.id}/cover-art`} loading="lazy"></img>
                 <div class="title">{wellFormed(game.title)}</div>
                 <div class="author">{wellFormed(game.author)}</div>
             </div>

@@ -54,4 +54,10 @@ describe("render", () => {
         const html = render(testGame);
         expect(html).toContain("/player/main.js");
     });
+
+    test("cover art uses x-image custom element with reloadable", () => {
+        const html = render(testGame);
+        expect(html).toContain('is="x-image"');
+        expect(html).toContain('reloadable');
+    });
 });

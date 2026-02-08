@@ -18,6 +18,7 @@ export class ImageElement {
                 this.addEventListener('click', (e) => {
                     if ((this.ownerDocument.body.classList.contains('ctrl')||this.ownerDocument.body.classList.contains('meta'))
                         && this.getAttribute('reloadable') !== null) {
+                        e.preventDefault();
                         e.stopPropagation();
                         this.reload();
                     }

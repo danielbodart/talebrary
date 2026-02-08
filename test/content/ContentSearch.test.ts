@@ -83,4 +83,15 @@ describe("render", () => {
         expect(html).toContain("/content/abc/cover-art");
         expect(html).toContain("/content/def/cover-art");
     });
+
+    test("cover art images use x-image custom element with reloadable", () => {
+        const html = render("", testGames);
+        expect(html).toContain('is="x-image"');
+        expect(html).toContain('reloadable');
+    });
+
+    test("loads catalogue script for image reload support", () => {
+        const html = render("", testGames);
+        expect(html).toContain('/catalogue/main.js');
+    });
 });
