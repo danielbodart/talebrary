@@ -5,6 +5,8 @@ import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
 import {type Http} from "./http/mod.ts";
 import {Routing} from "./Routing.ts";
 import {templateHandler} from "./templates/TemplateHandler.ts";
+import {breadcrumbRenderer} from "./templates/renderers/BreadcrumbRenderer.tsx";
+import type {RendererRegistry} from "./templates/Renderer.ts";
 import {R2CachingHandler} from "./cloudflare/R2CachingHandler.ts";
 import {etagHandler} from "./http/EtagHandler.ts";
 import {cacheControlHandler} from "./http/CacheControl.ts";
@@ -32,6 +34,10 @@ export interface ApplicationDependencies extends
 }
 
 
+const renderers: RendererRegistry = {
+    'script[type="application/ld+json"].breadcrumb': breadcrumbRenderer,
+};
+
 export function application(deps: ApplicationDependencies) {
     return LazyMap.create(deps)
         .set('clock', constructor(SystemClock))
@@ -51,7 +57,7 @@ export function application(deps: ApplicationDependencies) {
         .set('aisle', constructor(AisleHandler))
         .set('content', constructor(ContentHandler))
         .set('handler', constructor(Routing))
-        .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request)))
+        .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request), renderers))
         .decorate('handler', ({handler}) => cacheControlHandler(handler))
         .decorate('handler', ({handler, digest}) => etagHandler(digest, handler))
 }
