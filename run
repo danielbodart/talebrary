@@ -131,6 +131,13 @@ function pull() {
   rclone --config rclone.conf copy cloudflare:talebrary/cards/art www/cards/art --metadata -v
 }
 
+function purge() {
+  check-rclone
+  local target="${1:?Usage: ./run purge <suggestions|art>}"
+  echo "Purging cached ${target} from R2..."
+  rclone --config rclone.conf delete cloudflare:talebrary/content --include "**/${target}/**" -v
+}
+
 function evals() {
   bun run evals/run-evals.ts "$@"
 }

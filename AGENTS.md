@@ -65,7 +65,8 @@
    - Use `/frontend-design` skill for any UI work
    - Run `/code-review:code-review-local` before committing significant changes (new endpoints, database changes, major refactors)
 
-8. Multi-Agent / Parallel Development
+8. Playwright
+   - Never wait for pages to load — our pages are fast, Playwright snapshots are instant
    - Playwright MCP is configured with `--isolated` so each agent gets its own browser context
    - When testing with Playwright, use `./run start-dynamic` to start the dev server on a random free port (PORT=0)
    - This avoids port conflicts when multiple agents run concurrently across worktrees
