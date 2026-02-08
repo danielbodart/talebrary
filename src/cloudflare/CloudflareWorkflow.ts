@@ -41,9 +41,7 @@ export class CloudflareWorkflow extends WorkflowEntrypoint<Env, Params> {
 
         // Step 2: Generate the image based on the description
         return await step.do('generate_image', async () => {
-            const imageModel = model.endsWith('flux')
-                ? '@cf/black-forest-labs/flux-1-schnell'
-                : '@cf/bytedance/stable-diffusion-xl-lightning';
+            const imageModel = '@cf/black-forest-labs/flux-2-klein-9b';
 
             const image = await this.deps.ai.generateImage(imageModel, {prompt: description.prompt!});
             return {

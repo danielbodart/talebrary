@@ -40,9 +40,7 @@ export class IllustrationHandler {
         }
 
         if (model.startsWith('llama+')) {
-            const imageModel = model.endsWith('flux')
-                ? '@cf/black-forest-labs/flux-1-schnell'
-                : '@cf/bytedance/stable-diffusion-xl-lightning';
+            const imageModel = '@cf/black-forest-labs/flux-2-klein-9b';
 
             let result: PromptResult;
             try {

@@ -3,13 +3,20 @@ import {Uri} from "../http/Uri.ts";
 import type {D1GameFinder} from "../cloudflare/D1GameFinder.ts";
 import {IllustrationHandler} from "./IllustrationHandler.ts";
 import type {Describable} from "../types.ts";
+import type {TalebraryAi} from "../ai/TalebraryAi.ts";
+import type {TalebraryBucket} from "../storage/TalebraryBucket.ts";
+import {styleTransferPrompt} from "../prompts/StyleTransferPrompt.ts";
+import {detectMimeType} from "../http/DetectMimeType.ts";
 
 import type {Dependency} from "@bodar/yadic/types.ts";
 
+const styleTransferModel = '@cf/black-forest-labs/flux-2-klein-9b';
 
 export interface CoverArtDeps extends Dependency<'http', Http>,
     Dependency<'finder', D1GameFinder>,
-    Dependency<'illustration', IllustrationHandler> {
+    Dependency<'illustration', IllustrationHandler>,
+    Dependency<'ai', TalebraryAi>,
+    Dependency<'bucket', TalebraryBucket> {
 }
 
 export function coverArt(deps: CoverArtDeps): Http {
@@ -21,7 +28,26 @@ export function coverArt(deps: CoverArtDeps): Http {
         if (!game) return new Response('Not Found', {status: 404});
 
         if (game.coverart) {
-            return deps.http(get(game.coverart));
+            const originalResponse = await deps.http(get(game.coverart));
+            if (!originalResponse.ok) return originalResponse;
+
+            const buffer = await originalResponse.arrayBuffer();
+
+            try {
+                await deps.bucket.put(`content/${id}/cover-art-original`, buffer, {
+                    contentType: originalResponse.headers.get('content-type') ?? await detectMimeType(new Uint8Array(buffer)),
+                    cacheControl: 'public, max-age=31536000',
+                });
+
+                const sourceImage = Buffer.from(buffer).toString('base64');
+                const prompt = styleTransferPrompt({title: game.title, description: game.description ?? ''});
+                const stylized = await deps.ai.generateImage(styleTransferModel, {prompt, sourceImage});
+
+                return new Response(stylized as any, {headers: {'content-type': await detectMimeType(stylized)}});
+            } catch (e) {
+                console.error('Style transfer failed, falling back to original:', e);
+                return new Response(buffer, {headers: originalResponse.headers});
+            }
         } else {
             const data: Describable = {
                 title: game.title,
