@@ -3,7 +3,7 @@ interactive-fiction {
 
     grid-window {
         position: fixed;
-        top: calc(38px + var(--padding));
+        top: calc(38px + var(--border-size-small));
         left: 0;
         right: 0;
         z-index: 10;
@@ -16,7 +16,7 @@ interactive-fiction {
             align-items: center;
             flex-direction: column;
             text-align: center;
-            white-space: pre;
+            white-space: pre-wrap;
             font-family: "Inconsolata", monospace;
             font-optical-sizing: auto;
             font-weight: 400;

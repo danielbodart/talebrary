@@ -525,30 +525,29 @@ img[state=failed] + div {
     left: 0;
     width: 100%;
     z-index: 20;
+    padding-top: var(--border-size-small);
+    background: var(--eerie-black);
 }
 
 .window.grid .card {
-    margin-top: calc(var(--border-size) * -1);
     padding: 8px 14px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     font-family: "League Spartan", sans-serif;
     font-weight: 700;
     font-size: 0.95rem;
     background: var(--eerie-black);
     min-width: unset;
     max-width: none;
-    text-align: left;
+    text-align: center;
     gap: 10px;
     border-left: none;
     border-right: none;
     border-top: none;
     border-radius: 0;
     box-shadow: none;
-    margin-left: 0;
-    margin-right: 0;
-    margin-bottom: 0;
+    margin: 0;
 }
 
 .window.grid .card .breadcrumb {
@@ -583,6 +582,17 @@ img[state=failed] + div {
 
 /* --- Grid status window (game player) --- */
 
+grid-window {
+    position: fixed;
+    top: calc(38px + var(--border-size-small));
+    left: 0;
+    right: 0;
+    z-index: 10;
+    margin: 0 auto;
+    min-width: 300px;
+    max-width: calc(600px + var(--border-size) * 2);
+}
+
 grid-window .card:first-child {
     display: flex;
     align-items: center;
@@ -591,12 +601,16 @@ grid-window .card:first-child {
 
 grid-window .card:first-child, .buffer div.preformatted {
     text-align: center;
-    white-space: pre;
+    white-space: pre-wrap;
     font-family: "Inconsolata", monospace;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
     font-variation-settings: "wdth" 75;
+}
+
+buffer-window section.card:first-child {
+    margin-top: calc(38px + 38px + var(--border-size) * 3 + var(--padding) * 2);
 }
 
 /* --- Fixed input at bottom of viewport --- */
