@@ -3,6 +3,6 @@
     "correctness": "off"
   },
   "rules": {
-    "complexity": ["error", { "max": 17 }]
+    "complexity": ["error", { "max": 16 }]
   }
 }

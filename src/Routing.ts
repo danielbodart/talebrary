@@ -27,6 +27,7 @@ export class Routing {
     constructor(private deps: RouterDependencies) {
     }
 
+    // eslint-disable-next-line complexity
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
         const [, section, id, subsection] = uri.path.split('/')
