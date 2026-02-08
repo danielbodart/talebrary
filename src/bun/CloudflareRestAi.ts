@@ -49,7 +49,7 @@ export class CloudflareRestAi {
 
     private buildBody(_model: string, input: any): {body: BodyInit; contentType: string | null} {
         if (input.multipart) {
-            return {body: input.multipart.body, contentType: null};
+            return {body: input.multipart.body, contentType: input.multipart.contentType};
         }
         return {body: JSON.stringify(input), contentType: 'application/json'};
     }

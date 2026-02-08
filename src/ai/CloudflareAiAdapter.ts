@@ -57,5 +57,10 @@ function toCloudflareImageInput(model: string, input: ImagePrompt): any {
         }
     }
 
-    return {multipart: {body: form, contentType: 'multipart/form-data'}};
+    // Serialize FormData to get the stream body and content type with boundary,
+    // as required by the Cloudflare Workers AI binding.
+    // Content type must be read before body due to Bun lazy-init quirk.
+    const request = new Request('http://localhost', {method: 'POST', body: form});
+    const contentType = request.headers.get('content-type');
+    return {multipart: {body: request.body, contentType}};
 }

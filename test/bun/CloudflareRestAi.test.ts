@@ -41,15 +41,20 @@ describe("CloudflareRestAi", () => {
         expect(result).toEqual(imageBytes);
     });
 
-    test("sends multipart FormData when multipart wrapper provided", async () => {
+    test("sends multipart stream when multipart wrapper provided", async () => {
         const responseImage = new Uint8Array([0x89, 0x50, 0x4E, 0x47]);
         const responseBase64 = Buffer.from(responseImage).toString("base64");
 
+        // Serialize FormData to stream + content type (as CloudflareAiAdapter does)
+        // Content type must be read before body due to Bun lazy-init quirk
         const form = new FormData();
         form.append("prompt", "a cat in a hat");
+        const serialized = new Request('http://localhost', {method: 'POST', body: form});
+        const contentType = serialized.headers.get('content-type');
 
         const ai = new CloudflareRestAi("test-account", "test-token", async (request) => {
             expect(request.headers.get('Content-Type')).toContain("multipart/form-data");
+            expect(request.headers.get('Content-Type')).toContain("boundary=");
 
             const receivedForm = await request.formData();
             expect(receivedForm.get("prompt")).toBe("a cat in a hat");
@@ -60,7 +65,7 @@ describe("CloudflareRestAi", () => {
         });
 
         const result = await ai.run("@cf/bytedance/stable-diffusion-xl-lightning", {
-            multipart: {body: form, contentType: "multipart/form-data"},
+            multipart: {body: serialized.body, contentType},
         });
         expect(result).toBeInstanceOf(Uint8Array);
         expect(result).toEqual(responseImage);

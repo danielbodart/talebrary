@@ -64,8 +64,10 @@ aiContractTests("CloudflareAiAdapter (native binding)", () => {
     const nativeBinding = {
         async run(model: string, input: any): Promise<any> {
             if (model.includes('stable-diffusion') || model.includes('flux')) {
-                // Native binding now requires multipart input
+                // Native binding requires multipart with serialized stream body and content type with boundary
                 if (!input.multipart) throw new Error('required properties at \'/\' are \'multipart\'');
+                if (!(input.multipart.body instanceof ReadableStream)) throw new Error('multipart.body must be a ReadableStream');
+                if (!input.multipart.contentType?.includes('boundary=')) throw new Error('multipart.contentType must include boundary');
                 const bytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
                 return new ReadableStream({
                     start(controller) {

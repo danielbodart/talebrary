@@ -52,6 +52,7 @@
    - Always check `./run` first for available commands before inventing build steps
    - If a needed command is missing from `./run`, add it there — keep build knowledge centralised
    - Key commands: `start`, `startw` (wrangler dev --remote), `check`, `test`, `build`, `deploy`
+   - Use `./run startw` instead of `./run start` when testing Cloudflare-specific features (AI bindings, D1, R2, Durable Objects) — it uses the real `env.AI` binding via wrangler dev --remote, while `start` uses a REST API adapter that may behave differently
 
 6. Worktree Setup
    - Main repo: `/home/dan/Projects/talebrary` (master)
