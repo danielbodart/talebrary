@@ -88,6 +88,24 @@ describe("BucketCachingHandler", () => {
         await rm(dir, {recursive: true});
     });
 
+    test("does not cache no-store responses", async () => {
+        const {bucket, dir} = await createTempBucket();
+        let callCount = 0;
+        const handler = new BucketCachingHandler({bucket, digest: fixedDigest}, async () => {
+            callCount++;
+            return new Response("fallback content", {
+                status: 200,
+                headers: {"content-type": "image/png", "cache-control": "no-store"},
+            });
+        });
+
+        await handler.handle(new Request("http://test/content/123/cover-art"));
+        await handler.handle(new Request("http://test/content/123/cover-art"));
+        expect(callCount).toBe(2);
+
+        await rm(dir, {recursive: true});
+    });
+
     test("different query params get different cache keys", async () => {
         const {bucket, dir} = await createTempBucket();
         let lastPrompt = '';

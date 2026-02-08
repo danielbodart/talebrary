@@ -46,7 +46,10 @@ export function coverArt(deps: CoverArtDeps): Http {
                 return new Response(stylized as any, {headers: {'content-type': await detectMimeType(stylized)}});
             } catch (e) {
                 console.error('Style transfer failed, falling back to original:', e);
-                return new Response(buffer, {headers: originalResponse.headers});
+                return new Response(buffer, {headers: {
+                    'content-type': originalResponse.headers.get('content-type') ?? await detectMimeType(new Uint8Array(buffer)),
+                    'cache-control': 'no-store',
+                }});
             }
         } else {
             const describable: Describable = {title: game.title, description: game.description ?? ''};

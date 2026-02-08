@@ -55,7 +55,7 @@ describe("coverArt", () => {
         expect(savedKey).toBe("content/abc/cover-art-original");
     });
 
-    test("falls back to original when style transfer fails", async () => {
+    test("falls back to original when style transfer fails with no-store to prevent caching", async () => {
         const failingAi: TalebraryAi = {
             generateText: async () => ({}) as any,
             generateImage: async () => { throw new Error("AI failed"); },
@@ -81,6 +81,7 @@ describe("coverArt", () => {
         const response = await handler(new Request("http://test/content/abc/cover-art"));
         expect(response.status).toBe(200);
         expect(await response.text()).toBe("original image");
+        expect(response.headers.get("cache-control")).toBe("no-store");
     });
 
     test("generates AI illustration when game has no coverart", async () => {

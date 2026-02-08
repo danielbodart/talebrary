@@ -38,6 +38,7 @@ export class BucketCachingHandler {
 
         const response = await this.http(request);
         if (!response.ok) return response;
+        if (response.headers.get('cache-control') === 'no-store') return response;
 
         const buffer = await response.arrayBuffer();
         try {
