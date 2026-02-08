@@ -34,8 +34,9 @@ function parseTextResponse<T>(result: any): T {
     throw new Error(`AI response has no response field: ${JSON.stringify(result)}`);
 }
 
-function normalizeImageResponse(result: any): Uint8Array {
+async function normalizeImageResponse(result: any): Promise<Uint8Array> {
     if (result instanceof Uint8Array) return result;
+    if (result instanceof ReadableStream) return new Uint8Array(await new Response(result).arrayBuffer());
     if (result?.image && typeof result.image === 'string') {
         return Uint8Array.from(atob(result.image), c => c.charCodeAt(0));
     }

@@ -51,6 +51,35 @@ function aiContractTests(name: string, createAi: () => TalebraryAi) {
 // DumbAi - the in-memory test double
 aiContractTests("DumbAi", () => new DumbAi());
 
+// CloudflareAiAdapter wrapping a native-like binding that returns ReadableStream for images
+aiContractTests("CloudflareAiAdapter (native binding)", () => {
+    const cannedSuggestionsResponse = {
+        people: false,
+        tree: {examine: ["cave"], look: [], go: ["north"]},
+    };
+    const cannedIllustrationResponse = {
+        prompt: "Dark cave entrance, dripping water. Style: fantasy illustration."
+    };
+
+    const nativeBinding = {
+        async run(model: string, input: any): Promise<any> {
+            if (model.includes('stable-diffusion') || model.includes('flux')) {
+                const bytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
+                return new ReadableStream({
+                    start(controller) {
+                        controller.enqueue(bytes);
+                        controller.close();
+                    }
+                });
+            }
+            const isIllustration = input.messages?.some((m: any) => m.content?.includes('stable diffusion') || m.content?.includes('Stable Diffusion'));
+            return {response: JSON.stringify(isIllustration ? cannedIllustrationResponse : cannedSuggestionsResponse)};
+        }
+    };
+
+    return new CloudflareAiAdapter(nativeBinding);
+});
+
 // CloudflareAiAdapter wrapping CloudflareRestAi with canned HTTP responses
 aiContractTests("CloudflareAiAdapter", () => {
     const cannedSuggestionsResponse = {
