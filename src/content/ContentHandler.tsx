@@ -36,7 +36,7 @@ export function render(game: GameStory): string {
                     '@type': 'BreadcrumbList',
                     itemListElement: [
                         {'@type': 'ListItem', position: 1, name: 'Atrium', item: '/catalogue'},
-                        {'@type': 'ListItem', position: 2, name: 'Search', item: '/content'},
+                        {'@type': 'ListItem', position: 2, name: 'Content', item: '/content/'},
                         {'@type': 'ListItem', position: 3, name: game.title}
                     ]
                 })}</script>

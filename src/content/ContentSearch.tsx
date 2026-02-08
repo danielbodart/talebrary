@@ -33,7 +33,7 @@ export function render(search: string, games: GameInfo[]): string {
                         '@type': 'BreadcrumbList',
                         itemListElement: [
                             {'@type': 'ListItem', position: 1, name: 'Atrium', item: '/catalogue'},
-                            {'@type': 'ListItem', position: 2, name: 'Search'}
+                            {'@type': 'ListItem', position: 2, name: 'Content'}
                         ]
                     })}</script>
                 </div>
@@ -60,7 +60,7 @@ export function render(search: string, games: GameInfo[]): string {
                 )}
             </div>
             <div class="card input-control">
-                <form class="input" action="/content">
+                <form class="input" action="/content/">
                     <input name="search" type="search" maxlength={256} value={search} autofocus={true}/>
                 </form>
             </div>

@@ -85,7 +85,7 @@ function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
             </div>
 
             <div class="card input-control">
-                <form class="input" action="/content">
+                <form class="input" action="/content/">
                     <input type="text" maxlength={256} name="search"/>
                 </form>
             </div>
