@@ -75,6 +75,8 @@
    - `PROXY_URL` and `PROXY_TOKEN` in `.env` enable local dev to proxy ifarchive.org requests through the deployed worker
    - The worker secret `PROXY_TOKEN` must also be set via `wrangler secret put PROXY_TOKEN` with the same value
    - Without these env vars, local dev fetches ifarchive.org directly (will 451 in UK)
+   - If a game story returns **HTTP 451**, the `.env` is missing or not being sourced — check the symlink exists and `bootstrap.sh` sources it
+   - The server logs `Using IF Archive proxy via <url>` on startup when the proxy is active — if you don't see this, the env is not loaded
 
 10. wasiglk Dependency
     - wasiglk lives at `/home/dan/Projects/wasiglk`, published to JSR as `@bodar/wasiglk`
