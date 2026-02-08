@@ -24,30 +24,21 @@ export class BufferWindow {
                 this.promoteGridTitleLines(lines);
                 const cards = this.groupIntoCards(lines);
 
-                const lastSection = this.querySelector<HTMLElement>('section.card:last-of-type');
-                if (lastSection && cards.length > 0) {
-                    const firstNewCard = cards[0];
-                    const firstIsHeader = firstNewCard[0]?.[0]?.style === 'header' || firstNewCard[0]?.[0]?.style === 'subheader';
-                    const lastHasNormal = lastSection.querySelector('.normal') !== null;
-                    const lastHasInput = lastSection.querySelector('.input') !== null;
-
-                    if (!firstIsHeader || (!lastHasNormal && !lastHasInput)) {
-                        for (const line of firstNewCard) {
-                            this.appendLine(lastSection, line);
-                        }
-                        lastSection.classList.add('scroll');
-                        cards.shift();
-                    }
-                }
-
-                for (const card of cards) {
+                const newSections = cards.map(card => {
                     const section = document.createElement('section');
                     section.classList.add('card', 'scroll');
-                    for (const line of card) {
-                        this.appendLine(section, line);
-                    }
-                    this.appendChild(section);
+                    for (const line of card) this.appendLine(section, line);
+                    return section;
+                });
+
+                const lastSection = this.querySelector<HTMLElement>('section.card:last-of-type');
+                if (lastSection && newSections.length > 0 && this.shouldMerge(lastSection, newSections[0])) {
+                    const first = newSections.shift()!;
+                    while (first.firstChild) lastSection.appendChild(first.firstChild);
+                    lastSection.classList.add('scroll');
                 }
+
+                for (const section of newSections) this.appendChild(section);
 
                 this.scrollToLatest();
             }
@@ -127,6 +118,13 @@ export class BufferWindow {
                 if (current.length > 0) cards.push(current);
 
                 return cards;
+            }
+
+            private shouldMerge(lastSection: HTMLElement, newSection: HTMLElement): boolean {
+                if (newSection.querySelector('.header, .subheader')) {
+                    return !lastSection.querySelector('.normal, .input');
+                }
+                return true;
             }
 
             private promoteGridTitleLines(lines: TextSpan[][]) {
