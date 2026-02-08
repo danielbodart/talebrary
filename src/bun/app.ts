@@ -23,7 +23,7 @@ function ai(): TalebraryAi {
 }
 
 const root = `${import.meta.dir}/../../www/`;
-const r2 = new FolderBucket(root);
+const bucket = new FolderBucket(root);
 
 let http = localhostHandler(root);
 if (PROXY_URL && PROXY_TOKEN) {
@@ -34,7 +34,7 @@ if (PROXY_URL && PROXY_TOKEN) {
 const deps = {
     http,
     db: talebrary(),
-    r2,
+    bucket,
     digest: md5,
     ai: ai(),
 };

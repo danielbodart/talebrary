@@ -1,4 +1,4 @@
-import type {D1Database, R2Bucket} from "@cloudflare/workers-types";
+import type {D1Database} from "@cloudflare/workers-types";
 import type {TalebraryAi} from "./ai/TalebraryAi.ts";
 import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
@@ -7,7 +7,7 @@ import {Routing} from "./Routing.ts";
 import {templateHandler} from "./templates/TemplateHandler.ts";
 import {breadcrumbRenderer} from "./templates/renderers/BreadcrumbRenderer.tsx";
 import type {RendererRegistry} from "./templates/Renderer.ts";
-import {R2CachingHandler} from "./cloudflare/R2CachingHandler.ts";
+import {BucketCachingHandler} from "./storage/BucketCachingHandler.ts";
 import {etagHandler} from "./http/EtagHandler.ts";
 import {cacheControlHandler} from "./http/CacheControl.ts";
 import type {Digest} from "./system/digest.ts";
@@ -24,11 +24,12 @@ import {WingHandler} from "./catalogue/WingHandler.tsx";
 import {AisleHandler} from "./catalogue/AisleHandler.tsx";
 import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
+import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
 
 export interface ApplicationDependencies extends
     Dependency<'http', Http>,
     Dependency<'db', D1Database>,
-    Dependency<'r2', R2Bucket>,
+    Dependency<'bucket', TalebraryBucket>,
     Dependency<'digest', Digest>,
     Dependency<'ai', TalebraryAi> {
 }
@@ -47,11 +48,11 @@ export function application(deps: ApplicationDependencies) {
         .set('finder', constructor(D1GameFinder))
         .set('search', constructor(ContentSearch))
         .set('illustration', constructor(IllustrationHandler))
-        .set('coverArt', deps => new R2CachingHandler(deps, coverArt(deps)))
-        .set('story', deps => new R2CachingHandler(deps, story(deps)))
-        .set('art', deps => new R2CachingHandler(deps, request => deps.illustration.handle(request)))
+        .set('coverArt', deps => new BucketCachingHandler(deps, coverArt(deps)))
+        .set('story', deps => new BucketCachingHandler(deps, story(deps)))
+        .set('art', deps => new BucketCachingHandler(deps, request => deps.illustration.handle(request)))
         .set('suggestions', constructor(SuggestionsHandler))
-        .decorate('suggestions', deps => new R2CachingHandler(deps, request => deps.suggestions.handle(request)))
+        .decorate('suggestions', deps => new BucketCachingHandler(deps, request => deps.suggestions.handle(request)))
         .set('atrium', constructor(AtriumHandler))
         .set('wing', constructor(WingHandler))
         .set('aisle', constructor(AisleHandler))

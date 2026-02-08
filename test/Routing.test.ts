@@ -6,22 +6,18 @@ function stubHandler(name: string) {
     return {handle: async (_request: Request) => new Response(name, {status: 200})};
 }
 
-function stubR2Bucket() {
+function stubBucket() {
     return {
-        get: async (key: string) => ({
-            body: `static:${key}`,
-            writeHttpMetadata: (headers: Headers) => headers.set('content-type', 'text/html'),
-            httpEtag: '"test"',
-            checksums: {toJSON: () => ({})},
-            customMetadata: {},
+        get: async (key: string) => new Response(`static:${key}`, {
+            headers: {'content-type': 'text/html', 'etag': '"test"'},
         }),
-        put: async () => ({}),
-    } as any;
+        put: async () => {},
+    };
 }
 
 function createRouting(overrides: Partial<RouterDependencies> = {}): Routing {
     return new Routing({
-        r2: stubR2Bucket(),
+        bucket: stubBucket(),
         search: stubHandler('search') as any,
         coverArt: stubHandler('coverArt') as any,
         story: stubHandler('story') as any,
@@ -118,7 +114,7 @@ describe("Routing", () => {
     });
 
     describe("static file fallback", () => {
-        test("serves static files from R2", async () => {
+        test("serves static files from bucket", async () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/player/main.js"));
             expect(response.status).toBe(200);
@@ -127,18 +123,12 @@ describe("Routing", () => {
         test("appends index.html to trailing slash paths", async () => {
             let requestedKey = '';
             const routing = createRouting({
-                r2: {
+                bucket: {
                     get: async (key: string) => {
                         requestedKey = key;
-                        return {
-                            body: 'index',
-                            writeHttpMetadata: () => {},
-                            httpEtag: '"test"',
-                            checksums: {toJSON: () => ({})},
-                            customMetadata: {},
-                        };
+                        return new Response('index', {headers: {'content-type': 'text/html'}});
                     },
-                    put: async () => ({}),
+                    put: async () => {},
                 } as any,
             });
             await routing.handle(new Request("http://test/some/path/"));

@@ -1,5 +1,5 @@
 import {describe, expect, test} from "bun:test";
-import {R2CachingHandler, unquote} from "../../src/cloudflare/R2CachingHandler.ts";
+import {BucketCachingHandler} from "../../src/storage/BucketCachingHandler.ts";
 import {FolderBucket} from "../../src/bun/buckets/FolderBucket.ts";
 import {mkdtemp, rm} from "fs/promises";
 import {join} from "path";
@@ -9,15 +9,15 @@ import type {Digest} from "../../src/system/digest.ts";
 const fixedDigest: Digest = () => "abc123";
 
 async function createTempBucket() {
-    const dir = await mkdtemp(join(tmpdir(), "r2-cache-test-"));
+    const dir = await mkdtemp(join(tmpdir(), "bucket-cache-test-"));
     return {bucket: new FolderBucket(dir), dir};
 }
 
-describe("R2CachingHandler", () => {
+describe("BucketCachingHandler", () => {
     test("cache miss: calls wrapped handler and caches result", async () => {
         const {bucket, dir} = await createTempBucket();
         let called = false;
-        const handler = new R2CachingHandler({r2: bucket as any, digest: fixedDigest}, async () => {
+        const handler = new BucketCachingHandler({bucket, digest: fixedDigest}, async () => {
             called = true;
             return new Response("fresh content", {
                 status: 200,
@@ -36,7 +36,7 @@ describe("R2CachingHandler", () => {
     test("cache hit: returns cached content without calling wrapped handler", async () => {
         const {bucket, dir} = await createTempBucket();
         let callCount = 0;
-        const handler = new R2CachingHandler({r2: bucket as any, digest: fixedDigest}, async () => {
+        const handler = new BucketCachingHandler({bucket, digest: fixedDigest}, async () => {
             callCount++;
             return new Response("fresh content", {
                 status: 200,
@@ -57,7 +57,7 @@ describe("R2CachingHandler", () => {
     test("does not cache error responses", async () => {
         const {bucket, dir} = await createTempBucket();
         let callCount = 0;
-        const handler = new R2CachingHandler({r2: bucket as any, digest: fixedDigest}, async () => {
+        const handler = new BucketCachingHandler({bucket, digest: fixedDigest}, async () => {
             callCount++;
             return new Response("not found", {status: 404});
         });
@@ -72,7 +72,7 @@ describe("R2CachingHandler", () => {
     test("reload parameter bypasses cache", async () => {
         const {bucket, dir} = await createTempBucket();
         let callCount = 0;
-        const handler = new R2CachingHandler({r2: bucket as any, digest: fixedDigest}, async () => {
+        const handler = new BucketCachingHandler({bucket, digest: fixedDigest}, async () => {
             callCount++;
             return new Response(`content-${callCount}`, {
                 status: 200,
@@ -91,7 +91,7 @@ describe("R2CachingHandler", () => {
     test("different query params get different cache keys", async () => {
         const {bucket, dir} = await createTempBucket();
         let lastPrompt = '';
-        const handler = new R2CachingHandler({r2: bucket as any, digest: async (buf) => {
+        const handler = new BucketCachingHandler({bucket, digest: async (buf) => {
             const text = new TextDecoder().decode(new Uint8Array(buf));
             return text;
         }}, async (request) => {
@@ -107,15 +107,5 @@ describe("R2CachingHandler", () => {
         expect(lastPrompt).toBe("dog"); // both should have been called
 
         await rm(dir, {recursive: true});
-    });
-});
-
-describe("unquote", () => {
-    test("removes all quotes from etag", () => {
-        expect(unquote('"abc123"')).toBe("abc123");
-    });
-
-    test("handles unquoted string", () => {
-        expect(unquote("abc123")).toBe("abc123");
     });
 });

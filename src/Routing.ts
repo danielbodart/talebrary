@@ -1,7 +1,6 @@
 import type {ContentSearch} from "./content/ContentSearch.tsx";
-import type {R2CachingHandler} from "./cloudflare/R2CachingHandler.ts";
-import type {R2Bucket} from "@cloudflare/workers-types";
-import {toResponse} from "./cloudflare/ToResponse.ts";
+import type {BucketCachingHandler} from "./storage/BucketCachingHandler.ts";
+import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {EventHandler} from "./events/EventHandler.ts";
@@ -11,13 +10,13 @@ import type {AisleHandler} from "./catalogue/AisleHandler.tsx";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface RouterDependencies extends
-    Dependency<'r2', R2Bucket>,
+    Dependency<'bucket', TalebraryBucket>,
     Dependency<'search', ContentSearch>,
-    Dependency<'coverArt', R2CachingHandler>,
-    Dependency<'story', R2CachingHandler>,
+    Dependency<'coverArt', BucketCachingHandler>,
+    Dependency<'story', BucketCachingHandler>,
     Dependency<'content', ContentHandler>,
-    Dependency<'art', R2CachingHandler>,
-    Dependency<'suggestions', R2CachingHandler>,
+    Dependency<'art', BucketCachingHandler>,
+    Dependency<'suggestions', BucketCachingHandler>,
     Dependency<'events', EventHandler>,
     Dependency<'atrium', AtriumHandler>,
     Dependency<'wing', WingHandler>,
@@ -76,6 +75,6 @@ export class Routing {
             uri.path += 'index.html';
         }
 
-        return toResponse(await this.deps.r2.get(uri.path.slice(1)));
+        return this.deps.bucket.get(uri.path.slice(1));
     }
 }
