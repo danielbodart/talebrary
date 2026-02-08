@@ -29,8 +29,9 @@ export class BufferWindow {
                     const firstNewCard = cards[0];
                     const firstIsHeader = firstNewCard[0]?.[0]?.style === 'header' || firstNewCard[0]?.[0]?.style === 'subheader';
                     const lastHasNormal = lastSection.querySelector('.normal') !== null;
+                    const lastHasInput = lastSection.querySelector('.input') !== null;
 
-                    if (!firstIsHeader || !lastHasNormal) {
+                    if (!firstIsHeader || (!lastHasNormal && !lastHasInput)) {
                         for (const line of firstNewCard) {
                             this.appendLine(lastSection, line);
                         }
