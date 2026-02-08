@@ -40,4 +40,25 @@
    - Examples: `./run test`, `./run deploy`
 
 
+6. Worktree Setup
+   - Main repo: `/home/dan/Projects/talebrary` (master)
+   - Worktrees live in `/home/dan/Projects/talebrary-worktrees/<branch-name>`
+   - When creating a new worktree, symlink `.env` from main repo: `ln -s /home/dan/Projects/talebrary/.env <worktree>/.env`
+   - The `./run` script sources `.env` if present
+
+7. Workflow
+   - After pushing, always monitor GitHub Actions with `gh run watch`
+
+8. Multi-Agent / Parallel Development
+   - Playwright MCP is configured with `--isolated` so each agent gets its own browser context
+   - When testing with Playwright, use `./run start-dynamic` to start the dev server on a random free port (PORT=0)
+   - This avoids port conflicts when multiple agents run concurrently across worktrees
+   - The server prints its URL on startup — use that URL in Playwright navigation
+
+9. IF Archive Proxy
+   - `PROXY_URL` and `PROXY_TOKEN` in `.env` enable local dev to proxy ifarchive.org requests through the deployed worker
+   - The worker secret `PROXY_TOKEN` must also be set via `wrangler secret put PROXY_TOKEN` with the same value
+   - Without these env vars, local dev fetches ifarchive.org directly (will 451 in UK)
+
+
 On the first start of every chat, tell me the number of Core Rules that have been read

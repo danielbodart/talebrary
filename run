@@ -95,6 +95,12 @@ function start() {
   bun run --watch src/bun/app.ts
 }
 
+function start-dynamic() {
+  check
+  build-client
+  PORT=0 bun run src/bun/app.ts
+}
+
 function startw() {
   check
   build-client
