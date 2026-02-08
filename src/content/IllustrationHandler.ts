@@ -19,6 +19,10 @@ function errorResponse(status: number, statusText: string, reason: string): Resp
     return new Response(JSON.stringify({status, statusText, reason}), {status, statusText, headers: {'content-type': 'application/json'}});
 }
 
+function defaultBookCoverPrompt(title: string): string {
+    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic.`;
+}
+
 export class IllustrationHandler {
     constructor(private deps: IllustrationDependencies) {
     }
@@ -48,17 +52,23 @@ export class IllustrationHandler {
             } catch (e) {
                 result = {status: 500, statusText: 'Expected JSON response', reason: String(e)};
             }
-            if (result.status) {
+            let prompt: string;
+            if (result.status === 404) {
+                const title = data.story?.title ?? data.title ?? 'Unknown';
+                prompt = defaultBookCoverPrompt(title);
+            } else if (result.status) {
                 return new Response(JSON.stringify(result), {status: result.status, statusText: result.statusText});
+            } else {
+                prompt = result.prompt!;
             }
 
             let image: Uint8Array;
             try {
-                image = await this.deps.ai.generateImage(imageModel, {prompt: result.prompt!});
+                image = await this.deps.ai.generateImage(imageModel, {prompt});
             } catch (e) {
                 return errorResponse(500, 'Image generation failed', String(e));
             }
-            return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': result.prompt!}});
+            return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt}});
         }
 
         const promptText = illustrationPrompt(path, data);

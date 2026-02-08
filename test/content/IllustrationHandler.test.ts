@@ -75,14 +75,16 @@ describe("IllustrationHandler", () => {
             expect(response.status).toBe(400);
         });
 
-        test("returns error status when AI returns 404 scene-not-found", async () => {
+        test("falls back to book cover when AI returns 404 scene-not-found", async () => {
             const noSceneAi: TalebraryAi = {
                 generateText: async () => ({status: 404, statusText: "No Scene Found", reason: "Not visual"}) as any,
                 generateImage: async () => new Uint8Array(0),
             };
             const handler = new IllustrationHandler({ai: noSceneAi});
             const response = await handler.handle(requestWithPrompt(exampleRequest));
-            expect(response.status).toBe(404);
+            expect(response.status).toBe(200);
+            expect(response.headers.get("content-type")).toBe("image/jpeg");
+            expect(response.headers.get("description")).toContain(exampleRequest.story.title);
         });
     });
 
