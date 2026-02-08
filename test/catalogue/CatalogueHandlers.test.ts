@@ -94,10 +94,11 @@ describe("CatalogueHandlers", () => {
         test("aisle page has breadcrumb navigation", async () => {
             const response = await handler.handle(new Request("http://test/catalogue/genres/horror"));
             const html = await response.text();
-            expect(html).toContain('class="breadcrumb"');
-            expect(html).toContain('href="/catalogue"');
-            expect(html).toContain('href="/catalogue/genres"');
-            expect(html).toContain("Horror Aisle");
+            expect(html).toContain('application/ld+json');
+            expect(html).toContain('"name":"Atrium"');
+            expect(html).toContain('"item":"/catalogue"');
+            expect(html).toContain('"item":"/catalogue/genres"');
+            expect(html).toContain('"name":"Horror Aisle"');
         });
     });
 });

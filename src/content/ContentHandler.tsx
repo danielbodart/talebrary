@@ -32,13 +32,14 @@ export function render(game: GameStory): string {
         <body>
         <div class="window grid">
             <div class="card">
-                <div class="breadcrumb">
-                    <a href="/catalogue">Atrium</a>
-                    <span class="sep">{'\u203A'}</span>
-                    <a href="/content">Search</a>
-                    <span class="sep">{'\u203A'}</span>
-                    <span class="current">{wellFormed(game.title)}</span>
-                </div>
+                <script type="application/ld+json" class="breadcrumb">{JSON.stringify({
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                        {'@type': 'ListItem', position: 1, name: 'Atrium', item: '/catalogue'},
+                        {'@type': 'ListItem', position: 2, name: 'Search', item: '/content'},
+                        {'@type': 'ListItem', position: 3, name: game.title}
+                    ]
+                })}</script>
             </div>
         </div>
         <main class="story">

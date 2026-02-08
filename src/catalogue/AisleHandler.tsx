@@ -58,13 +58,14 @@ function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
         <main class="story catalogue">
             <div class="window grid">
                 <div class="card">
-                    <div class="breadcrumb">
-                        <a href="/catalogue">Atrium</a>
-                        <span class="sep">{'\u203A'}</span>
-                        <a href={`/catalogue/${wing.id}`}>{wing.title}</a>
-                        <span class="sep">{'\u203A'}</span>
-                        <span class="current">{category.title}</span>
-                    </div>
+                    <script type="application/ld+json" class="breadcrumb">{JSON.stringify({
+                        '@type': 'BreadcrumbList',
+                        itemListElement: [
+                            {'@type': 'ListItem', position: 1, name: 'Atrium', item: '/catalogue'},
+                            {'@type': 'ListItem', position: 2, name: wing.title, item: `/catalogue/${wing.id}`},
+                            {'@type': 'ListItem', position: 3, name: category.title}
+                        ]
+                    })}</script>
                 </div>
             </div>
 

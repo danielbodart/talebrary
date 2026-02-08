@@ -20,9 +20,12 @@ function render(): string {
         <main class="story catalogue">
             <div class="window grid">
                 <div class="card">
-                    <div class="breadcrumb">
-                        <span class="current">Atrium</span>
-                    </div>
+                    <script type="application/ld+json" class="breadcrumb">{JSON.stringify({
+                        '@type': 'BreadcrumbList',
+                        itemListElement: [
+                            {'@type': 'ListItem', position: 1, name: 'Atrium'}
+                        ]
+                    })}</script>
                 </div>
             </div>
             <div class="card scene-card">

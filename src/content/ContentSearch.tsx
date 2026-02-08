@@ -29,11 +29,13 @@ export function render(search: string, games: GameInfo[]): string {
         <main class="search catalogue">
             <div class="window grid">
                 <div class="card">
-                    <div class="breadcrumb">
-                        <a href="/catalogue">Atrium</a>
-                        <span class="sep">{'\u203A'}</span>
-                        <span class="current">Search</span>
-                    </div>
+                    <script type="application/ld+json" class="breadcrumb">{JSON.stringify({
+                        '@type': 'BreadcrumbList',
+                        itemListElement: [
+                            {'@type': 'ListItem', position: 1, name: 'Atrium', item: '/catalogue'},
+                            {'@type': 'ListItem', position: 2, name: 'Search'}
+                        ]
+                    })}</script>
                 </div>
             </div>
             <div class="window buffer">
