@@ -95,6 +95,14 @@ export const suggestionCases: EvalCase<Describable>[] = [
     {name: "adventure-inside-building", input: adventureInsideBuilding.scene},
 ];
 
+export const suggestionTreeCases: EvalCase<Describable>[] = [
+    {name: "adventure-end-of-road", input: adventureEndOfRoad.scene},
+    {name: "adventure-inside-building", input: adventureInsideBuilding.scene},
+    {name: "adventure-below-grate", input: adventureBelowGrate.scene},
+    {name: "svt-orbiting-boony", input: svtOrbitingBoony.scene},
+    {name: "tobys-nose-drawing-room", input: tobysNoseDrawingRoom.scene},
+];
+
 export const illustrationCases: EvalCase<SceneContext>[] = [
     {name: "adventure-end-of-road", input: adventureEndOfRoad},
     {name: "adventure-inside-building", input: adventureInsideBuilding},

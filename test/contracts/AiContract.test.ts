@@ -2,7 +2,7 @@ import {describe, expect, test} from "bun:test";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
 import {CloudflareRestAi} from "../../src/bun/CloudflareRestAi.ts";
 import {CloudflareAiAdapter} from "../../src/ai/CloudflareAiAdapter.ts";
-import {suggestionsPrompt, ExamplePrompt} from "../../src/prompts/SuggestionsPrompt.ts";
+import {suggestionsTreePrompt, ExampleInput} from "../../src/prompts/SuggestionsTreePrompt.ts";
 import {generateIllustrationPrompt, exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 
@@ -18,12 +18,10 @@ function aiContractTests(name: string, createAi: () => TalebraryAi) {
         describe("text generation", () => {
             test("suggestions: returns parsed object with expected fields", async () => {
                 const ai = createAi();
-                const result = await ai.generateText("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsPrompt(ExamplePrompt));
-                expect(result).toHaveProperty("commands");
+                const result = await ai.generateText("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsTreePrompt(ExampleInput));
                 expect(result).toHaveProperty("people");
-                expect(result).toHaveProperty("nouns");
-                expect(result).toHaveProperty("actions");
-                expect(result.commands).toBeArray();
+                expect(result).toHaveProperty("tree");
+                expect(typeof result.tree).toBe("object");
             });
 
             test("illustration prompt: returns parsed object with prompt field", async () => {
@@ -56,10 +54,12 @@ aiContractTests("DumbAi", () => new DumbAi());
 // CloudflareAiAdapter wrapping CloudflareRestAi with canned HTTP responses
 aiContractTests("CloudflareAiAdapter", () => {
     const cannedSuggestionsResponse = {
-        actions: ["examine cave", "go north"],
-        commands: ["examine", "look", "north", "go"],
-        nouns: ["cave", "light"],
-        people: false
+        people: false,
+        tree: {
+            examine: ["cave"],
+            look: [],
+            go: ["north"],
+        },
     };
     const cannedIllustrationResponse = {
         prompt: "Dark cave entrance, dripping water, faint light at end. Style: fantasy illustration."
@@ -83,7 +83,7 @@ aiContractTests("CloudflareAiAdapter", () => {
 
         // Text generation: detect suggestion vs illustration by checking prompt content
         const body = await request.json() as any;
-        const isIllustration = body.messages?.some((m: any) => m.content?.includes('stable diffusion'));
+        const isIllustration = body.messages?.some((m: any) => m.content?.includes('stable diffusion') || m.content?.includes('Stable Diffusion'));
         const responseData = isIllustration ? cannedIllustrationResponse : cannedSuggestionsResponse;
 
         return new Response(JSON.stringify({result: {response: JSON.stringify(responseData)}}), {

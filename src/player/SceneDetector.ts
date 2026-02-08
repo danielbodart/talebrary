@@ -1,7 +1,6 @@
 import type {Describable, SceneContext} from "../types.ts";
-import type {Suggestions} from "../prompts/SuggestionsPrompt.ts";
-import {Arrays} from "../system/Arrays.ts";
-import {collapseSuggestions} from "./PrefixTree.ts";
+import type {SuggestionTree} from "../prompts/SuggestionsTreePrompt.ts";
+import {treeToSuggestions} from "./PrefixTree.ts";
 
 export class SceneDetector {
     private models = ['llama+stable-diffusion'];
@@ -45,9 +44,8 @@ export class SceneDetector {
         fetch(`/content/${id}/suggestions?prompt=${encodeURIComponent(JSON.stringify(current))}`)
             .then(response => {
                 if (!response.ok) return;
-                response.json().then((json: Suggestions) => {
-                    const unique = Arrays.unique([...json.commands, ...json.nouns, ...json.actions]);
-                    const collapsed = collapseSuggestions(unique);
+                response.json().then((json: SuggestionTree) => {
+                    const collapsed = treeToSuggestions(json.tree);
                     const suggestions = document.createElement('x-suggestions');
                     for (const {text, completions} of collapsed) {
                         const instruction = document.createElement('x-instruction');

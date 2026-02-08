@@ -3,10 +3,12 @@ import {CloudflareAiAdapter} from "../src/ai/CloudflareAiAdapter.ts";
 import {client} from "../src/http/mod.ts";
 import {CachedAi} from "./cache.ts";
 import {allModels, imageModels, img2imgModels, textModels} from "./models.ts";
-import {suggestionCases, illustrationCases, coverArtCases} from "./fixtures.ts";
+import {suggestionCases, suggestionTreeCases, illustrationCases, coverArtCases} from "./fixtures.ts";
 import {suggestionsPrompt} from "../src/prompts/SuggestionsPrompt.ts";
+import {suggestionsTreePrompt} from "../src/prompts/SuggestionsTreePrompt.ts";
 import {jsonValid, schemaMatch} from "./scorers/json.ts";
 import {commandsFromList, nounsFromScene, actionCount} from "./scorers/suggestions.ts";
+import {validTree, verbsFromList, nounsFromScene as treeNounsFromScene, treeSize, treeDepth} from "./scorers/suggestion-tree.ts";
 import {runTextEvals, runImageEvals, runImg2ImgEvals, runStyleTransferEvals} from "./runner.ts";
 import type {EvalRun, ModelOutput, Score} from "./types.ts";
 import {mkdir} from "node:fs/promises";
@@ -78,6 +80,25 @@ async function runSuggestions() {
     printSummary(run);
 }
 
+async function runSuggestionsTree() {
+    console.log("\n--- Suggestion Tree Evals ---");
+    const treeScorers = [
+        jsonValid,
+        schemaMatch(["people", "tree"]),
+        validTree,
+        verbsFromList,
+        treeNounsFromScene,
+        treeSize,
+        treeDepth,
+    ];
+    const run = await runTextEvals(
+        ai, "suggestions-tree", suggestionTreeCases,
+        allModels(textModels), suggestionsTreePrompt, treeScorers,
+    );
+    await saveRun("suggestions-tree", run);
+    printSummary(run);
+}
+
 async function runIllustrationPrompts() {
     console.log("\n--- Illustration Prompt Evals ---");
     const promptScorers = [
@@ -129,6 +150,7 @@ async function runStyleTransfer() {
 
 const suites: Record<string, () => Promise<void>> = {
     suggestions: runSuggestions,
+    "suggestions-tree": runSuggestionsTree,
     prompts: runIllustrationPrompts,
     images: runImages,
     img2img: runImg2Img,

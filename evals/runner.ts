@@ -30,7 +30,13 @@ export async function runTextEvals<I>(
         for (const model of models) {
             const prompt = {...promptFn(evalCase.input), ...(maxTokens[model] ? {max_tokens: maxTokens[model]} : {})};
             const start = performance.now();
-            const output = await ai.generateText(model, prompt);
+            let output: any;
+            try {
+                output = await ai.generateText(model, prompt);
+            } catch (e: any) {
+                output = null;
+                console.log(`  ${model} [${(performance.now() - start).toFixed(0)}ms] error: ${e.message?.slice(0, 80)}`);
+            }
             const latencyMs = performance.now() - start;
 
             results.push({model, output, latencyMs, cached: false});
@@ -44,7 +50,7 @@ export async function runTextEvals<I>(
             const avg = modelScores.length > 0
                 ? (modelScores.reduce((s, sc) => s + sc.value, 0) / modelScores.length).toFixed(2)
                 : "n/a";
-            console.log(`  ${model} [${latencyMs.toFixed(0)}ms] avg=${avg}`);
+            if (output !== null) console.log(`  ${model} [${latencyMs.toFixed(0)}ms] avg=${avg}`);
         }
 
         caseResults.push({case: evalCase, results, scores});

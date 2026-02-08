@@ -1,6 +1,6 @@
 import {describe, expect, test} from "bun:test";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
-import {suggestionsPrompt, ExamplePrompt, type Suggestions} from "../../src/prompts/SuggestionsPrompt.ts";
+import {suggestionsTreePrompt, ExampleInput, type SuggestionTree} from "../../src/prompts/SuggestionsTreePrompt.ts";
 import {generateIllustrationPrompt, exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 
 describe("DumbAi", () => {
@@ -8,22 +8,23 @@ describe("DumbAi", () => {
 
     describe("suggestions", () => {
         test("can detect people and directions", async () => {
-            const suggestions = await ai.generateText<Suggestions>("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsPrompt(ExamplePrompt));
+            const suggestions = await ai.generateText<SuggestionTree>("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsTreePrompt(ExampleInput));
             expect(suggestions.people).toBe(true);
-            expect(suggestions.commands.sort()).toEqual([
-                "ask", "down", "east", "examine", "give", "go", "help", "in", "inventory", "look", "north", "out", "show", "south", "talk", "tell", "up", "west"
-            ]);
+            expect(suggestions.tree).toHaveProperty("go");
+            expect(suggestions.tree["go"]).toContain("east");
+            expect(suggestions.tree).toHaveProperty("east");
+            expect(suggestions.tree).toHaveProperty("look");
+            expect(suggestions.tree).toHaveProperty("ask");
         });
 
-        test("returns valid Suggestions shape", async () => {
-            const suggestions = await ai.generateText<Suggestions>("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsPrompt({
+        test("returns valid SuggestionTree shape", async () => {
+            const suggestions = await ai.generateText<SuggestionTree>("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsTreePrompt({
                 title: "Cave",
                 description: "A dark cave with dripping water"
             }));
             expect(suggestions).toHaveProperty("people");
-            expect(suggestions).toHaveProperty("nouns");
-            expect(suggestions).toHaveProperty("commands");
-            expect(suggestions).toHaveProperty("actions");
+            expect(suggestions).toHaveProperty("tree");
+            expect(typeof suggestions.tree).toBe("object");
         });
     });
 

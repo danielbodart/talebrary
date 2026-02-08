@@ -1,5 +1,5 @@
 import {describe, expect, test} from "bun:test";
-import {collapseSuggestions} from "../../src/player/PrefixTree.ts";
+import {collapseSuggestions, treeToSuggestions} from "../../src/player/PrefixTree.ts";
 
 describe('collapseSuggestions', () => {
     test('single-word suggestions pass through unchanged', () => {
@@ -53,5 +53,44 @@ describe('collapseSuggestions', () => {
 
     test('empty input returns empty output', () => {
         expect(collapseSuggestions([])).toEqual([]);
+    });
+});
+
+describe('treeToSuggestions', () => {
+    test('standalone verb with empty array', () => {
+        expect(treeToSuggestions({inventory: [], look: []})).toEqual([
+            {text: 'inventory', completions: []},
+            {text: 'look', completions: []},
+        ]);
+    });
+
+    test('verb with single noun shows full command', () => {
+        expect(treeToSuggestions({take: ['key']})).toEqual([
+            {text: 'take key', completions: []},
+        ]);
+    });
+
+    test('verb with multiple nouns collapses with ...', () => {
+        expect(treeToSuggestions({examine: ['book', 'lamp', 'desk']})).toEqual([
+            {text: 'examine...', completions: ['book', 'lamp', 'desk']},
+        ]);
+    });
+
+    test('mixed tree with standalone and expandable entries', () => {
+        expect(treeToSuggestions({
+            examine: ['book', 'lamp'],
+            go: ['east', 'west'],
+            take: ['key'],
+            inventory: [],
+        })).toEqual([
+            {text: 'examine...', completions: ['book', 'lamp']},
+            {text: 'go...', completions: ['east', 'west']},
+            {text: 'take key', completions: []},
+            {text: 'inventory', completions: []},
+        ]);
+    });
+
+    test('empty tree returns empty output', () => {
+        expect(treeToSuggestions({})).toEqual([]);
     });
 });

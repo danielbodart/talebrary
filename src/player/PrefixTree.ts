@@ -3,6 +3,20 @@ export interface CollapsedSuggestion {
     completions: string[];
 }
 
+export function treeToSuggestions(tree: Record<string, string[]>): CollapsedSuggestion[] {
+    const result: CollapsedSuggestion[] = [];
+    for (const [verb, nouns] of Object.entries(tree)) {
+        if (nouns.length === 0) {
+            result.push({text: verb, completions: []});
+        } else if (nouns.length === 1) {
+            result.push({text: `${verb} ${nouns[0]}`, completions: []});
+        } else {
+            result.push({text: `${verb}...`, completions: nouns});
+        }
+    }
+    return result;
+}
+
 export function collapseSuggestions(suggestions: string[]): CollapsedSuggestion[] {
     const groups = new Map<string, string[]>();
     const singles: string[] = [];

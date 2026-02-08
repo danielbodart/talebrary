@@ -27,9 +27,9 @@ describe("SuggestionsHandler", () => {
         expect(response.headers.get("content-type")).toBe("application/json");
 
         const json = await response.json();
-        expect(json.commands).toBeArray();
-        expect(json.commands).toContain("look");
-        expect(json.commands).toContain("north");
+        expect(json.tree).toBeObject();
+        expect(json.tree).toHaveProperty("look");
+        expect(json.tree).toHaveProperty("north");
     });
 
     test("returns suggestions with people detection", async () => {
@@ -39,7 +39,7 @@ describe("SuggestionsHandler", () => {
         }));
         const json = await response.json();
         expect(json.people).toBe(true);
-        expect(json.commands).toContain("ask");
+        expect(json.tree).toHaveProperty("ask");
     });
 
     test("returns 500 when AI throws", async () => {

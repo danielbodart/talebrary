@@ -1,5 +1,6 @@
 import {describe, expect, test} from "bun:test";
 import {suggestionsPrompt, ExamplePrompt, ExampleSuggestions} from "../../src/prompts/SuggestionsPrompt.ts";
+import {suggestionsTreePrompt, ExampleInput} from "../../src/prompts/SuggestionsTreePrompt.ts";
 import {generateIllustrationPrompt, exampleRequest, exampleResponse} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import {illustrationPrompt} from "../../src/prompts/IllustrationPrompt.ts";
 import {scenePrompt} from "../../src/prompts/ScenePrompt.ts";
@@ -29,6 +30,33 @@ describe("suggestionsPrompt", () => {
     test("user message is JSON-stringified input", () => {
         const input = {title: "Test", description: "A test scene"};
         const result = suggestionsPrompt(input);
+        expect(result.messages[1].content).toBe(JSON.stringify(input));
+    });
+});
+
+describe("suggestionsTreePrompt", () => {
+    test("returns ScopedPrompt with system and user messages", () => {
+        const result = suggestionsTreePrompt(ExampleInput);
+        expect(result.messages).toHaveLength(2);
+        expect(result.messages[0].role).toBe("system");
+        expect(result.messages[1].role).toBe("user");
+    });
+
+    test("system message contains command vocabulary", () => {
+        const result = suggestionsTreePrompt(ExampleInput);
+        expect(result.messages[0].content).toContain("command tree");
+        expect(result.messages[0].content).toContain("examine");
+    });
+
+    test("system message contains example input and output", () => {
+        const result = suggestionsTreePrompt(ExampleInput);
+        expect(result.messages[0].content).toContain(JSON.stringify(ExampleInput));
+        expect(result.messages[0].content).toContain('"tree"');
+    });
+
+    test("user message is JSON-stringified input", () => {
+        const input = {title: "Test", description: "A test scene"};
+        const result = suggestionsTreePrompt(input);
         expect(result.messages[1].content).toBe(JSON.stringify(input));
     });
 });

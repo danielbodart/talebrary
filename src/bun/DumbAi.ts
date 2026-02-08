@@ -5,7 +5,7 @@ import {
     peopleCommands,
     type ScopedPrompt,
 } from "../types.ts";
-import type {Suggestions} from "../prompts/SuggestionsPrompt.ts";
+import type {SuggestionTree} from "../prompts/SuggestionsTreePrompt.ts";
 import {Arrays} from "../system/Arrays.ts";
 import {words} from "../system/Strings.ts";
 import type {ImagePrompt, TalebraryAi} from "../ai/TalebraryAi.ts";
@@ -22,7 +22,7 @@ export class DumbAi implements TalebraryAi {
     private textGeneration(prompt: ScopedPrompt): object | string {
         const system = prompt.messages.find(m => m.role === 'system');
         const user = prompt.messages.find(m => m.role === 'user');
-        if (system?.content.includes('commands list:')) {
+        if (system?.content.includes('command tree')) {
             return this.suggestions(user?.content);
         }
         if (system?.content.includes('stable diffusion')) {
@@ -31,23 +31,21 @@ export class DumbAi implements TalebraryAi {
         return 'Unsupported prompt';
     }
 
-    private suggestions(userContent: string | undefined): Suggestions {
+    private suggestions(userContent: string | undefined): SuggestionTree {
         const foundWords = words(userContent);
         const people = foundWords.some(w => peopleWords.has(w.toLowerCase()));
         const dir = foundWords.filter(w => directionWords.has(w));
         const mentioned = foundWords.filter(w => commandWords.has(w));
-        return {
-            actions: [],
-            nouns: [],
-            people: people,
-            commands: Arrays.unique(Arrays.shuffle([
-                ...always,
-                ...dir,
-                ...(people ? peopleCommands : []),
-                ...(dir.length ? directions : []),
-                ...mentioned,
-            ])),
-        } satisfies Suggestions;
+        const verbs = Arrays.unique(Arrays.shuffle([
+            ...always,
+            ...(people ? peopleCommands : []),
+            ...mentioned,
+        ]));
+        const tree: Record<string, string[]> = {};
+        for (const verb of verbs) tree[verb] = [];
+        for (const d of Arrays.unique(dir)) tree[d] = [];
+        if (dir.length) tree["go"] = Arrays.unique(dir);
+        return {people, tree} satisfies SuggestionTree;
     }
 
     private illustrationPrompt(userContent: string | undefined): object {

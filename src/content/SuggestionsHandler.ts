@@ -1,5 +1,5 @@
 import {Uri} from "../http/Uri.ts";
-import {suggestionsPrompt, type Suggestions} from "../prompts/SuggestionsPrompt.ts";
+import {suggestionsTreePrompt, type SuggestionTree} from "../prompts/SuggestionsTreePrompt.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 
@@ -17,10 +17,10 @@ export class SuggestionsHandler {
         if (!rawPrompt) return new Response('Not Found', {status: 404});
 
         const data = JSON.parse(rawPrompt);
-        const prompt = suggestionsPrompt(data);
+        const prompt = suggestionsTreePrompt(data);
 
         try {
-            const json = await this.ai.generateText<Suggestions>(model, prompt);
+            const json = await this.ai.generateText<SuggestionTree>(model, prompt);
             return new Response(JSON.stringify(json), {
                 headers: {
                     "content-type": "application/json",
