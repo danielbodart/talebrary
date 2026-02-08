@@ -70,7 +70,7 @@ function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
             </div>
 
             <div class="card scene-card">
-                <img class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
+                <img is="x-image" reloadable class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
                 <div class="title">{category.title}</div>
                 <div class="normal">{category.narrative}</div>
                 <div class="suggestions nav">
@@ -94,7 +94,7 @@ function render(wing: Wing, category: AnyCategory, games: GameInfo[]): string {
                 {games.map(game =>
                     <div class="card">
                         <div class="rating" aria-label="Rating" role="img">{roundStep(game.rating, 0.5)}</div>
-                        <img class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt=""
+                        <img is="x-image" reloadable class="image" src={`/content/${game.id}/cover-art`} loading="lazy" alt=""
                              aria-hidden="true"></img>
                         <div class="title">{wellFormed(game.title)}</div>
                         <div class="author">{wellFormed(game.author)}</div>

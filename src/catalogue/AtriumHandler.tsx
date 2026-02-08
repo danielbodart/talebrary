@@ -1,6 +1,11 @@
 import {html5} from "../templates/LinkedomHelpers.ts";
 import {CATALOGUE} from "./CatalogueConfig.ts";
 
+const atriumIllustration = {
+    title: 'The Atrium',
+    description: 'A vast library atrium with a librarian at a desk, towering bookshelves, grand archways leading to different wings of the collection.',
+};
+
 export class AtriumHandler {
     async handle(_request: Request): Promise<Response> {
         return new Response(render(), {status: 200, headers: {'Content-Type': 'text/html'}});
@@ -8,6 +13,11 @@ export class AtriumHandler {
 }
 
 function render(): string {
+    const illustrationUrl = `/cards/art?prompt=${encodeURIComponent(JSON.stringify({
+        story: {title: 'The Talebrary Athenaeum', description: 'A vast library of interactive fiction games'},
+        scene: atriumIllustration,
+    }))}`;
+
     return html5(jsx =>
         <html lang="en">
         <head>
@@ -29,7 +39,7 @@ function render(): string {
                 </div>
             </div>
             <div class="card scene-card">
-                <img class="image" src="/library.jpeg" loading="eager" alt="" aria-hidden="true"></img>
+                <img is="x-image" reloadable class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
                 <div class="title">The Atrium</div>
                 <div class="normal">You find yourself standing in the atrium of a vast library. Before you
                     stands the librarian, ready to help you find whatever adventure you require. To either side,

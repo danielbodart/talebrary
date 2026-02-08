@@ -1,6 +1,20 @@
+import {constructor, instance, LazyMap} from "@bodar/yadic/LazyMap.ts";
+import {SystemClock} from "../system/clock.ts";
+import {ImageElement} from "../components/ImageElement.ts";
 import {type InstructionDetail, Instruction, InstructionEventName} from "../player/Instruction.ts";
+import {customElement, realise} from "../components/misc.ts";
+import {controlKeys} from "../player/controlKeys.ts";
 
-customElements.define('x-instruction', Instruction);
+const app = LazyMap.create()
+    .set('clock', constructor(SystemClock))
+    .set('customElements', instance(window.customElements))
+    .set('HTMLElement', instance(HTMLElement))
+    .set('HTMLImageElement', instance(HTMLImageElement))
+    .set('ImageElement', customElement(ImageElement))
+    .set('Instruction', customElement(Instruction))
+realise(app.ImageElement, app.Instruction);
+
+controlKeys(document);
 
 let activePrefix = '';
 

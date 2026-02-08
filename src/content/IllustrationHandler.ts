@@ -31,7 +31,7 @@ export class IllustrationHandler {
         const {path, query} = new Uri(request.url);
         const params = new URLSearchParams(query);
 
-        const model = params.get('model') ?? 'llama+stable-diffusion';
+        const model = params.get('model') ?? 'llama+flux';
 
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});

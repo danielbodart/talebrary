@@ -6,6 +6,7 @@ interface HTMLMetaElement {
 
 interface HTMLElement {
     is: string;
+    reloadable: boolean;
 }
 
 namespace JSX {

@@ -42,7 +42,7 @@ function render(wing: Wing): string {
                 </div>
             </div>
             <div class="card scene-card">
-                <img class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
+                <img is="x-image" reloadable class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
                 <div class="title">{wing.title}</div>
                 <div class="normal">{wing.narrative}</div>
                 <div class="suggestions nav">

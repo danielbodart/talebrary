@@ -3,7 +3,7 @@ import type {SuggestionTree} from "../prompts/SuggestionsTreePrompt.ts";
 import {treeToSuggestions} from "./PrefixTree.ts";
 
 export class SceneDetector {
-    private models = ['llama+stable-diffusion'];
+    private models = ['llama+flux'];
 
     detect(card: HTMLElement) {
         const hasHeader = card.querySelector('.header, .subheader');

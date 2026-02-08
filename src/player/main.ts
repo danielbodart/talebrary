@@ -1,12 +1,15 @@
 import {createClient, detectFormat} from "@bodar/wasiglk";
+import {constructor, instance, LazyMap} from "@bodar/yadic/LazyMap.ts";
+import {SystemClock} from "../system/clock.ts";
+import {ImageElement} from "../components/ImageElement.ts";
+import {customElement, realise} from "../components/misc.ts";
+import {controlKeys} from "./controlKeys.ts";
 import {InteractiveFiction} from "./InteractiveFiction.ts";
 import {BufferWindow} from "./BufferWindow.ts";
 import {GridWindow} from "./GridWindow.ts";
 import {UserInput} from "./UserInput.ts";
 import {Suggestions} from "./Suggestions.ts";
-import {ImageElement} from "./ImageElement.ts";
 import {type InstructionDetail, Instruction, InstructionEventName} from "./Instruction.ts";
-import {controlKeys} from "./controlKeys.ts";
 
 const story = document.querySelector<HTMLLinkElement>('#story');
 if (!story) throw new Error("Could not find story");
@@ -17,26 +20,28 @@ const storyResponse = await fetch(storyUrl);
 if (!storyResponse.ok) throw new Error(`Failed to load story: ${storyResponse.status}`);
 const storyData = new Uint8Array(await storyResponse.arrayBuffer());
 
-// Use server-provided game type when available, fall back to auto-detection
 const interpreter = interpreterFor(story.dataset.type) ?? detectFormat(storyUrl, storyData).interpreter;
 console.log('[player] Interpreter:', interpreter, 'type:', story.dataset.type);
 
-customElements.define('x-image', ImageElement, {extends: 'img'});
-customElements.define('x-instruction', Instruction);
-customElements.define('x-suggestions', Suggestions);
-customElements.define('user-input', UserInput);
-customElements.define('grid-window', GridWindow);
-customElements.define('buffer-window', BufferWindow);
-customElements.define('interactive-fiction', InteractiveFiction);
+const app = LazyMap.create()
+    .set('clock', constructor(SystemClock))
+    .set('customElements', instance(window.customElements))
+    .set('HTMLElement', instance(HTMLElement))
+    .set('HTMLImageElement', instance(HTMLImageElement))
+    .set('ImageElement', customElement(ImageElement))
+    .set('Instruction', customElement(Instruction))
+    .set('Suggestions', customElement(Suggestions))
+    .set('UserInput', customElement(UserInput))
+    .set('GridWindow', customElement(GridWindow))
+    .set('BufferWindow', customElement(BufferWindow))
+    .set('InteractiveFiction', customElement(InteractiveFiction))
+realise(app.ImageElement, app.Instruction, app.Suggestions, app.UserInput, app.GridWindow, app.BufferWindow, app.InteractiveFiction);
 
-const ifEl = document.querySelector<InteractiveFiction>('interactive-fiction')
-    ?? document.createElement('interactive-fiction') as InteractiveFiction;
-
-if (!ifEl.parentElement) document.body.appendChild(ifEl);
+controlKeys(document);
 
 document.addEventListener(InstructionEventName, (ev: Event) => {
     const {text, partial, completions} = (ev as CustomEvent<InstructionDetail>).detail;
-    const input = document.querySelector<UserInput>('user-input');
+    const input = document.querySelector('user-input') as any;
     if (!input) return;
     if (partial) {
         input.setPrefix(text, completions);
@@ -45,7 +50,10 @@ document.addEventListener(InstructionEventName, (ev: Event) => {
     }
 });
 
-controlKeys(document);
+const ifEl = document.querySelector('interactive-fiction') as any
+    ?? document.createElement('interactive-fiction');
+
+if (!ifEl.parentElement) document.body.appendChild(ifEl);
 
 const client = await createClient({
     storyData,
