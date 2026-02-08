@@ -15,6 +15,10 @@ interface PromptResult {
     reason?: string;
 }
 
+function errorResponse(status: number, statusText: string, reason: string): Response {
+    return new Response(JSON.stringify({status, statusText, reason}), {status, statusText, headers: {'content-type': 'application/json'}});
+}
+
 export class IllustrationHandler {
     constructor(private deps: IllustrationDependencies) {
     }
@@ -28,7 +32,12 @@ export class IllustrationHandler {
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});
 
-        const data = JSON.parse(rawPrompt);
+        let data: any;
+        try {
+            data = JSON.parse(rawPrompt);
+        } catch (e) {
+            return errorResponse(400, 'Invalid JSON', String(e));
+        }
 
         if (model.startsWith('llama+')) {
             const imageModel = model.endsWith('flux')
@@ -45,12 +54,22 @@ export class IllustrationHandler {
                 return new Response(JSON.stringify(result), {status: result.status, statusText: result.statusText});
             }
 
-            const image = await this.deps.ai.generateImage(imageModel, {prompt: result.prompt!});
+            let image: Uint8Array;
+            try {
+                image = await this.deps.ai.generateImage(imageModel, {prompt: result.prompt!});
+            } catch (e) {
+                return errorResponse(500, 'Image generation failed', String(e));
+            }
             return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': result.prompt!}});
         }
 
         const promptText = illustrationPrompt(path, data);
-        const image = await this.deps.ai.generateImage(model, {prompt: promptText});
+        let image: Uint8Array;
+        try {
+            image = await this.deps.ai.generateImage(model, {prompt: promptText});
+        } catch (e) {
+            return errorResponse(500, 'Image generation failed', String(e));
+        }
         return new Response(image as any, {headers: {'content-type': 'image/jpeg'}});
     }
 }

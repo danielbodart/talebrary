@@ -45,6 +45,36 @@ describe("IllustrationHandler", () => {
             expect(response.status).toBe(500);
         });
 
+        test("returns error when AI throws on image generation", async () => {
+            const badImageAi: TalebraryAi = {
+                generateText: async () => ({prompt: "a test prompt"}) as any,
+                generateImage: async () => { throw new Error("model unavailable"); },
+            };
+            const badHandler = new IllustrationHandler({ai: badImageAi});
+            const response = await badHandler.handle(requestWithPrompt(exampleRequest));
+            expect(response.status).toBe(500);
+            const body = await response.json();
+            expect(body.reason).toContain("model unavailable");
+        });
+
+        test("returns error when AI throws on direct model image generation", async () => {
+            const badImageAi: TalebraryAi = {
+                generateText: async () => ({}) as any,
+                generateImage: async () => { throw new Error("quota exceeded"); },
+            };
+            const badHandler = new IllustrationHandler({ai: badImageAi});
+            const data: Describable = {title: "Test", description: "A scene"};
+            const response = await badHandler.handle(requestWithPrompt(data, "@cf/bytedance/stable-diffusion-xl-lightning"));
+            expect(response.status).toBe(500);
+            const body = await response.json();
+            expect(body.reason).toContain("quota exceeded");
+        });
+
+        test("returns 400 for invalid JSON prompt", async () => {
+            const response = await handler.handle(new Request("http://test/content/123/art?prompt=not-json"));
+            expect(response.status).toBe(400);
+        });
+
         test("returns error status when AI returns 404 scene-not-found", async () => {
             const noSceneAi: TalebraryAi = {
                 generateText: async () => ({status: 404, statusText: "No Scene Found", reason: "Not visual"}) as any,
