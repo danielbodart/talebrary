@@ -2,7 +2,7 @@ import {get, type Http} from "../http/mod.ts";
 import {Uri} from "../http/Uri.ts";
 import type {D1GameFinder} from "../cloudflare/D1GameFinder.ts";
 import {IllustrationHandler} from "./IllustrationHandler.ts";
-import type {Describable} from "../types.ts";
+import type {Describable, SceneContext} from "../types.ts";
 import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 import type {TalebraryBucket} from "../storage/TalebraryBucket.ts";
 import {styleTransferPrompt} from "../prompts/StyleTransferPrompt.ts";
@@ -49,10 +49,8 @@ export function coverArt(deps: CoverArtDeps): Http {
                 return new Response(buffer, {headers: originalResponse.headers});
             }
         } else {
-            const data: Describable = {
-                title: game.title,
-                description: game.description ?? '',
-            };
+            const describable: Describable = {title: game.title, description: game.description ?? ''};
+            const data: SceneContext = {story: describable, scene: describable};
             uri.query = `prompt=${encodeURIComponent(JSON.stringify(data))}`;
             return deps.illustration.handle(get(uri.toString()));
         }
