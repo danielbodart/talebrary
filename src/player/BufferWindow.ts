@@ -128,10 +128,18 @@ export class BufferWindow {
             }
 
             private promoteGridTitleLines(lines: TextSpan[][]) {
-                if (!this.gridTitle) return;
-                for (const line of lines) {
-                    if (line.length === 1 && line[0].text.trim() === this.gridTitle) {
-                        line[0] = {...line[0], style: 'subheader'};
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const first = line[0];
+                    if (!first) continue;
+
+                    if (this.gridTitle && line.length === 1 && first.text.trim() === this.gridTitle) {
+                        line[0] = {...first, style: 'subheader'};
+                    }
+
+                    const style = line[0].style;
+                    if (line.length > 1 && (style === 'header' || style === 'subheader')) {
+                        lines[i] = [{text: line.map(s => s.text).join(''), style}];
                     }
                 }
             }
