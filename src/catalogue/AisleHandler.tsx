@@ -3,6 +3,7 @@ import {roundStep, wellFormed} from "../templates/misc.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
 import {type AnyCategory, findCategory, findWing, isGenreCategory, isHandPickedCategory, type Wing} from "./CatalogueConfig.ts";
 import {Uri} from "../http/Uri.ts";
+import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export class AisleHandler {
@@ -19,23 +20,24 @@ export class AisleHandler {
         const category = findCategory(wing, categoryId);
         if (!category) return new Response('Not Found', {status: 404});
 
-        const games = await this.findGames(category);
+        const languages = parseAcceptLanguage(request.headers.get('accept-language'));
+        const games = await this.findGames(category, languages);
 
         return new Response(render(wing, category, games), {status: 200, headers: {'Content-Type': 'text/html'}});
     }
 
-    private async findGames(category: AnyCategory): Promise<GameInfo[]> {
+    private async findGames(category: AnyCategory, languages: string[]): Promise<GameInfo[]> {
         if (isGenreCategory(category)) {
-            return this.finder.findByGenre(category.genre);
+            return this.finder.findByGenre(category.genre, languages);
         }
         if (isHandPickedCategory(category)) {
-            return this.finder.findByIds(category.games);
+            return this.finder.findByIds(category.games, languages);
         }
         switch (category.type) {
             case 'top-rated':
-                return this.finder.findTopRated();
+                return this.finder.findTopRated(languages);
             case 'recent':
-                return this.finder.findRecent();
+                return this.finder.findRecent(languages);
         }
     }
 }

@@ -90,4 +90,62 @@ describe("D1GameFinder", () => {
             coverart: "https://ifdb.org/viewgame?coverart&id=qpecxgjpxnvw50xq",
         } as any);
     });
+
+    test("language filter: English-only returns results", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.find('', ['en', 'en-us', 'en-gb']);
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+    });
+
+    test("language filter: French user sees English and French games", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.find('', ['en', 'en-us', 'en-gb', 'fr']);
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+    });
+
+    test("language filter: no languages returns all (no filter)", async () => {
+        const finder = new D1GameFinder({db});
+        const withFilter = await finder.find('');
+        const withoutFilter = await finder.find('', undefined);
+        expect(withFilter.length).toEqual(withoutFilter.length);
+    });
+
+    test("language filter works with search", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.find('Adventure', ['en', 'en-us', 'en-gb']);
+        expect(result).toBeArray();
+        const adventure = result.find(g => g.title === 'Adventure');
+        expect(adventure).toBeDefined();
+    });
+
+    test("language filter works with findByGenre", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findByGenre('Fantasy', ['en', 'en-us', 'en-gb']);
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+    });
+
+    test("language filter works with findTopRated", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findTopRated(['en', 'en-us', 'en-gb']);
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+    });
+
+    test("language filter works with findRecent", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findRecent(['en', 'en-us', 'en-gb']);
+        expect(result).toBeArray();
+        expect(result.length).toEqual(20);
+    });
+
+    test("language filter works with findByIds", async () => {
+        const finder = new D1GameFinder({db});
+        const result = await finder.findByIds(['fft6pu91j85y4acv'], ['en', 'en-us', 'en-gb']);
+        expect(result).toBeArray();
+        expect(result.length).toBeGreaterThanOrEqual(1);
+        expect(result[0].id).toEqual('fft6pu91j85y4acv');
+    });
 })

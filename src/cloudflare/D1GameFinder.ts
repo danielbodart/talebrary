@@ -60,11 +60,26 @@ const selectGameInfo = `SELECT fg.id,
             ORDER BY score DESC
             LIMIT 20;`;
 
+function languageCondition(languages: string[] | undefined, paramStart: number): { sql: string, params: string[] } {
+    if (!languages || languages.length === 0) return {sql: '', params: []};
+
+    const conditions = languages.map((_, i) =>
+        `(', ' || lower(g.language) || ', ') LIKE '%, ' || ?${paramStart + i} || ', %'`
+    );
+
+    return {
+        sql: `(g.language IS NULL OR ${conditions.join(' OR ')})`,
+        params: languages
+    };
+}
+
 export class D1GameFinder {
     constructor(deps: Dependency<'db', D1Database>, private db = deps.db) {
     }
 
-    async find(search: string): Promise<GameInfo[]> {
+    async find(search: string, languages?: string[]): Promise<GameInfo[]> {
+        const lang = languageCondition(languages, 2);
+        const langWhere = lang.sql ? `WHERE ${lang.sql}` : '';
         const sql = `
             WITH ranks AS (
                 SELECT g.id, 0 as rank
@@ -84,15 +99,18 @@ export class D1GameFinder {
                        g.desc AS description,
                        ${playableSubquery} AS playable
                 FROM ranks r JOIN games g ON g.id = r.id
+                ${langWhere}
             ),
             ${gameReviewsCte}
             ${selectGameInfo}
         `;
-        const statement = this.db.prepare(sql).bind(search ?? '');
+        const statement = this.db.prepare(sql).bind(search ?? '', ...lang.params);
         return (await statement.all()).results as any;
     }
 
-    async findByGenre(genre: string): Promise<GameInfo[]> {
+    async findByGenre(genre: string, languages?: string[]): Promise<GameInfo[]> {
+        const lang = languageCondition(languages, 2);
+        const langAnd = lang.sql ? `AND ${lang.sql}` : '';
         const sql = `
             WITH filtered_games AS (
                 SELECT g.id,
@@ -104,14 +122,17 @@ export class D1GameFinder {
                        ${playableSubquery} AS playable
                 FROM games g
                 WHERE g.genre = ?1
+                ${langAnd}
             ),
             ${gameReviewsCte}
             ${selectGameInfo}
         `;
-        return (await this.db.prepare(sql).bind(genre).all()).results as any;
+        return (await this.db.prepare(sql).bind(genre, ...lang.params).all()).results as any;
     }
 
-    async findTopRated(): Promise<GameInfo[]> {
+    async findTopRated(languages?: string[]): Promise<GameInfo[]> {
+        const lang = languageCondition(languages, 1);
+        const langWhere = lang.sql ? `WHERE ${lang.sql}` : '';
         const sql = `
             WITH filtered_games AS (
                 SELECT g.id,
@@ -122,6 +143,7 @@ export class D1GameFinder {
                        g.desc AS description,
                        ${playableSubquery} AS playable
                 FROM games g
+                ${langWhere}
             ),
             ${gameReviewsCte}
             SELECT fg.id,
@@ -139,10 +161,12 @@ export class D1GameFinder {
             ORDER BY gr.rating DESC
             LIMIT 20;
         `;
-        return (await this.db.prepare(sql).all()).results as any;
+        return (await this.db.prepare(sql).bind(...lang.params).all()).results as any;
     }
 
-    async findRecent(): Promise<GameInfo[]> {
+    async findRecent(languages?: string[]): Promise<GameInfo[]> {
+        const lang = languageCondition(languages, 1);
+        const langAnd = lang.sql ? `AND ${lang.sql}` : '';
         const sql = `
             WITH filtered_games AS (
                 SELECT g.id,
@@ -154,6 +178,7 @@ export class D1GameFinder {
                        ${playableSubquery} AS playable
                 FROM games g
                 WHERE g.published IS NOT NULL
+                ${langAnd}
             ),
             ${gameReviewsCte}
             SELECT fg.id,
@@ -171,11 +196,13 @@ export class D1GameFinder {
             ORDER BY fg.id DESC
             LIMIT 20;
         `;
-        return (await this.db.prepare(sql).all()).results as any;
+        return (await this.db.prepare(sql).bind(...lang.params).all()).results as any;
     }
 
-    async findByIds(ids: string[]): Promise<GameInfo[]> {
+    async findByIds(ids: string[], languages?: string[]): Promise<GameInfo[]> {
         const placeholders = ids.map((_, i) => `?${i + 1}`).join(', ');
+        const lang = languageCondition(languages, ids.length + 1);
+        const langAnd = lang.sql ? `AND ${lang.sql}` : '';
         const sql = `
             WITH filtered_games AS (
                 SELECT g.id,
@@ -187,6 +214,7 @@ export class D1GameFinder {
                        ${playableSubquery} AS playable
                 FROM games g
                 WHERE g.id IN (${placeholders})
+                ${langAnd}
             ),
             ${gameReviewsCte}
             SELECT fg.id,
@@ -203,7 +231,7 @@ export class D1GameFinder {
             WHERE fg.playable = 1
             ORDER BY gr.rating DESC;
         `;
-        return (await this.db.prepare(sql).bind(...ids).all()).results as any;
+        return (await this.db.prepare(sql).bind(...ids, ...lang.params).all()).results as any;
     }
 
     async get(id: string): Promise<GameStory | null | undefined> {

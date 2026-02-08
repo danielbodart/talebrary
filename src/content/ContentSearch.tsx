@@ -1,6 +1,7 @@
 import {D1GameFinder, type GameInfo} from "../cloudflare/D1GameFinder.ts";
 import {roundStep, wellFormed} from "../templates/misc.ts";
 import {Uri} from "../http/Uri.ts";
+import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
 
 import type {Dependency} from "@bodar/yadic/types.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
@@ -12,7 +13,8 @@ export class ContentSearch {
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
         const search = new URLSearchParams(uri.query).get('search') ?? '';
-        const games = await this.finder.find(search);
+        const languages = parseAcceptLanguage(request.headers.get('accept-language'));
+        const games = await this.finder.find(search, languages);
         return new Response(render(search, games), {status: 200, headers: {'Content-Type': 'text/html'}});
     }
 }
