@@ -6,15 +6,17 @@ import {FolderBucket} from "./buckets/FolderBucket.ts";
 import {md5} from "./digest.ts";
 import {DumbAi} from "./DumbAi.ts";
 import {CloudflareRestAi} from "./CloudflareRestAi.ts";
+import {CloudflareAiAdapter} from "../ai/CloudflareAiAdapter.ts";
 import {client} from "../http/mod.ts";
 import {withProxy} from "./withProxy.ts";
+import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 
 const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, PROXY_URL, PROXY_TOKEN} = process.env;
 
-function ai(): any {
+function ai(): TalebraryAi {
     if (CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_API_TOKEN) {
         console.log('Using Cloudflare Workers AI via REST API');
-        return new CloudflareRestAi(CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, client);
+        return new CloudflareAiAdapter(new CloudflareRestAi(CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, client));
     }
     console.log('Using DumbAi stub');
     return new DumbAi();

@@ -49,12 +49,6 @@ export const controls = ["about", "info", "help", "again", "restore", "save", "q
 export const commands = [...peopleCommands, ...directions, ...always, ...common, ...controls, ...extra];
 
 
-export interface Suggestions {
-    actions: string[];
-    commands: string[];
-    nouns: string[];
-}
-
 export interface ScopedMessage {
     role: string;
     content: string;
@@ -98,46 +92,3 @@ export interface ScopedPrompt extends PromptProperties {
     messages: ScopedMessage[];
 }
 
-export type TextGenerationPrompt = UnscopedPrompt | ScopedPrompt;
-
-export interface FluxRequest {
-    prompt: string;
-    num_steps: number; // default: 4, max: 8, type: integer
-}
-
-export interface FluxResponse {
-    image: string; // base64 encoded image
-}
-
-// Workers AI native format (e.g. Llama 3.3 via @cf/)
-export interface WorkersAiResponse {
-    response: string;
-}
-
-// OpenAI-compatible format (e.g. Granite, Qwen via @cf/)
-export interface OpenAiCompatibleResponse {
-    choices: OpenAiChoice[];
-}
-
-export interface OpenAiChoice {
-    index: number;
-    message: {
-        role: string;
-        content: string | null;
-        reasoning_content?: string | null;
-    };
-    finish_reason: string;
-}
-
-export type AiTextResponse = WorkersAiResponse | OpenAiCompatibleResponse;
-
-export function isOpenAiCompatible(output: any): output is OpenAiCompatibleResponse {
-    return output && Array.isArray(output.choices);
-}
-
-export function extractText(output: any): string | undefined {
-    if (typeof output === 'string') return output;
-    if (output?.response != null) return String(output.response);
-    if (isOpenAiCompatible(output)) return output.choices[0]?.message?.content?.trim() ?? undefined;
-    return undefined;
-}

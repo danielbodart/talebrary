@@ -3,12 +3,17 @@ import type {Params} from "@cloudflare/workers-types";
 import {WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep} from "cloudflare:workers";
 import type {IllustrationDependencies} from "../content/IllustrationHandler.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
-import {_try} from "../content/IllustrationHandler.ts";
-import type {FluxResponse} from "../types.ts";
 
 interface IllustrationEvent {
     model: string;
     prompt: string;
+}
+
+interface PromptResult {
+    prompt?: string;
+    status?: number;
+    statusText?: string;
+    reason?: string;
 }
 
 export class CloudflareWorkflow extends WorkflowEntrypoint<Env, Params> {
@@ -25,15 +30,9 @@ export class CloudflareWorkflow extends WorkflowEntrypoint<Env, Params> {
         // Step 1: Generate the visual description using LLama
         const description = await step.do('generate_description', async () => {
             if (!model.startsWith('llama+')) {
-                return { prompt: data }; // Use raw prompt if not using LLama
+                return {prompt: data} as PromptResult;
             }
-
-            const result: any = await this.deps.ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', generateIllustrationPrompt(data));
-            return _try(() => JSON.parse(result.response), (e) => ({
-                status: 500,
-                statusText: 'Expected JSON response',
-                reason: String(e)
-            }));
+            return this.deps.ai.generateText<PromptResult>('@cf/meta/llama-3.3-70b-instruct-fp8-fast', generateIllustrationPrompt(data));
         });
 
         if (description.status) {
@@ -42,18 +41,11 @@ export class CloudflareWorkflow extends WorkflowEntrypoint<Env, Params> {
 
         // Step 2: Generate the image based on the description
         return await step.do('generate_image', async () => {
-            if (model.endsWith('flux')) {
-                const result = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell', description) as FluxResponse;
-                const imageData = await fetch(`data:application/octet;base64,${result.image}`);
-                return {
-                    image: await imageData.arrayBuffer(),
-                    contentType: 'image/jpeg',
-                    description: description.prompt
-                };
-            }
+            const imageModel = model.endsWith('flux')
+                ? '@cf/black-forest-labs/flux-1-schnell'
+                : '@cf/bytedance/stable-diffusion-xl-lightning';
 
-            // Default to Stable Diffusion XL Lightning
-            const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', description);
+            const image = await this.deps.ai.generateImage(imageModel, {prompt: description.prompt!});
             return {
                 image,
                 contentType: 'image/jpeg',

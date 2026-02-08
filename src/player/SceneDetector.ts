@@ -1,4 +1,5 @@
-import type {Describable, SceneContext, Suggestions} from "../types.ts";
+import type {Describable, SceneContext} from "../types.ts";
+import type {Suggestions} from "../prompts/SuggestionsPrompt.ts";
 import {Arrays} from "../system/Arrays.ts";
 import {collapseSuggestions} from "./PrefixTree.ts";
 

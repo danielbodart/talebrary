@@ -3,10 +3,11 @@ import {IllustrationHandler} from "../../src/content/IllustrationHandler.ts";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
 import type {Describable} from "../../src/types.ts";
 import {exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
+import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 
 describe("IllustrationHandler", () => {
     const ai = new DumbAi();
-    const handler = new IllustrationHandler({ai: ai as any});
+    const handler = new IllustrationHandler({ai});
 
     function requestWithPrompt(data: object, model?: string): Request {
         const prompt = encodeURIComponent(JSON.stringify(data));
@@ -34,28 +35,22 @@ describe("IllustrationHandler", () => {
     });
 
     describe("error handling", () => {
-        test("returns error when AI returns invalid JSON for illustration prompt", async () => {
-            const badAi = {
-                run: async (model: string) => {
-                    if (model.includes('llama')) return {response: "not valid json"};
-                    return new Uint8Array(0);
-                }
+        test("returns error when AI throws on text generation", async () => {
+            const badAi: TalebraryAi = {
+                generateText: async () => { throw new Error("not valid json"); },
+                generateImage: async () => new Uint8Array(0),
             };
-            const badHandler = new IllustrationHandler({ai: badAi as any});
+            const badHandler = new IllustrationHandler({ai: badAi});
             const response = await badHandler.handle(requestWithPrompt(exampleRequest));
             expect(response.status).toBe(500);
         });
 
         test("returns error status when AI returns 404 scene-not-found", async () => {
-            const noSceneAi = {
-                run: async (model: string) => {
-                    if (model.includes('llama')) {
-                        return {response: JSON.stringify({status: 404, statusText: "No Scene Found", reason: "Not visual"})};
-                    }
-                    return new Uint8Array(0);
-                }
+            const noSceneAi: TalebraryAi = {
+                generateText: async () => ({status: 404, statusText: "No Scene Found", reason: "Not visual"}) as any,
+                generateImage: async () => new Uint8Array(0),
             };
-            const handler = new IllustrationHandler({ai: noSceneAi as any});
+            const handler = new IllustrationHandler({ai: noSceneAi});
             const response = await handler.handle(requestWithPrompt(exampleRequest));
             expect(response.status).toBe(404);
         });

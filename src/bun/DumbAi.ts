@@ -4,31 +4,19 @@ import {
     directions,
     peopleCommands,
     type ScopedPrompt,
-    type TextGenerationPrompt,
-    type UnscopedPrompt
 } from "../types.ts";
 import type {Suggestions} from "../prompts/SuggestionsPrompt.ts";
 import {Arrays} from "../system/Arrays.ts";
-import type {AiTextGenerationOutput} from "@cloudflare/workers-types";
 import {words} from "../system/Strings.ts";
+import type {ImagePrompt, TalebraryAi} from "../ai/TalebraryAi.ts";
 
-export class DumbAi {
-    run(model: "@cf/meta/llama-3-8b-instruct-awq", prompt: ScopedPrompt): Promise<AiTextGenerationOutput | undefined>;
-    run(model: "@cf/bytedance/stable-diffusion-xl-lightning", prompt: UnscopedPrompt): Promise<Uint8Array>;
-    async run(model: any, prompt: TextGenerationPrompt): Promise<any> {
-        switch (model) {
-            case "@cf/bytedance/stable-diffusion-xl-lightning":
-                return new Uint8Array(0);
-            case "@cf/black-forest-labs/flux-1-schnell":
-                return {image: ""};
-            case "@cf/meta/llama-3-8b-instruct-awq":
-            case "@cf/meta/llama-3.1-8b-instruct":
-            case "@cf/meta/llama-3.2-3b-instruct":
-            case "@cf/meta/llama-3.3-70b-instruct-fp8-fast":
-                return {response: JSON.stringify(this.textGeneration(prompt as ScopedPrompt))};
-            default:
-                throw new Error(`Model ${model} not found`);
-        }
+export class DumbAi implements TalebraryAi {
+    async generateText<T = any>(_model: string, prompt: ScopedPrompt): Promise<T> {
+        return this.textGeneration(prompt) as T;
+    }
+
+    async generateImage(_model: string, _input: ImagePrompt): Promise<Uint8Array> {
+        return new Uint8Array(0);
     }
 
     private textGeneration(prompt: ScopedPrompt): object | string {

@@ -3,11 +3,12 @@ import {Uri} from "../http/Uri.ts";
 import {md5} from "../system/digest.ts";
 import {ifArchiveHttp} from "./IfArchiveHttp.ts";
 import {proxyHandler} from "./proxyHandler.ts";
+import {CloudflareAiAdapter} from "../ai/CloudflareAiAdapter.ts";
 
 export {IfArchiveProxy} from "./IfArchiveProxy.ts";
 
 function app(env: Env) {
-    return application({http: ifArchiveHttp(env.IFARCHIVE_PROXY), digest: md5, ...env});
+    return application({http: ifArchiveHttp(env.IFARCHIVE_PROXY), digest: md5, db: env.db, r2: env.r2, ai: new CloudflareAiAdapter(env.ai)});
 }
 
 export default {

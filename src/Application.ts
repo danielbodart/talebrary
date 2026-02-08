@@ -1,4 +1,5 @@
-import type {Ai, D1Database, R2Bucket} from "@cloudflare/workers-types";
+import type {D1Database, R2Bucket} from "@cloudflare/workers-types";
+import type {TalebraryAi} from "./ai/TalebraryAi.ts";
 import {ContentSearch} from "./content/ContentSearch.tsx";
 import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
 import {type Http} from "./http/mod.ts";
@@ -27,7 +28,7 @@ export interface ApplicationDependencies extends
     Dependency<'db', D1Database>,
     Dependency<'r2', R2Bucket>,
     Dependency<'digest', Digest>,
-    Dependency<'ai', Ai> {
+    Dependency<'ai', TalebraryAi> {
 }
 
 

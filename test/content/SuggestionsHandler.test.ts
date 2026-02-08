@@ -2,10 +2,11 @@ import {describe, expect, test} from "bun:test";
 import {SuggestionsHandler} from "../../src/content/SuggestionsHandler.ts";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
 import type {Describable} from "../../src/types.ts";
+import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 
 describe("SuggestionsHandler", () => {
     const ai = new DumbAi();
-    const handler = new SuggestionsHandler({ai: ai as any});
+    const handler = new SuggestionsHandler({ai});
 
     function requestWithPrompt(data: Describable): Request {
         const prompt = encodeURIComponent(JSON.stringify(data));
@@ -41,11 +42,12 @@ describe("SuggestionsHandler", () => {
         expect(json.commands).toContain("ask");
     });
 
-    test("returns 500 when AI returns non-JSON text", async () => {
-        const badAi = {
-            run: async () => ({response: "I cannot help with that"})
+    test("returns 500 when AI throws", async () => {
+        const badAi: TalebraryAi = {
+            generateText: async () => { throw new Error("Parse failed"); },
+            generateImage: async () => new Uint8Array(0),
         };
-        const badHandler = new SuggestionsHandler({ai: badAi as any});
+        const badHandler = new SuggestionsHandler({ai: badAi});
         const response = await badHandler.handle(requestWithPrompt({
             title: "Test",
             description: "Test scene"
@@ -53,33 +55,5 @@ describe("SuggestionsHandler", () => {
         expect(response.status).toBe(500);
         const text = await response.text();
         expect(text).toContain("Model failed to return JSON");
-    });
-
-    test("returns 404 when AI response has no response field", async () => {
-        const noResponseAi = {
-            run: async () => ({image: new Uint8Array(0)})
-        };
-        const badHandler = new SuggestionsHandler({ai: noResponseAi as any});
-        const response = await badHandler.handle(requestWithPrompt({
-            title: "Test",
-            description: "Test scene"
-        }));
-        expect(response.status).toBe(404);
-    });
-
-    test("handles AI returning object instead of string", async () => {
-        const objectAi = {
-            run: async () => ({
-                response: {actions: ["look around"], commands: ["look"], nouns: ["room"], people: false}
-            })
-        };
-        const objectHandler = new SuggestionsHandler({ai: objectAi as any});
-        const response = await objectHandler.handle(requestWithPrompt({
-            title: "Test",
-            description: "A simple room"
-        }));
-        expect(response.status).toBe(200);
-        const json = await response.json();
-        expect(json.commands).toContain("look");
     });
 });

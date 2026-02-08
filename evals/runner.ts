@@ -1,12 +1,17 @@
 import type {CachedAi} from "./cache.ts";
 import type {CoverArtInput} from "./fixtures.ts";
 import type {EvalCase, EvalRun, ModelOutput, Score, Scorer, CaseResult} from "./types.ts";
-import {extractText} from "../src/types.ts";
 import type {SceneContext, ScopedPrompt} from "../src/types.ts";
 import {generateIllustrationPrompt} from "../src/prompts/GenerateIllustrationPrompt.ts";
 import {styleTransferPrompt} from "../src/prompts/StyleTransferPrompt.ts";
 import {maxTokens} from "./models.ts";
 import {visionJudge} from "./scorers/vision-judge.ts";
+
+interface PromptResult {
+    prompt?: string;
+    status?: number;
+    reason?: string;
+}
 
 export async function runTextEvals<I>(
     ai: CachedAi,
@@ -25,10 +30,10 @@ export async function runTextEvals<I>(
         for (const model of models) {
             const prompt = {...promptFn(evalCase.input), ...(maxTokens[model] ? {max_tokens: maxTokens[model]} : {})};
             const start = performance.now();
-            const {output, cached} = await ai.run(model, prompt);
+            const output = await ai.generateText(model, prompt);
             const latencyMs = performance.now() - start;
 
-            results.push({model, output, latencyMs, cached});
+            results.push({model, output, latencyMs, cached: false});
 
             const modelScores: Score[] = [];
             for (const scorer of scorers) {
@@ -36,11 +41,10 @@ export async function runTextEvals<I>(
             }
             scores[model] = modelScores;
 
-            const status = cached ? "cached" : `${latencyMs.toFixed(0)}ms`;
             const avg = modelScores.length > 0
                 ? (modelScores.reduce((s, sc) => s + sc.value, 0) / modelScores.length).toFixed(2)
                 : "n/a";
-            console.log(`  ${model} [${status}] avg=${avg}`);
+            console.log(`  ${model} [${latencyMs.toFixed(0)}ms] avg=${avg}`);
         }
 
         caseResults.push({case: evalCase, results, scores});
@@ -62,29 +66,20 @@ export async function runImageEvals(
     for (const evalCase of cases) {
         console.log(`\nCase: ${evalCase.name}`);
 
-        // Step 1: generate illustration prompt using the text model
-        const illustrationPrompt = generateIllustrationPrompt(evalCase.input);
-        const {output: promptOutput} = await ai.run(textModel, illustrationPrompt);
-        const promptText = extractText(promptOutput);
+        const promptResult = await ai.generateText<PromptResult>(textModel, generateIllustrationPrompt(evalCase.input));
 
-        if (!promptText) {
+        if (promptResult.status === 404) {
+            console.log(`  Skipping (no scene): ${promptResult.reason}`);
+            continue;
+        }
+
+        const sdPrompt = promptResult.prompt;
+        if (!sdPrompt) {
             console.log(`  Skipping (no prompt text from ${textModel})`);
             continue;
         }
 
-        let sdPrompt: string;
-        try {
-            const parsed = JSON.parse(promptText);
-            if (parsed.status === 404) {
-                console.log(`  Skipping (no scene): ${parsed.reason}`);
-                continue;
-            }
-            sdPrompt = parsed.prompt;
-        } catch {
-            sdPrompt = promptText;
-        }
-
-        console.log(`  SD prompt: ${sdPrompt?.slice(0, 80)}...`);
+        console.log(`  SD prompt: ${sdPrompt.slice(0, 80)}...`);
 
         const results: ModelOutput<string>[] = [];
         const scores: Record<string, Score[]> = {};
@@ -95,20 +90,19 @@ export async function runImageEvals(
                 : {prompt: sdPrompt};
 
             const start = performance.now();
-            const {output, cached, cachePath} = await ai.run(model, input);
+            const output = await ai.generateImage(model, input);
             const latencyMs = performance.now() - start;
 
-            results.push({model, output: cachePath ?? String(output), latencyMs, cached});
+            results.push({model, output: String(output), latencyMs, cached: false});
 
             const modelScores: Score[] = [];
-            if (enableVisionJudge && output instanceof Uint8Array) {
+            if (enableVisionJudge) {
                 const judge = visionJudge(ai, evalCase.input.scene.description);
                 modelScores.push(...await judge(output));
             }
             scores[model] = modelScores;
 
-            const status = cached ? "cached" : `${latencyMs.toFixed(0)}ms`;
-            console.log(`  ${model} [${status}] ${cachePath ?? "no image"}`);
+            console.log(`  ${model} [${latencyMs.toFixed(0)}ms]`);
         }
 
         caseResults.push({case: evalCase, results, scores});
@@ -131,59 +125,41 @@ export async function runImg2ImgEvals(
     for (const evalCase of cases) {
         console.log(`\nCase: ${evalCase.name}`);
 
-        // Step 1: generate illustration prompt
-        const illustrationPrompt = generateIllustrationPrompt(evalCase.input);
-        const {output: promptOutput} = await ai.run(textModel, illustrationPrompt);
-        const promptText = extractText(promptOutput);
+        const promptResult = await ai.generateText<PromptResult>(textModel, generateIllustrationPrompt(evalCase.input));
 
-        if (!promptText) {
+        if (promptResult.status === 404) {
+            console.log(`  Skipping (no scene): ${promptResult.reason}`);
+            continue;
+        }
+
+        const sdPrompt = promptResult.prompt;
+        if (!sdPrompt) {
             console.log(`  Skipping (no prompt text from ${textModel})`);
             continue;
         }
 
-        let sdPrompt: string;
-        try {
-            const parsed = JSON.parse(promptText);
-            if (parsed.status === 404) {
-                console.log(`  Skipping (no scene): ${parsed.reason}`);
-                continue;
-            }
-            sdPrompt = parsed.prompt;
-        } catch {
-            sdPrompt = promptText;
-        }
-
         // Step 2: generate source image
-        const {output: sourceImage} = await ai.run(sourceImageModel, {prompt: sdPrompt});
-        if (!(sourceImage instanceof Uint8Array)) {
-            console.log(`  Skipping (no source image)`);
-            continue;
-        }
+        const sourceImage = await ai.generateImage(sourceImageModel, {prompt: sdPrompt});
         const sourceBase64 = Buffer.from(sourceImage).toString("base64");
 
         const results: ModelOutput<string>[] = [];
         const scores: Record<string, Score[]> = {};
 
         for (const model of img2imgModels) {
-            const input = model.includes("flux-2-klein")
-                ? {prompt: sdPrompt, input_image_0: sourceBase64}
-                : {prompt: sdPrompt, image_b64: sourceBase64, ...(model.includes("flux") ? {num_steps: 4} : {})};
-
             const start = performance.now();
-            const {output, cached, cachePath} = await ai.run(model, input);
+            const output = await ai.generateImage(model, {prompt: sdPrompt, sourceImage: sourceBase64});
             const latencyMs = performance.now() - start;
 
-            results.push({model, output: cachePath ?? String(output), latencyMs, cached});
+            results.push({model, output: String(output), latencyMs, cached: false});
 
             const modelScores: Score[] = [];
-            if (enableVisionJudge && output instanceof Uint8Array) {
+            if (enableVisionJudge) {
                 const judge = visionJudge(ai, evalCase.input.scene.description);
                 modelScores.push(...await judge(output));
             }
             scores[model] = modelScores;
 
-            const status = cached ? "cached" : `${latencyMs.toFixed(0)}ms`;
-            console.log(`  ${model} [${status}] ${cachePath ?? "no image"}`);
+            console.log(`  ${model} [${latencyMs.toFixed(0)}ms]`);
         }
 
         caseResults.push({case: evalCase, results, scores});
@@ -213,26 +189,21 @@ export async function runStyleTransferEvals(
         const scores: Record<string, Score[]> = {};
 
         for (const model of img2imgModels) {
-            const input = model.includes("flux-2-klein")
-                ? {prompt, input_image_0: sourceBase64}
-                : {prompt, image_b64: sourceBase64, ...(model.includes("flux") ? {num_steps: 4} : {})};
-
             try {
                 const start = performance.now();
-                const {output, cached, cachePath} = await ai.run(model, input);
+                const output = await ai.generateImage(model, {prompt, sourceImage: sourceBase64});
                 const latencyMs = performance.now() - start;
 
-                results.push({model, output: cachePath ?? String(output), latencyMs, cached});
+                results.push({model, output: String(output), latencyMs, cached: false});
 
                 const modelScores: Score[] = [];
-                if (enableVisionJudge && output instanceof Uint8Array) {
+                if (enableVisionJudge) {
                     const judge = visionJudge(ai, evalCase.input.story.description);
                     modelScores.push(...await judge(output));
                 }
                 scores[model] = modelScores;
 
-                const status = cached ? "cached" : `${latencyMs.toFixed(0)}ms`;
-                console.log(`  ${model} [${status}] ${cachePath ?? "no image"}`);
+                console.log(`  ${model} [${latencyMs.toFixed(0)}ms]`);
             } catch (e: any) {
                 console.log(`  ${model} [error] ${e.message?.slice(0, 80)}`);
                 results.push({model, output: `error: ${e.message}`, latencyMs: 0, cached: false});

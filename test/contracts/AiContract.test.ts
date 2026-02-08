@@ -1,58 +1,50 @@
 import {describe, expect, test} from "bun:test";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
 import {CloudflareRestAi} from "../../src/bun/CloudflareRestAi.ts";
+import {CloudflareAiAdapter} from "../../src/ai/CloudflareAiAdapter.ts";
 import {suggestionsPrompt, ExamplePrompt} from "../../src/prompts/SuggestionsPrompt.ts";
 import {generateIllustrationPrompt, exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
-import {parseAiJsonResponse} from "../../src/ai/parseAiJsonResponse.ts";
+import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 
 /**
- * Contract tests for Ai implementations.
+ * Contract tests for TalebraryAi implementations.
  *
- * Both DumbAi and CloudflareRestAi (with canned Http) must satisfy the same contract:
- * - Text models return {response: string} where the string is valid JSON
- * - Image models return Uint8Array (stable-diffusion) or {image: string} (flux)
- * - Suggestions response satisfies the Suggestions shape
- * - Illustration prompt response has a {prompt: string} shape
+ * Both DumbAi and CloudflareAiAdapter (with canned Http) must satisfy the same contract:
+ * - generateText returns parsed objects directly
+ * - generateImage returns Uint8Array
  */
-function aiContractTests(name: string, createAi: () => any) {
-    describe(`${name} - Ai contract`, () => {
+function aiContractTests(name: string, createAi: () => TalebraryAi) {
+    describe(`${name} - TalebraryAi contract`, () => {
         describe("text generation", () => {
-            test("suggestions: returns response with valid JSON string", async () => {
+            test("suggestions: returns parsed object with expected fields", async () => {
                 const ai = createAi();
-                const result = await ai.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsPrompt(ExamplePrompt));
-                expect(result).toHaveProperty("response");
-
-                const parsed = parseAiJsonResponse(result);
-                expect(parsed).toHaveProperty("commands");
-                expect(parsed).toHaveProperty("people");
-                expect(parsed).toHaveProperty("nouns");
-                expect(parsed).toHaveProperty("actions");
-                expect((parsed as any).commands).toBeArray();
+                const result = await ai.generateText("@cf/meta/llama-3.3-70b-instruct-fp8-fast", suggestionsPrompt(ExamplePrompt));
+                expect(result).toHaveProperty("commands");
+                expect(result).toHaveProperty("people");
+                expect(result).toHaveProperty("nouns");
+                expect(result).toHaveProperty("actions");
+                expect(result.commands).toBeArray();
             });
 
-            test("illustration prompt: returns response with prompt field", async () => {
+            test("illustration prompt: returns parsed object with prompt field", async () => {
                 const ai = createAi();
-                const result = await ai.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", generateIllustrationPrompt(exampleRequest));
-                expect(result).toHaveProperty("response");
-
-                const parsed = parseAiJsonResponse(result);
-                expect(parsed).toHaveProperty("prompt");
-                expect((parsed as any).prompt).toBeString();
+                const result = await ai.generateText("@cf/meta/llama-3.3-70b-instruct-fp8-fast", generateIllustrationPrompt(exampleRequest));
+                expect(result).toHaveProperty("prompt");
+                expect(result.prompt).toBeString();
             });
         });
 
         describe("image generation", () => {
             test("stable-diffusion: returns Uint8Array", async () => {
                 const ai = createAi();
-                const result = await ai.run("@cf/bytedance/stable-diffusion-xl-lightning", {prompt: "a cat"});
+                const result = await ai.generateImage("@cf/bytedance/stable-diffusion-xl-lightning", {prompt: "a cat"});
                 expect(result).toBeInstanceOf(Uint8Array);
             });
 
-            test("flux: returns object with image string", async () => {
+            test("flux: returns Uint8Array", async () => {
                 const ai = createAi();
-                const result = await ai.run("@cf/black-forest-labs/flux-1-schnell", {prompt: "a cat"});
-                expect(result).toHaveProperty("image");
-                expect(typeof result.image).toBe("string");
+                const result = await ai.generateImage("@cf/black-forest-labs/flux-1-schnell", {prompt: "a cat"});
+                expect(result).toBeInstanceOf(Uint8Array);
             });
         });
     });
@@ -61,8 +53,8 @@ function aiContractTests(name: string, createAi: () => any) {
 // DumbAi - the in-memory test double
 aiContractTests("DumbAi", () => new DumbAi());
 
-// CloudflareRestAi - with canned HTTP responses that simulate the real API
-aiContractTests("CloudflareRestAi", () => {
+// CloudflareAiAdapter wrapping CloudflareRestAi with canned HTTP responses
+aiContractTests("CloudflareAiAdapter", () => {
     const cannedSuggestionsResponse = {
         actions: ["examine cave", "go north"],
         commands: ["examine", "look", "north", "go"],
@@ -73,10 +65,9 @@ aiContractTests("CloudflareRestAi", () => {
         prompt: "Dark cave entrance, dripping water, faint light at end. Style: fantasy illustration."
     };
 
-    return new CloudflareRestAi("test-account", "test-token", async (request) => {
+    const restAi = new CloudflareRestAi("test-account", "test-token", async (request) => {
         const url = new URL(request.url);
         const model = url.pathname.split('/ai/run/')[1];
-        const body = await request.json() as any;
 
         if (model === "@cf/bytedance/stable-diffusion-xl-lightning") {
             return new Response(new Uint8Array([0xFF, 0xD8, 0xFF]), {
@@ -91,6 +82,7 @@ aiContractTests("CloudflareRestAi", () => {
         }
 
         // Text generation: detect suggestion vs illustration by checking prompt content
+        const body = await request.json() as any;
         const isIllustration = body.messages?.some((m: any) => m.content?.includes('stable diffusion'));
         const responseData = isIllustration ? cannedIllustrationResponse : cannedSuggestionsResponse;
 
@@ -98,4 +90,6 @@ aiContractTests("CloudflareRestAi", () => {
             headers: {"content-type": "application/json"},
         });
     });
+
+    return new CloudflareAiAdapter(restAi);
 });

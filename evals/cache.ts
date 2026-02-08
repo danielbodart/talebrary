@@ -1,4 +1,5 @@
-import {CloudflareRestAi} from "../src/bun/CloudflareRestAi.ts";
+import type {TalebraryAi, ImagePrompt} from "../src/ai/TalebraryAi.ts";
+import type {ScopedPrompt} from "../src/types.ts";
 import {md5} from "../src/bun/digest.ts";
 import {file} from "bun";
 import {mkdir} from "node:fs/promises";
@@ -22,57 +23,51 @@ function imageExtension(bytes: Uint8Array): string {
 
 const imageExtensions = ["jpg", "png", "webp", "bin"];
 
-export class CachedAi {
-    constructor(private ai: CloudflareRestAi) {
+export class CachedAi implements TalebraryAi {
+    constructor(private ai: TalebraryAi) {
     }
 
-    async run(model: string, input: any): Promise<{ output: any; cached: boolean; cachePath?: string }> {
-        const inputKey = await hash(JSON.stringify(input));
+    async generateText<T = any>(model: string, prompt: ScopedPrompt): Promise<T> {
+        const inputKey = await hash(JSON.stringify(prompt));
         const modelDir = `${CACHE_DIR}/${sanitiseModel(model)}`;
         const jsonPath = `${modelDir}/${inputKey}.json`;
 
         const jsonFile = file(jsonPath);
         if (await jsonFile.exists()) {
-            const parsed = JSON.parse(await jsonFile.text());
-            if (parsed?.image && typeof parsed.image === 'string') {
-                const bytes = Uint8Array.from(atob(parsed.image), c => c.charCodeAt(0));
-                const ext = imageExtension(bytes);
-                const imgPath = `${modelDir}/${inputKey}.${ext}`;
-                const imgRelPath = `${sanitiseModel(model)}/${inputKey}.${ext}`;
-                await Bun.write(imgPath, bytes);
-                await jsonFile.delete();
-                return {output: bytes, cached: true, cachePath: imgRelPath};
-            }
-            return {output: parsed, cached: true};
+            return JSON.parse(await jsonFile.text());
         }
+
+        const output = await this.ai.generateText<T>(model, prompt);
+
+        await mkdir(modelDir, {recursive: true});
+        await Bun.write(jsonPath, JSON.stringify(output, null, 2));
+
+        return output;
+    }
+
+    async generateImage(model: string, input: ImagePrompt): Promise<Uint8Array> {
+        const inputKey = await hash(JSON.stringify(input));
+        const modelDir = `${CACHE_DIR}/${sanitiseModel(model)}`;
 
         for (const ext of imageExtensions) {
             const imgPath = `${modelDir}/${inputKey}.${ext}`;
             const imgFile = file(imgPath);
             if (await imgFile.exists()) {
-                const imgRelPath = `${sanitiseModel(model)}/${inputKey}.${ext}`;
-                return {output: new Uint8Array(await imgFile.arrayBuffer()), cached: true, cachePath: imgRelPath};
+                return new Uint8Array(await imgFile.arrayBuffer());
             }
         }
 
-        const raw = await this.ai.run(model, input);
-
-        // Normalise base64 image responses (FluxResponse) to Uint8Array
-        const output = raw?.image && typeof raw.image === 'string'
-            ? Uint8Array.from(atob(raw.image), c => c.charCodeAt(0))
-            : raw;
+        const output = await this.ai.generateImage(model, input);
 
         await mkdir(modelDir, {recursive: true});
-        if (output instanceof Uint8Array) {
-            const ext = imageExtension(output);
-            const imgPath = `${modelDir}/${inputKey}.${ext}`;
-            const imgRelPath = `${sanitiseModel(model)}/${inputKey}.${ext}`;
-            await Bun.write(imgPath, output);
-            return {output, cached: false, cachePath: imgRelPath};
-        } else {
-            await Bun.write(jsonPath, JSON.stringify(output, null, 2));
-        }
+        const ext = imageExtension(output);
+        const imgPath = `${modelDir}/${inputKey}.${ext}`;
+        await Bun.write(imgPath, output);
 
-        return {output, cached: false};
+        return output;
+    }
+
+    imageCachePath(model: string, inputKey: string, bytes: Uint8Array): string {
+        return `${sanitiseModel(model)}/${inputKey}.${imageExtension(bytes)}`;
     }
 }

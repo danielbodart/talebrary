@@ -1,4 +1,4 @@
-import type {CachedAi} from "../cache.ts";
+import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 import {judgeModel} from "../models.ts";
 import type {Score} from "../types.ts";
 
@@ -8,12 +8,12 @@ interface VisionScores {
     style_consistency: number;
 }
 
-export function visionJudge(ai: CachedAi, sceneDescription: string): (imageBytes: Uint8Array) => Promise<Score[]> {
-    return async (imageBytes: Uint8Array): Promise<Score[]> => {
+export function visionJudge(ai: TalebraryAi, sceneDescription: string): (imageBytes: Uint8Array) => Promise<Score[]> {
+    return async (imageBytes: Uint8Array) => {
         const base64 = Buffer.from(imageBytes).toString("base64");
         const dataUri = `data:image/png;base64,${base64}`;
 
-        const {output} = await ai.run(judgeModel, {
+        const scores = await ai.generateText<VisionScores>(judgeModel, {
             messages: [
                 {
                     role: "user",
@@ -24,23 +24,19 @@ export function visionJudge(ai: CachedAi, sceneDescription: string): (imageBytes
                             text: `Rate this illustration for an interactive fiction game. Scene: ${sceneDescription}. Score 1-5 on: scene_accuracy, artistic_quality, style_consistency. Return only JSON: {"scene_accuracy": N, "artistic_quality": N, "style_consistency": N}`,
                         },
                     ],
-                },
+                } as any,
             ],
             max_tokens: 256,
         });
 
-        const text = typeof output === 'string' ? output : output?.response;
-        if (!text) return [{name: "vision-judge", value: 0, reason: "no response"}];
-
         try {
-            const scores: VisionScores = JSON.parse(text);
             return [
                 {name: "scene-accuracy", value: (scores.scene_accuracy ?? 0) / 5},
                 {name: "artistic-quality", value: (scores.artistic_quality ?? 0) / 5},
                 {name: "style-consistency", value: (scores.style_consistency ?? 0) / 5},
             ];
         } catch {
-            return [{name: "vision-judge", value: 0, reason: `unparseable: ${text.slice(0, 100)}`}];
+            return [{name: "vision-judge", value: 0, reason: `unparseable: ${JSON.stringify(scores).slice(0, 100)}`}];
         }
     };
 }

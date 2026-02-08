@@ -1,18 +1,17 @@
-import type {Ai} from "@cloudflare/workers-types";
 import {Uri} from "../http/Uri.ts";
-import {suggestionsPrompt} from "../prompts/SuggestionsPrompt.ts";
+import {suggestionsPrompt, type Suggestions} from "../prompts/SuggestionsPrompt.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
-import {parseAiJsonResponse} from "../ai/parseAiJsonResponse.ts";
+import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 
 export class SuggestionsHandler {
-    constructor(deps: Dependency<'ai', Ai>, private ai: Ai = deps.ai) {
+    constructor(deps: Dependency<'ai', TalebraryAi>, private ai: TalebraryAi = deps.ai) {
     }
 
     async handle(request: Request): Promise<Response> {
         const {query} = new Uri(request.url);
         const params = new URLSearchParams(query);
 
-        const model = params.get('model') ?? "@cf/meta/llama-3.3-70b-instruct-fp8-fast" as any;
+        const model = params.get('model') ?? "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});
@@ -20,11 +19,8 @@ export class SuggestionsHandler {
         const data = JSON.parse(rawPrompt);
         const prompt = suggestionsPrompt(data);
 
-        const output = await this.ai.run(model, prompt as any) as any;
-        if (!('response' in output)) return new Response('Unsupported response', {status: 404});
-
         try {
-            const json = parseAiJsonResponse(output);
+            const json = await this.ai.generateText<Suggestions>(model, prompt);
             return new Response(JSON.stringify(json), {
                 headers: {
                     "content-type": "application/json",
@@ -32,7 +28,7 @@ export class SuggestionsHandler {
             });
         } catch (e) {
             return new Response(`Model failed to return JSON:
-${output.response!}`, {
+${e}`, {
                 status: 500,
                 headers: {
                     "content-type": "plain/text",
@@ -41,4 +37,3 @@ ${output.response!}`, {
         }
     }
 }
-

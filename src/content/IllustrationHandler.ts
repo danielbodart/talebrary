@@ -1,29 +1,18 @@
-import type {Ai} from "@cloudflare/workers-types";
 import {Uri} from "../http/Uri.ts";
-
 import type {Dependency} from "@bodar/yadic/types.ts";
 import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
-import type {FluxResponse} from "../types.ts";
-import {parseAiJsonResponse} from "../ai/parseAiJsonResponse.ts";
+import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 
 export interface IllustrationDependencies extends
-    Dependency<'ai', Ai> {
+    Dependency<'ai', TalebraryAi> {
 }
 
-export function _try<R>(fun: () => R | undefined, rejected: (e: unknown | undefined) => R): R {
-    try {
-        const result = fun();
-        if (typeof result == 'undefined') return rejected(undefined);
-        return result;
-    } catch (e) {
-        return rejected(e);
-    }
-}
-
-
-async function decodeBase64(value: string) {
-    return await (await fetch(`data:application/octet;base64,${value}`)).arrayBuffer();
+interface PromptResult {
+    prompt?: string;
+    status?: number;
+    statusText?: string;
+    reason?: string;
 }
 
 export class IllustrationHandler {
@@ -34,7 +23,7 @@ export class IllustrationHandler {
         const {path, query} = new Uri(request.url);
         const params = new URLSearchParams(query);
 
-        const model = params.get('model') ?? 'llama+stable-diffusion' as any;
+        const model = params.get('model') ?? 'llama+stable-diffusion';
 
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});
@@ -42,39 +31,26 @@ export class IllustrationHandler {
         const data = JSON.parse(rawPrompt);
 
         if (model.startsWith('llama+')) {
-            const result = await this.deps.ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast' as any, generateIllustrationPrompt(data) as any) as any;
-            const prompt = _try(() => {
-                return parseAiJsonResponse(result);
-            }, (e) => ({
-                status: 500,
-                statusText: 'Expected JSON response',
-                reason: String(e)
-            }));
-            if (prompt.status) {
-                return new Response(JSON.stringify(prompt), {status: prompt.status, statusText: prompt.statusText});
+            const imageModel = model.endsWith('flux')
+                ? '@cf/black-forest-labs/flux-1-schnell'
+                : '@cf/bytedance/stable-diffusion-xl-lightning';
+
+            let result: PromptResult;
+            try {
+                result = await this.deps.ai.generateText<PromptResult>('@cf/meta/llama-3.3-70b-instruct-fp8-fast', generateIllustrationPrompt(data));
+            } catch (e) {
+                result = {status: 500, statusText: 'Expected JSON response', reason: String(e)};
+            }
+            if (result.status) {
+                return new Response(JSON.stringify(result), {status: result.status, statusText: result.statusText});
             }
 
-            if (model.endsWith('flux')) {
-                const result = await this.deps.ai.run('@cf/black-forest-labs/flux-1-schnell' as any, prompt) as any as FluxResponse;
-                console.log('FLUX', 'prompt', prompt, 'result', result.image ? {image: 'base64 encoded image'} : result);
-                const image = await decodeBase64(result.image);
-                return new Response(image as any, {
-                    headers: {
-                        'content-type': 'image/jpeg',
-                        'description': prompt.prompt,
-                        'type': typeof image
-                    }
-                });
-            }
-
-            const image = await this.deps.ai.run('@cf/bytedance/stable-diffusion-xl-lightning', prompt as any);
-            return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt.prompt}});
+            const image = await this.deps.ai.generateImage(imageModel, {prompt: result.prompt!});
+            return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': result.prompt!}});
         }
 
-        const prompt = illustrationPrompt(path, data);
-
-        const response = await this.deps.ai.run(model, {prompt}) as any;
-        const image = model.includes('flux') ? await decodeBase64(response.image) : response;
-        return new Response(image, {headers: {'content-type': 'image/jpeg'}});
+        const promptText = illustrationPrompt(path, data);
+        const image = await this.deps.ai.generateImage(model, {prompt: promptText});
+        return new Response(image as any, {headers: {'content-type': 'image/jpeg'}});
     }
 }
