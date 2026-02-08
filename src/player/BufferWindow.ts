@@ -1,4 +1,4 @@
-import type {ProcessedContentSpan} from "@bodar/wasiglk";
+import type {TextSpan} from "@bodar/wasiglk";
 import {SceneDetector} from "./SceneDetector.ts";
 import {capitalWords, wordCount} from "../system/Strings.ts";
 
@@ -6,7 +6,7 @@ export class BufferWindow extends HTMLElement {
     private sceneDetector = new SceneDetector();
     gridTitle = '';
 
-    updateContent(content: ProcessedContentSpan[], clear: boolean) {
+    updateContent(content: TextSpan[], clear: boolean) {
         // Remove intro card when game content arrives
         document.querySelector('main.story')?.remove();
 
@@ -47,15 +47,15 @@ export class BufferWindow extends HTMLElement {
         this.scrollToLatest();
     }
 
-    private appendLine(section: HTMLElement, line: ProcessedContentSpan[]) {
+    private appendLine(section: HTMLElement, line: TextSpan[]) {
         if (line.length === 1) {
             const span = line[0];
             const div = document.createElement('div');
             div.className = span.style ?? 'normal';
             if (span.style === 'normal' || !span.style) {
-                div.append(...this.createInstructions(span.text ?? ''));
+                div.append(...this.createInstructions(span.text));
             } else {
-                div.textContent = span.text ?? '';
+                div.textContent = span.text;
             }
             section.appendChild(div);
         } else {
@@ -66,9 +66,9 @@ export class BufferWindow extends HTMLElement {
                 const el = document.createElement('span');
                 el.className = span.style ?? 'normal';
                 if (span.style === 'normal' || !span.style) {
-                    el.append(...this.createInstructions(span.text ?? ''));
+                    el.append(...this.createInstructions(span.text));
                 } else {
-                    el.textContent = span.text ?? '';
+                    el.textContent = span.text;
                 }
                 div.appendChild(el);
             }
@@ -77,13 +77,12 @@ export class BufferWindow extends HTMLElement {
     }
 
     /** Split content on newlines into lines, where each line is an array of inline spans. */
-    private groupIntoLines(content: ProcessedContentSpan[]): ProcessedContentSpan[][] {
-        const lines: ProcessedContentSpan[][] = [];
-        let current: ProcessedContentSpan[] = [];
+    private groupIntoLines(content: TextSpan[]): TextSpan[][] {
+        const lines: TextSpan[][] = [];
+        let current: TextSpan[] = [];
 
         for (const span of content) {
-            if (span.type !== 'text') continue;
-            const text = span.text ?? '';
+            const text = span.text;
             if (!text.includes('\n')) {
                 if (text.trim() && text.trim() !== '>') current.push(span);
                 continue;
@@ -106,9 +105,9 @@ export class BufferWindow extends HTMLElement {
     }
 
     /** Group lines into cards, splitting when a header follows normal content. */
-    private groupIntoCards(lines: ProcessedContentSpan[][]): ProcessedContentSpan[][][] {
-        const cards: ProcessedContentSpan[][][] = [];
-        let current: ProcessedContentSpan[][] = [];
+    private groupIntoCards(lines: TextSpan[][]): TextSpan[][][] {
+        const cards: TextSpan[][][] = [];
+        let current: TextSpan[][] = [];
 
         for (const line of lines) {
             const isHeader = line[0]?.style === 'header' || line[0]?.style === 'subheader';
@@ -129,10 +128,10 @@ export class BufferWindow extends HTMLElement {
     }
 
     /** When a single-span line matches the grid window's room title, promote it to subheader. */
-    private promoteGridTitleLines(lines: ProcessedContentSpan[][]) {
+    private promoteGridTitleLines(lines: TextSpan[][]) {
         if (!this.gridTitle) return;
         for (const line of lines) {
-            if (line.length === 1 && line[0].text?.trim() === this.gridTitle) {
+            if (line.length === 1 && line[0].text.trim() === this.gridTitle) {
                 line[0] = {...line[0], style: 'subheader'};
             }
         }
@@ -165,12 +164,13 @@ export class BufferWindow extends HTMLElement {
     }
 
     echoInput(text: string) {
-        const lastSection = this.querySelector<HTMLElement>('section.card:last-of-type');
-        if (!lastSection) return;
+        const section = document.createElement('section');
+        section.classList.add('card');
         const div = document.createElement('div');
         div.className = 'input';
-        div.textContent = `> ${text}`;
-        lastSection.appendChild(div);
+        div.textContent = text;
+        section.appendChild(div);
+        this.appendChild(section);
     }
 
     detectScene() {

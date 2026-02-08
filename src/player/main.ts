@@ -52,6 +52,7 @@ const client = await createClient({
     workerUrl: '/wasiglk/worker.js',
     interpreterUrl: `/wasiglk/${interpreter}.wasm`,
     filesystem: 'auto',
+    metrics: {width: 80, height: 24},
 });
 
 ifEl.run(client);

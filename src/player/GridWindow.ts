@@ -1,4 +1,4 @@
-import type {ProcessedContentSpan} from "@bodar/wasiglk";
+import type {TextSpan} from "@bodar/wasiglk";
 
 export class GridWindow extends HTMLElement {
     private lineElements: HTMLDivElement[] = [];
@@ -30,17 +30,14 @@ export class GridWindow extends HTMLElement {
         return parts[0]?.trim() ?? '';
     }
 
-    updateGridContent(content: ProcessedContentSpan[]) {
-        // Grid content arrives as flat spans - render into first line
+    updateGridContent(content: TextSpan[]) {
         const elements: HTMLElement[] = [];
 
         for (const span of content) {
-            if (span.type === 'text') {
-                const el = document.createElement('span');
-                el.className = span.style ?? '';
-                el.textContent = span.text ?? '';
-                elements.push(el);
-            }
+            const el = document.createElement('span');
+            el.className = span.style ?? '';
+            el.textContent = span.text;
+            elements.push(el);
         }
 
         if (elements.length > 0 && this.lineElements[0]) {
