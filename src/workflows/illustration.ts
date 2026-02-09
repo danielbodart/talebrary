@@ -2,7 +2,9 @@ import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
 import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
-import type {Workflow} from "./mod.ts";
+import type {Workflow, StepConfig} from "./mod.ts";
+
+const noRetry: StepConfig = {retries: {limit: 0}};
 
 const defaultImageModel = '@cf/leonardo/phoenix-1.0';
 const textModel = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
@@ -37,7 +39,7 @@ function defaultBookCoverPrompt(title: string): string {
 export function illustrationWorkflow(deps: IllustrationWorkflowDeps): Workflow<IllustrationParams, IllustrationResult> {
     return async ({data, imageModel = defaultImageModel, path}, step) => {
         if (data.scene) {
-            const prompt = await step.do('generate-prompt', async () => {
+            const prompt = await step.do('generate-prompt', noRetry, async () => {
                 let result: PromptResult;
                 try {
                     result = await deps.ai.generateText<PromptResult>(textModel, generateIllustrationPrompt(data));
@@ -52,7 +54,7 @@ export function illustrationWorkflow(deps: IllustrationWorkflowDeps): Workflow<I
                 return result.prompt!;
             });
 
-            const image = await step.do('generate-image', () =>
+            const image = await step.do('generate-image', noRetry, () =>
                 deps.ai.generateImage(imageModel, {prompt})
             );
 
@@ -60,7 +62,7 @@ export function illustrationWorkflow(deps: IllustrationWorkflowDeps): Workflow<I
         }
 
         const promptText = illustrationPrompt(path, data);
-        const image = await step.do('generate-image', () =>
+        const image = await step.do('generate-image', noRetry, () =>
             deps.ai.generateImage(imageModel, {prompt: promptText})
         );
 

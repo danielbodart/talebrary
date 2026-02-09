@@ -11,21 +11,25 @@ import {coverArtWorkflow} from "../workflows/coverArt.ts";
 import {illustrationWorkflow} from "../workflows/illustration.ts";
 // @ts-ignore
 import {WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep} from "cloudflare:workers";
-import type {CoverArtParams} from "../workflows/coverArt.ts";
-import type {IllustrationParams} from "../workflows/illustration.ts";
+import type {CoverArtParams, CoverArtResult} from "../workflows/coverArt.ts";
+import type {IllustrationParams, IllustrationResult} from "../workflows/illustration.ts";
 
 export {IfArchiveProxy} from "./IfArchiveProxy.ts";
 
-function app(env: Env) {
-    return application({
+function deps(env: Env) {
+    return {
         http: ifArchiveHttp(env.IFARCHIVE_PROXY),
         digest: md5,
         db: new D1Adapter(env.db),
         bucket: new CloudflareR2Adapter(env.r2),
         ai: new CloudflareAiAdapter(env.ai),
-        coverArtRunner: new CloudflareWorkflowRunner(env.COVER_ART_WORKFLOW),
-        illustrationRunner: new CloudflareWorkflowRunner(env.ILLUSTRATION_WORKFLOW),
-    });
+        coverArtRunner: new CloudflareWorkflowRunner<CoverArtParams, CoverArtResult>(env.COVER_ART_WORKFLOW),
+        illustrationRunner: new CloudflareWorkflowRunner<IllustrationParams, IllustrationResult>(env.ILLUSTRATION_WORKFLOW),
+    };
+}
+
+function app(env: Env) {
+    return application(deps(env));
 }
 
 export default {
@@ -43,8 +47,7 @@ export class CoverArtWorkflow extends WorkflowEntrypoint<Env, CoverArtParams> {
     declare env: Env;
 
     async run(event: WorkflowEvent<CoverArtParams>, step: WorkflowStep) {
-        const deps = app(this.env);
-        return coverArtWorkflow(deps)(event.payload, step);
+        return coverArtWorkflow(deps(this.env))(event.payload, step);
     }
 }
 
@@ -52,7 +55,6 @@ export class IllustrationWorkflow extends WorkflowEntrypoint<Env, IllustrationPa
     declare env: Env;
 
     async run(event: WorkflowEvent<IllustrationParams>, step: WorkflowStep) {
-        const deps = app(this.env);
-        return illustrationWorkflow(deps)(event.payload, step);
+        return illustrationWorkflow(deps(this.env))(event.payload, step);
     }
 }
