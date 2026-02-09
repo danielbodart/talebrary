@@ -8,9 +8,11 @@ import {CloudflareR2Adapter} from "../storage/CloudflareR2Adapter.ts";
 import {D1Adapter} from "../database/D1Adapter.ts";
 import {CloudflareWorkflowRunner} from "./CloudflareWorkflowRunner.ts";
 import {coverArtWorkflow} from "../workflows/coverArt.ts";
+import {illustrationWorkflow} from "../workflows/illustration.ts";
 // @ts-ignore
 import {WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep} from "cloudflare:workers";
 import type {CoverArtParams} from "../workflows/coverArt.ts";
+import type {IllustrationParams} from "../workflows/illustration.ts";
 
 export {IfArchiveProxy} from "./IfArchiveProxy.ts";
 
@@ -21,7 +23,8 @@ function app(env: Env) {
         db: new D1Adapter(env.db),
         bucket: new CloudflareR2Adapter(env.r2),
         ai: new CloudflareAiAdapter(env.ai),
-        coverArtRunner: new CloudflareWorkflowRunner(env.WORKFLOW),
+        coverArtRunner: new CloudflareWorkflowRunner(env.COVER_ART_WORKFLOW),
+        illustrationRunner: new CloudflareWorkflowRunner(env.ILLUSTRATION_WORKFLOW),
     });
 }
 
@@ -42,5 +45,14 @@ export class CoverArtWorkflow extends WorkflowEntrypoint<Env, CoverArtParams> {
     async run(event: WorkflowEvent<CoverArtParams>, step: WorkflowStep) {
         const deps = app(this.env);
         return coverArtWorkflow(deps)(event.payload, step);
+    }
+}
+
+export class IllustrationWorkflow extends WorkflowEntrypoint<Env, IllustrationParams> {
+    declare env: Env;
+
+    async run(event: WorkflowEvent<IllustrationParams>, step: WorkflowStep) {
+        const deps = app(this.env);
+        return illustrationWorkflow(deps)(event.payload, step);
     }
 }

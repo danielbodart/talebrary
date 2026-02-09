@@ -1,28 +1,10 @@
 import {Uri} from "../http/Uri.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
-import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
-import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
-import type {TalebraryAi} from "../ai/TalebraryAi.ts";
-
-export const defaultImageModel = '@cf/leonardo/phoenix-1.0';
+import type {WorkflowRunner} from "../workflows/mod.ts";
+import type {IllustrationParams, IllustrationResult} from "../workflows/illustration.ts";
 
 export interface IllustrationDependencies extends
-    Dependency<'ai', TalebraryAi> {
-}
-
-interface PromptResult {
-    prompt?: string;
-    status?: number;
-    statusText?: string;
-    reason?: string;
-}
-
-function errorResponse(status: number, statusText: string, reason: string): Response {
-    return new Response(JSON.stringify({status, statusText, reason}), {status, statusText, headers: {'content-type': 'application/json'}});
-}
-
-function defaultBookCoverPrompt(title: string): string {
-    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic. No border or frame.`;
+    Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>> {
 }
 
 export class IllustrationHandler {
@@ -33,8 +15,6 @@ export class IllustrationHandler {
         const {path, query} = new Uri(request.url);
         const params = new URLSearchParams(query);
 
-        const imageModel = params.get('model') ?? defaultImageModel;
-
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});
 
@@ -42,42 +22,25 @@ export class IllustrationHandler {
         try {
             data = JSON.parse(rawPrompt);
         } catch (e) {
-            return errorResponse(400, 'Invalid JSON', String(e));
+            return new Response(JSON.stringify({status: 400, statusText: 'Invalid JSON', reason: String(e)}),
+                {status: 400, statusText: 'Invalid JSON', headers: {'content-type': 'application/json'}});
         }
 
-        if (data.scene) {
-            let result: PromptResult;
-            try {
-                result = await this.deps.ai.generateText<PromptResult>('@cf/meta/llama-3.3-70b-instruct-fp8-fast', generateIllustrationPrompt(data));
-            } catch (e) {
-                result = {status: 500, statusText: 'Expected JSON response', reason: String(e)};
-            }
-            let prompt: string;
-            if (result.status === 404) {
-                const title = data.story?.title ?? data.title ?? 'Unknown';
-                prompt = defaultBookCoverPrompt(title);
-            } else if (result.status) {
-                return new Response(JSON.stringify(result), {status: result.status, statusText: result.statusText});
-            } else {
-                prompt = result.prompt!;
-            }
-
-            let image: Uint8Array;
-            try {
-                image = await this.deps.ai.generateImage(imageModel, {prompt});
-            } catch (e) {
-                return errorResponse(500, 'Image generation failed', String(e));
-            }
-            return new Response(image as any, {headers: {'content-type': 'image/jpeg', 'description': prompt}});
-        }
-
-        const promptText = illustrationPrompt(path, data);
-        let image: Uint8Array;
         try {
-            image = await this.deps.ai.generateImage(imageModel, {prompt: promptText});
+            const result = await this.deps.illustrationRunner.run({
+                data,
+                imageModel: params.get('model') ?? undefined,
+                path,
+            });
+            return new Response(result.image as any, {
+                headers: {
+                    'content-type': result.contentType,
+                    ...(result.description ? {'description': result.description} : {}),
+                },
+            });
         } catch (e) {
-            return errorResponse(500, 'Image generation failed', String(e));
+            return new Response(JSON.stringify({status: 500, statusText: 'Workflow failed', reason: String(e)}),
+                {status: 500, statusText: 'Workflow failed', headers: {'content-type': 'application/json'}});
         }
-        return new Response(image as any, {headers: {'content-type': 'image/jpeg'}});
     }
 }

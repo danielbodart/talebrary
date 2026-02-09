@@ -80,7 +80,20 @@
    - If a game story returns **HTTP 451**, the `.env` is missing or not being sourced — check the symlink exists and `bootstrap.sh` sources it
    - The server logs `Using IF Archive proxy via <url>` on startup when the proxy is active — if you don't see this, the env is not loaded
 
-10. wasiglk Dependency
+10. Durable Workflows
+    - Multi-step processes (multiple AI calls, fetch + transform, etc.) must use the workflow abstraction in `src/workflows/`
+    - Single-step handlers (one AI call, one fetch) do not need workflows
+    - Workflow definition: `Workflow<Params, Result> = (params, step) => Promise<Result>` — portable, no Cloudflare imports
+    - `Step.do(name, fn)` matches Cloudflare's `WorkflowStep.do()` natively — no adapter needed
+    - `WorkflowRunner<P, R>` abstracts execution: `DirectRunner` (Bun/tests), `CloudflareWorkflowRunner` (production polling)
+    - **Every workflow must have its own Cloudflare Workflow binding** — `DirectRunner` is only for Bun/tests, never in `cloudflare/app.ts`
+    - Each workflow gets: a `[[workflows]]` entry in `wrangler.toml`, an entrypoint class in `cloudflare/app.ts`, and a `CloudflareWorkflowRunner` binding
+    - HTTP handlers stay thin: parse request → call `runner.run(params)` → build response
+    - `BucketCachingHandler` remains as the outer HTTP caching wrapper
+    - Test workflows directly with `InMemoryStep` — no runner needed
+    - Cloudflare entrypoints live in `src/cloudflare/app.ts`, reuse `app(env)` for deps
+
+11. wasiglk Dependency
     - wasiglk lives at `/home/dan/Projects/wasiglk`, published to JSR as `@bodar/wasiglk`
     - talebrary uses it via `npm:@jsr/bodar__wasiglk@<version>` in package.json
     - **Update flow**: commit+push wasiglk → wait for CI to publish to JSR → update version in talebrary package.json → `bun install` → `./run build` → commit+push talebrary

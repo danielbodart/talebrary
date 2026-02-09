@@ -12,6 +12,7 @@ import {withProxy} from "./withProxy.ts";
 import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 import {DirectRunner} from "../workflows/mod.ts";
 import {coverArtWorkflow} from "../workflows/coverArt.ts";
+import {illustrationWorkflow} from "../workflows/illustration.ts";
 
 const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, PROXY_URL, PROXY_TOKEN} = process.env;
 
@@ -41,6 +42,7 @@ const deps = {
     digest: md5,
     ai: aiInstance,
     coverArtRunner: new DirectRunner(coverArtWorkflow({http, ai: aiInstance, bucket})),
+    illustrationRunner: new DirectRunner(illustrationWorkflow({ai: aiInstance})),
 };
 const app = application(deps);
 const handler = (req: Request) => app.handler(req);

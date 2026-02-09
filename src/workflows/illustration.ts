@@ -1,0 +1,69 @@
+import type {TalebraryAi} from "../ai/TalebraryAi.ts";
+import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
+import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
+import type {Dependency} from "@bodar/yadic/types.ts";
+import type {Workflow} from "./mod.ts";
+
+const defaultImageModel = '@cf/leonardo/phoenix-1.0';
+const textModel = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+
+export interface IllustrationParams {
+    data: any;
+    imageModel?: string;
+    path: string;
+}
+
+export interface IllustrationResult {
+    image: Uint8Array;
+    contentType: string;
+    description?: string;
+}
+
+export interface IllustrationWorkflowDeps extends
+    Dependency<'ai', TalebraryAi> {
+}
+
+interface PromptResult {
+    prompt?: string;
+    status?: number;
+    statusText?: string;
+    reason?: string;
+}
+
+function defaultBookCoverPrompt(title: string): string {
+    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic. No border or frame.`;
+}
+
+export function illustrationWorkflow(deps: IllustrationWorkflowDeps): Workflow<IllustrationParams, IllustrationResult> {
+    return async ({data, imageModel = defaultImageModel, path}, step) => {
+        if (data.scene) {
+            const prompt = await step.do('generate-prompt', async () => {
+                let result: PromptResult;
+                try {
+                    result = await deps.ai.generateText<PromptResult>(textModel, generateIllustrationPrompt(data));
+                } catch (e) {
+                    result = {status: 500, statusText: 'Expected JSON response', reason: String(e)};
+                }
+                if (result.status === 404) {
+                    const title = data.story?.title ?? data.title ?? 'Unknown';
+                    return defaultBookCoverPrompt(title);
+                }
+                if (result.status) throw new Error(`${result.statusText}: ${result.reason}`);
+                return result.prompt!;
+            });
+
+            const image = await step.do('generate-image', () =>
+                deps.ai.generateImage(imageModel, {prompt})
+            );
+
+            return {image, contentType: 'image/jpeg', description: prompt};
+        }
+
+        const promptText = illustrationPrompt(path, data);
+        const image = await step.do('generate-image', () =>
+            deps.ai.generateImage(imageModel, {prompt: promptText})
+        );
+
+        return {image, contentType: 'image/jpeg'};
+    };
+}

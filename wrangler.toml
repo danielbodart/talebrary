@@ -28,6 +28,11 @@ tag = "v1"
 new_classes = ["IfArchiveProxy"]
 
 [[workflows]]
-name = "talebrary"
-binding = "WORKFLOW"
+name = "talebrary-cover-art"
+binding = "COVER_ART_WORKFLOW"
 class_name = "CoverArtWorkflow"
+
+[[workflows]]
+name = "talebrary-illustration"
+binding = "ILLUSTRATION_WORKFLOW"
+class_name = "IllustrationWorkflow"

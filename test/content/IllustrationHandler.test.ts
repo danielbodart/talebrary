@@ -5,10 +5,18 @@ import {CloudflareAiAdapter} from "../../src/ai/CloudflareAiAdapter.ts";
 import type {Describable} from "../../src/types.ts";
 import {exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
+import {DirectRunner} from "../../src/workflows/mod.ts";
+import {illustrationWorkflow} from "../../src/workflows/illustration.ts";
+
+function makeHandler(ai: TalebraryAi) {
+    return new IllustrationHandler({
+        illustrationRunner: new DirectRunner(illustrationWorkflow({ai})),
+    });
+}
 
 describe("IllustrationHandler", () => {
     const ai = new DumbAi();
-    const handler = new IllustrationHandler({ai});
+    const handler = makeHandler(ai);
 
     function requestWithPrompt(data: object, model?: string): Request {
         const prompt = encodeURIComponent(JSON.stringify(data));
@@ -66,7 +74,7 @@ describe("IllustrationHandler", () => {
                 return {response: JSON.stringify({prompt: "A dark barrow interior"})};
             }
         };
-        const strictHandler = new IllustrationHandler({ai: new CloudflareAiAdapter(strictBinding)});
+        const strictHandler = makeHandler(new CloudflareAiAdapter(strictBinding));
 
         test("scene context uses default model without multipart", async () => {
             const response = await strictHandler.handle(requestWithPrompt(exampleRequest));
@@ -88,8 +96,7 @@ describe("IllustrationHandler", () => {
                 generateText: async () => { throw new Error("not valid json"); },
                 generateImage: async () => new Uint8Array(0),
             };
-            const badHandler = new IllustrationHandler({ai: badAi});
-            const response = await badHandler.handle(requestWithPrompt(exampleRequest));
+            const response = await makeHandler(badAi).handle(requestWithPrompt(exampleRequest));
             expect(response.status).toBe(500);
         });
 
@@ -98,8 +105,7 @@ describe("IllustrationHandler", () => {
                 generateText: async () => ({prompt: "a test prompt"}) as any,
                 generateImage: async () => { throw new Error("model unavailable"); },
             };
-            const badHandler = new IllustrationHandler({ai: badImageAi});
-            const response = await badHandler.handle(requestWithPrompt(exampleRequest));
+            const response = await makeHandler(badImageAi).handle(requestWithPrompt(exampleRequest));
             expect(response.status).toBe(500);
             const body = await response.json();
             expect(body.reason).toContain("model unavailable");
@@ -110,9 +116,8 @@ describe("IllustrationHandler", () => {
                 generateText: async () => ({}) as any,
                 generateImage: async () => { throw new Error("quota exceeded"); },
             };
-            const badHandler = new IllustrationHandler({ai: badImageAi});
             const data: Describable = {title: "Test", description: "A scene"};
-            const response = await badHandler.handle(requestWithPrompt(data));
+            const response = await makeHandler(badImageAi).handle(requestWithPrompt(data));
             expect(response.status).toBe(500);
             const body = await response.json();
             expect(body.reason).toContain("quota exceeded");
@@ -128,8 +133,7 @@ describe("IllustrationHandler", () => {
                 generateText: async () => ({status: 404, statusText: "No Scene Found", reason: "Not visual"}) as any,
                 generateImage: async () => new Uint8Array(0),
             };
-            const handler = new IllustrationHandler({ai: noSceneAi});
-            const response = await handler.handle(requestWithPrompt(exampleRequest));
+            const response = await makeHandler(noSceneAi).handle(requestWithPrompt(exampleRequest));
             expect(response.status).toBe(200);
             expect(response.headers.get("content-type")).toBe("image/jpeg");
             expect(response.headers.get("description")).toContain(exampleRequest.story.title);

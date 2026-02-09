@@ -27,6 +27,7 @@ import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
 import type {TalebraryDatabase} from "./database/TalebraryDatabase.ts";
 import type {WorkflowRunner} from "./workflows/mod.ts";
 import type {CoverArtParams, CoverArtResult} from "./workflows/coverArt.ts";
+import type {IllustrationParams, IllustrationResult} from "./workflows/illustration.ts";
 
 export interface ApplicationDependencies extends
     Dependency<'http', Http>,
@@ -34,7 +35,8 @@ export interface ApplicationDependencies extends
     Dependency<'bucket', TalebraryBucket>,
     Dependency<'digest', Digest>,
     Dependency<'ai', TalebraryAi>,
-    Dependency<'coverArtRunner', WorkflowRunner<CoverArtParams, CoverArtResult>> {
+    Dependency<'coverArtRunner', WorkflowRunner<CoverArtParams, CoverArtResult>>,
+    Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>> {
 }
 
 
