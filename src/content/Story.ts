@@ -1,10 +1,10 @@
 import {get, type Http} from "../http/mod.ts";
-import type {D1GameFinder} from "../cloudflare/D1GameFinder.ts";
+import type {GameFinder} from "../games/GameFinder.ts";
 import {Uri} from "../http/Uri.ts";
 
 import type {Dependency} from "@bodar/yadic/types.ts";
 
-export function story(deps: Dependency<'http', Http> & Dependency<'finder', D1GameFinder>): Http {
+export function story(deps: Dependency<'http', Http> & Dependency<'finder', GameFinder>): Http {
     return async request => {
         const uri = new Uri(request.url);
         const [, , id] = uri.path.split('/');

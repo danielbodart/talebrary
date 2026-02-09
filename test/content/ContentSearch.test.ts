@@ -1,6 +1,6 @@
 import {describe, expect, test} from "bun:test";
 import {ContentSearch, render} from "../../src/content/ContentSearch.tsx";
-import type {GameInfo} from "../../src/cloudflare/D1GameFinder.ts";
+import type {GameInfo} from "../../src/games/GameFinder.ts";
 
 const testGames: GameInfo[] = [
     {

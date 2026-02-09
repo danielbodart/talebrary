@@ -1,10 +1,10 @@
 import {describe, expect, test} from "bun:test";
 import {story} from "../../src/content/Story.ts";
-import type {D1GameFinder, GameStory} from "../../src/cloudflare/D1GameFinder.ts";
+import type {GameFinder, GameStory} from "../../src/games/GameFinder.ts";
 import type {Http} from "../../src/http/mod.ts";
 
-function stubFinder(game: GameStory | null): D1GameFinder {
-    return {get: async () => game} as any;
+function stubFinder(game: GameStory | null) {
+    return {get: async () => game} as any as GameFinder;
 }
 
 describe("story", () => {

@@ -1,59 +1,29 @@
 import {Database, Statement} from "bun:sqlite";
-import type {D1Database, D1DatabaseSession, D1ExecResult, D1PreparedStatement, D1Result, D1SessionBookmark, D1SessionConstraint} from "@cloudflare/workers-types";
+import type {TalebraryDatabase, TalebraryStatement} from "../database/TalebraryDatabase.ts";
 
-export class SqlitePrepareStatement implements D1PreparedStatement {
+class SqliteStatement implements TalebraryStatement {
     constructor(private statement: Statement, private values: unknown[] = []) {
     }
 
-    run<T = Record<string, unknown>>(): Promise<D1Result<T>> {
-        throw new Error("Method not implemented.");
+    bind(...values: unknown[]): TalebraryStatement {
+        return new SqliteStatement(this.statement, values);
     }
 
-    bind(...values: unknown[]): D1PreparedStatement {
-        return new SqlitePrepareStatement(this.statement, values);
+    async first<T = Record<string, unknown>>(): Promise<T | null> {
+        return this.statement.get(...this.values) as T | null;
     }
 
-    first<T = unknown>(colName: string): Promise<T | null>;
-    first<T = Record<string, unknown>>(): Promise<T | null>;
-    async first(_colName?: unknown): Promise<any> {
-        return this.statement.get(...this.values);
-    }
-
-    async all<T = Record<string, unknown>>(): Promise<D1Result<T>> {
-        return {
-            results: this.statement.all(...this.values)
-        } as any;
-    }
-
-    raw<T = unknown[]>(options: { columnNames: true; }): Promise<[string[], ...T[]]>;
-    raw<T = unknown[]>(options?: { columnNames?: false | undefined; } | undefined): Promise<T[]>;
-    raw(_options?: unknown): Promise<any> {
-        throw new Error("Method not implemented.");
+    async all<T = Record<string, unknown>>(): Promise<{ results: T[] }> {
+        return {results: this.statement.all(...this.values) as T[]};
     }
 }
 
-export class SqliteDatabase implements D1Database {
+export class SqliteDatabase implements TalebraryDatabase {
     constructor(private database: Database) {
     }
 
-    prepare(query: string): D1PreparedStatement {
-        return new SqlitePrepareStatement(this.database.prepare(query));
-    }
-
-    dump(): Promise<ArrayBuffer> {
-        throw new Error("Method not implemented.");
-    }
-
-    batch<T = unknown>(_ignore: D1PreparedStatement[]): Promise<D1Result<T>[]> {
-        throw new Error("Method not implemented.");
-    }
-
-    withSession(_constraintOrBookmark?: D1SessionBookmark | D1SessionConstraint): D1DatabaseSession {
-        throw new Error("Method not implemented.");
-    }
-
-    exec(_query: string): Promise<D1ExecResult> {
-        throw new Error("Method not implemented.");
+    prepare(query: string): TalebraryStatement {
+        return new SqliteStatement(this.database.prepare(query));
     }
 }
 

@@ -1,6 +1,6 @@
 import {describe, expect, test} from "bun:test";
 import {ContentHandler, render} from "../../src/content/ContentHandler.tsx";
-import type {GameStory} from "../../src/cloudflare/D1GameFinder.ts";
+import type {GameStory} from "../../src/games/GameFinder.ts";
 
 const testGame: GameStory = {
     id: "abc123",

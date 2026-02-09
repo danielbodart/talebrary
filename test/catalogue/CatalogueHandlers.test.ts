@@ -2,12 +2,12 @@ import {describe, expect, test} from "bun:test";
 import {AtriumHandler} from "../../src/catalogue/AtriumHandler.tsx";
 import {WingHandler} from "../../src/catalogue/WingHandler.tsx";
 import {AisleHandler} from "../../src/catalogue/AisleHandler.tsx";
-import {D1GameFinder} from "../../src/cloudflare/D1GameFinder.ts";
+import {SqlGameFinder} from "../../src/games/SqlGameFinder.ts";
 import {talebrary} from "../../src/bun/SqliteDatabase.ts";
 
 describe("CatalogueHandlers", () => {
     const db = talebrary();
-    const finder = new D1GameFinder({db});
+    const finder = new SqlGameFinder({db});
 
     describe("AtriumHandler", () => {
         const handler = new AtriumHandler();

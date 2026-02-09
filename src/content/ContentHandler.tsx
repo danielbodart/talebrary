@@ -1,11 +1,11 @@
-import type {D1GameFinder, GameStory} from "../cloudflare/D1GameFinder.ts";
+import type {GameFinder, GameStory} from "../games/GameFinder.ts";
 import {Uri} from "../http/Uri.ts";
 import {compactText, wellFormed} from "../templates/misc.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
 
 export class ContentHandler {
-    constructor(deps: Dependency<'finder', D1GameFinder>, private finder: D1GameFinder = deps.finder) {
+    constructor(deps: Dependency<'finder', GameFinder>, private finder: GameFinder = deps.finder) {
     }
 
     async handle(request: Request): Promise<Response> {

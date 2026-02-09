@@ -1,6 +1,6 @@
 import {get, type Http} from "../http/mod.ts";
 import {Uri} from "../http/Uri.ts";
-import type {D1GameFinder} from "../cloudflare/D1GameFinder.ts";
+import type {GameFinder} from "../games/GameFinder.ts";
 import {IllustrationHandler} from "./IllustrationHandler.ts";
 import type {Describable, SceneContext} from "../types.ts";
 import type {TalebraryAi} from "../ai/TalebraryAi.ts";
@@ -13,7 +13,7 @@ import type {Dependency} from "@bodar/yadic/types.ts";
 const styleTransferModel = '@cf/black-forest-labs/flux-2-klein-9b';
 
 export interface CoverArtDeps extends Dependency<'http', Http>,
-    Dependency<'finder', D1GameFinder>,
+    Dependency<'finder', GameFinder>,
     Dependency<'illustration', IllustrationHandler>,
     Dependency<'ai', TalebraryAi>,
     Dependency<'bucket', TalebraryBucket> {

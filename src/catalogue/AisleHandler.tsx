@@ -1,4 +1,4 @@
-import {type D1GameFinder, type GameInfo} from "../cloudflare/D1GameFinder.ts";
+import type {GameFinder, GameInfo} from "../games/GameFinder.ts";
 import {roundStep, wellFormed} from "../templates/misc.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
 import {type AnyCategory, findCategory, findWing, isGenreCategory, isHandPickedCategory, type Wing} from "./CatalogueConfig.ts";
@@ -7,7 +7,7 @@ import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export class AisleHandler {
-    constructor(deps: Dependency<'finder', D1GameFinder>, private finder = deps.finder) {
+    constructor(deps: Dependency<'finder', GameFinder>, private finder = deps.finder) {
     }
 
     async handle(request: Request): Promise<Response> {

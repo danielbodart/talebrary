@@ -1,28 +1,7 @@
-import type {D1Database} from "@cloudflare/workers-types";
-import type {SupportedGameType} from "../types.ts";
+import type {TalebraryDatabase} from "../database/TalebraryDatabase.ts";
+import type {GameFinder, GameInfo, GameStory} from "./GameFinder.ts";
 
 import type {Dependency} from "@bodar/yadic/types.ts";
-
-export interface GameBase {
-    id: string;
-    title: string;
-    author: string;
-    description?: string;
-}
-
-export interface GameInfo extends GameBase {
-    rating: number;
-    rank: number;
-    boost: number;
-    score: number;
-    playable: 1 | 0;
-}
-
-export interface GameStory extends GameBase {
-    url: string;
-    coverart: string;
-    type: SupportedGameType
-}
 
 const supportedFormats = `('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
                     'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')`;
@@ -73,8 +52,8 @@ function languageCondition(languages: string[] | undefined, paramStart: number):
     };
 }
 
-export class D1GameFinder {
-    constructor(deps: Dependency<'db', D1Database>, private db = deps.db) {
+export class SqlGameFinder implements GameFinder {
+    constructor(deps: Dependency<'db', TalebraryDatabase>, private db = deps.db) {
     }
 
     async find(search: string, languages?: string[]): Promise<GameInfo[]> {
@@ -105,7 +84,7 @@ export class D1GameFinder {
             ${selectGameInfo}
         `;
         const statement = this.db.prepare(sql).bind(search ?? '', ...lang.params);
-        return (await statement.all()).results as any;
+        return (await statement.all<GameInfo>()).results;
     }
 
     async findByGenre(genre: string, languages?: string[]): Promise<GameInfo[]> {
@@ -127,7 +106,7 @@ export class D1GameFinder {
             ${gameReviewsCte}
             ${selectGameInfo}
         `;
-        return (await this.db.prepare(sql).bind(genre, ...lang.params).all()).results as any;
+        return (await this.db.prepare(sql).bind(genre, ...lang.params).all<GameInfo>()).results;
     }
 
     async findTopRated(languages?: string[]): Promise<GameInfo[]> {
@@ -161,7 +140,7 @@ export class D1GameFinder {
             ORDER BY gr.rating DESC
             LIMIT 20;
         `;
-        return (await this.db.prepare(sql).bind(...lang.params).all()).results as any;
+        return (await this.db.prepare(sql).bind(...lang.params).all<GameInfo>()).results;
     }
 
     async findRecent(languages?: string[]): Promise<GameInfo[]> {
@@ -196,7 +175,7 @@ export class D1GameFinder {
             ORDER BY fg.id DESC
             LIMIT 20;
         `;
-        return (await this.db.prepare(sql).bind(...lang.params).all()).results as any;
+        return (await this.db.prepare(sql).bind(...lang.params).all<GameInfo>()).results;
     }
 
     async findByIds(ids: string[], languages?: string[]): Promise<GameInfo[]> {
@@ -231,10 +210,10 @@ export class D1GameFinder {
             WHERE fg.playable = 1
             ORDER BY gr.rating DESC;
         `;
-        return (await this.db.prepare(sql).bind(...ids, ...lang.params).all()).results as any;
+        return (await this.db.prepare(sql).bind(...ids, ...lang.params).all<GameInfo>()).results;
     }
 
-    async get(id: string): Promise<GameStory | null | undefined> {
+    async get(id: string): Promise<GameStory | null> {
         const sql = `
             select g.id, g.title, g.author, g.desc as description, l.url, f.externid as type, g.coverart
             from games g
@@ -249,6 +228,6 @@ export class D1GameFinder {
             order by l.displayorder asc
             limit 1
         `;
-        return await this.db.prepare(sql).bind(id).first();
+        return await this.db.prepare(sql).bind(id).first<GameStory>();
     }
 }

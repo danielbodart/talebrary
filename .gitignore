@@ -8,7 +8,7 @@ www/new-client/main.*
 db/full.sql
 .idea/inspectionProfiles/
 .idea/dataSources.local.xml
-games
+/games
 wrangler-local.toml
 .env
 *.png

@@ -1,7 +1,6 @@
-import type {D1Database} from "@cloudflare/workers-types";
 import type {TalebraryAi} from "./ai/TalebraryAi.ts";
 import {ContentSearch} from "./content/ContentSearch.tsx";
-import {D1GameFinder} from "./cloudflare/D1GameFinder.ts";
+import {SqlGameFinder} from "./games/SqlGameFinder.ts";
 import {type Http} from "./http/mod.ts";
 import {Routing} from "./Routing.ts";
 import {templateHandler} from "./templates/TemplateHandler.ts";
@@ -25,10 +24,11 @@ import {AisleHandler} from "./catalogue/AisleHandler.tsx";
 import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
+import type {TalebraryDatabase} from "./database/TalebraryDatabase.ts";
 
 export interface ApplicationDependencies extends
     Dependency<'http', Http>,
-    Dependency<'db', D1Database>,
+    Dependency<'db', TalebraryDatabase>,
     Dependency<'bucket', TalebraryBucket>,
     Dependency<'digest', Digest>,
     Dependency<'ai', TalebraryAi> {
@@ -45,7 +45,7 @@ export function application(deps: ApplicationDependencies) {
         .set('timers', constructor(SystemTimers))
         .set('eventSender', _ => ({ send: async () => {} }))
         .set('events', constructor(EventHandler))
-        .set('finder', constructor(D1GameFinder))
+        .set('finder', constructor(SqlGameFinder))
         .set('search', constructor(ContentSearch))
         .set('illustration', constructor(IllustrationHandler))
         .set('coverArt', deps => new BucketCachingHandler(deps, coverArt(deps)))
