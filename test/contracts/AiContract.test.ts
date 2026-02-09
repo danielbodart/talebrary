@@ -44,6 +44,12 @@ function aiContractTests(name: string, createAi: () => TalebraryAi) {
                 const result = await ai.generateImage("@cf/black-forest-labs/flux-1-schnell", {prompt: "a cat"});
                 expect(result).toBeInstanceOf(Uint8Array);
             });
+
+            test("leonardo phoenix: returns Uint8Array", async () => {
+                const ai = createAi();
+                const result = await ai.generateImage("@cf/leonardo/phoenix-1.0", {prompt: "a cat"});
+                expect(result).toBeInstanceOf(Uint8Array);
+            });
         });
     });
 }
@@ -63,11 +69,14 @@ aiContractTests("CloudflareAiAdapter (native binding)", () => {
 
     const nativeBinding = {
         async run(model: string, input: any): Promise<any> {
-            if (model.includes('stable-diffusion') || model.includes('flux')) {
-                // Native binding requires multipart with serialized stream body and content type with boundary
-                if (!input.multipart) throw new Error('required properties at \'/\' are \'multipart\'');
-                if (!(input.multipart.body instanceof ReadableStream)) throw new Error('multipart.body must be a ReadableStream');
-                if (!input.multipart.contentType?.includes('boundary=')) throw new Error('multipart.contentType must include boundary');
+            const isImageModel = model.includes('stable-diffusion') || model.includes('flux') || model.includes('leonardo');
+            if (isImageModel) {
+                if (!input.prompt) throw new Error('prompt is required');
+                if (input.multipart) {
+                    // Img2img: validate multipart format
+                    if (!(input.multipart.body instanceof ReadableStream)) throw new Error('multipart.body must be a ReadableStream');
+                    if (!input.multipart.contentType?.includes('boundary=')) throw new Error('multipart.contentType must include boundary');
+                }
                 const bytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
                 return new ReadableStream({
                     start(controller) {
@@ -111,6 +120,12 @@ aiContractTests("CloudflareAiAdapter", () => {
         if (model === "@cf/black-forest-labs/flux-1-schnell") {
             return new Response(JSON.stringify({result: {image: "base64data"}}), {
                 headers: {"content-type": "application/json"},
+            });
+        }
+
+        if (model === "@cf/leonardo/phoenix-1.0") {
+            return new Response(new Uint8Array([0xFF, 0xD8, 0xFF]), {
+                headers: {"content-type": "image/jpeg"},
             });
         }
 

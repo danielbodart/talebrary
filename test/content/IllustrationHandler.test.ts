@@ -1,6 +1,7 @@
 import {describe, expect, test} from "bun:test";
 import {IllustrationHandler} from "../../src/content/IllustrationHandler.ts";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
+import {CloudflareAiAdapter} from "../../src/ai/CloudflareAiAdapter.ts";
 import type {Describable} from "../../src/types.ts";
 import {exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
@@ -44,6 +45,39 @@ describe("IllustrationHandler", () => {
         test("uses specified model when provided", async () => {
             const data: Describable = {title: "Test", description: "A scene"};
             const response = await handler.handle(requestWithPrompt(data, "@cf/bytedance/stable-diffusion-xl-lightning"));
+            expect(response.headers.get("content-type")).toBe("image/jpeg");
+        });
+    });
+
+    describe("default model (Leonardo Phoenix) via CloudflareAiAdapter", () => {
+        const strictBinding = {
+            async run(model: string, input: any): Promise<any> {
+                if (model.includes('leonardo')) {
+                    if (input.multipart) throw new Error('Leonardo models do not accept multipart input');
+                    if (!input.prompt) throw new Error('prompt is required');
+                    return new ReadableStream({
+                        start(controller) {
+                            controller.enqueue(new Uint8Array([0xFF, 0xD8, 0xFF]));
+                            controller.close();
+                        }
+                    });
+                }
+                // Text generation (llama) - return a valid illustration prompt
+                return {response: JSON.stringify({prompt: "A dark barrow interior"})};
+            }
+        };
+        const strictHandler = new IllustrationHandler({ai: new CloudflareAiAdapter(strictBinding)});
+
+        test("scene context uses default model without multipart", async () => {
+            const response = await strictHandler.handle(requestWithPrompt(exampleRequest));
+            expect(response.status).toBe(200);
+            expect(response.headers.get("content-type")).toBe("image/jpeg");
+        });
+
+        test("direct prompt uses default model without multipart", async () => {
+            const data: Describable = {title: "Test", description: "A scene"};
+            const response = await strictHandler.handle(requestWithPrompt(data));
+            expect(response.status).toBe(200);
             expect(response.headers.get("content-type")).toBe("image/jpeg");
         });
     });

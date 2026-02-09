@@ -44,21 +44,24 @@ async function normalizeImageResponse(result: any): Promise<Uint8Array> {
 }
 
 function toCloudflareImageInput(model: string, input: ImagePrompt): any {
+    // Text-to-image: pass plain JSON (required by Leonardo Phoenix and other models
+    // that don't accept multipart)
+    if (!input.sourceImage) return input;
+
+    // Img2img: wrap in multipart FormData for the native Workers AI binding
     const form = new FormData();
     form.append('prompt', input.prompt);
     if (input.num_steps) form.append('num_steps', String(input.num_steps));
 
-    if (input.sourceImage) {
-        const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
-        if (model.includes('flux-2-klein')) {
-            form.append('input_image_0', new Blob([bytes]));
-        } else {
-            form.append('image', new Blob([bytes]));
-        }
+    const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
+    if (model.includes('flux-2-klein')) {
+        form.append('input_image_0', new Blob([bytes]));
+    } else {
+        form.append('image', new Blob([bytes]));
     }
 
     // Serialize FormData to get the stream body and content type with boundary,
-    // as required by the Cloudflare Workers AI binding.
+    // as required by the Cloudflare Workers AI binding for img2img.
     // Content type must be read before body due to Bun lazy-init quirk.
     // Raw ImagePrompt fields are spread alongside so CloudflareRestAi can
     // fall back to JSON for models whose REST endpoint rejects multipart.
