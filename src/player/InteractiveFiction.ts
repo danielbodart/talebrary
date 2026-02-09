@@ -1,5 +1,6 @@
 import type {WasiGlkClient, RemGlkUpdate, WindowUpdate, ContentUpdate, InputRequest, ContentSpan, TextSpan, TextParagraph, GridLine} from "@bodar/wasiglk";
 import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
+import type {GridLineUpdate} from "./GridWindow.ts";
 
 interface InteractiveFictionDeps {
     HTMLElement: typeof HTMLElement;
@@ -11,6 +12,9 @@ export class InteractiveFiction {
             private client: WasiGlkClient | null = null;
             private windows = new Map<number, HTMLElement>();
             private windowTypes = new Map<number, 'buffer' | 'grid'>();
+            private resizeObserver = new ResizeObserver(() => this.scheduleResize());
+            private resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+            private currentColumns = 0;
 
             async run(client: WasiGlkClient) {
                 this.client = client;
@@ -18,6 +22,23 @@ export class InteractiveFiction {
                 for await (const update of client.updates()) {
                     this.handle(update);
                 }
+            }
+
+            private observeGridWindow(el: HTMLElement) {
+                this.resizeObserver.observe(el);
+            }
+
+            private scheduleResize() {
+                if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+                this.resizeTimeout = setTimeout(() => {
+                    const gridWindow = this.querySelector('grid-window');
+                    if (!gridWindow) return;
+                    const columns = measureColumns(gridWindow as HTMLElement);
+                    if (columns > 0 && columns !== this.currentColumns) {
+                        this.currentColumns = columns;
+                        this.client?.sendArrange({width: columns, height: 24});
+                    }
+                }, 300);
             }
 
             private handle(update: RemGlkUpdate) {
@@ -71,6 +92,7 @@ export class InteractiveFiction {
                     }
                     if (win.type === 'grid' && 'setGridSize' in el) {
                         (el as any).setGridSize(win.gridheight ?? 0);
+                        this.observeGridWindow(el);
                     }
                 }
             }
@@ -83,8 +105,8 @@ export class InteractiveFiction {
                     const spans = extractBufferSpans(content.text ?? []);
                     (el as any).updateContent(spans, content.clear ?? false);
                 } else if ('updateGridContent' in el) {
-                    const spans = extractGridSpans(content.lines ?? []);
-                    (el as any).updateGridContent(spans);
+                    const gridLines = extractGridLines(content.lines ?? []);
+                    (el as any).updateGridContent(gridLines);
                     const title = (el as any).roomTitle;
                     if (title) {
                         for (const win of this.windows.values()) {
@@ -129,8 +151,29 @@ function extractBufferSpans(paragraphs: TextParagraph[]): TextSpan[] {
     );
 }
 
-function extractGridSpans(lines: GridLine[]): TextSpan[] {
-    return lines.flatMap(line =>
-        (line.content ?? []).map(normalizeSpan)
-    );
+function extractGridLines(lines: GridLine[]): GridLineUpdate[] {
+    return lines.map(line => ({
+        line: line.line,
+        spans: (line.content ?? []).map(normalizeSpan),
+    }));
+}
+
+function measureColumns(gridWindow: HTMLElement): number {
+    const section = gridWindow.querySelector('section');
+    if (!section) return 0;
+
+    const style = getComputedStyle(section);
+    const paddingLeft = parseFloat(style.paddingLeft) || 0;
+    const paddingRight = parseFloat(style.paddingRight) || 0;
+    const available = section.clientWidth - paddingLeft - paddingRight;
+
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;';
+    probe.textContent = '0';
+    section.appendChild(probe);
+    const charWidth = probe.getBoundingClientRect().width;
+    probe.remove();
+
+    if (charWidth === 0) return 0;
+    return Math.floor(available / charWidth);
 }

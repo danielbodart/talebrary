@@ -1,6 +1,11 @@
 import type {TextSpan} from "@bodar/wasiglk";
 import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
 
+export interface GridLineUpdate {
+    line: number;
+    spans: TextSpan[];
+}
+
 interface GridWindowDeps {
     HTMLElement: typeof HTMLElement;
 }
@@ -37,18 +42,19 @@ export class GridWindow {
                 return parts[0]?.trim() ?? '';
             }
 
-            updateGridContent(content: TextSpan[]) {
-                const elements: HTMLElement[] = [];
+            updateGridContent(lines: GridLineUpdate[]) {
+                for (const {line, spans} of lines) {
+                    const lineEl = this.lineElements[line];
+                    if (!lineEl) continue;
 
-                for (const span of content) {
-                    const el = document.createElement('span');
-                    el.className = span.style ?? '';
-                    el.textContent = span.text;
-                    elements.push(el);
-                }
-
-                if (elements.length > 0 && this.lineElements[0]) {
-                    this.lineElements[0].replaceChildren(...elements);
+                    const elements: HTMLElement[] = [];
+                    for (const span of spans) {
+                        const el = document.createElement('span');
+                        el.className = span.style ?? '';
+                        el.textContent = span.text;
+                        elements.push(el);
+                    }
+                    lineEl.replaceChildren(...elements);
                 }
             }
         });

@@ -55,15 +55,38 @@ const ifEl = document.querySelector('interactive-fiction') as any
 
 if (!ifEl.parentElement) document.body.appendChild(ifEl);
 
+const initialColumns = await measureInitialColumns(ifEl);
+
 const client = await createClient({
     storyData,
     workerUrl: '/wasiglk/worker.js',
     interpreterUrl: `/wasiglk/${interpreter}.wasm`,
     filesystem: 'auto',
-    metrics: {width: 80, height: 24},
+    metrics: {width: initialColumns, height: 24},
 });
 
 ifEl.run(client);
+
+async function measureInitialColumns(container: HTMLElement): Promise<number> {
+    await document.fonts.ready;
+
+    const gridWindow = document.createElement('grid-window');
+    const section = document.createElement('section');
+    section.classList.add('card');
+    const probe = document.createElement('span');
+    probe.style.cssText = 'visibility:hidden;white-space:pre;';
+    probe.textContent = '0';
+    section.appendChild(probe);
+    gridWindow.appendChild(section);
+    container.appendChild(gridWindow);
+
+    const available = section.clientWidth;
+    const charWidth = probe.getBoundingClientRect().width;
+    gridWindow.remove();
+
+    if (charWidth === 0) return 80;
+    return Math.floor(available / charWidth);
+}
 
 function interpreterFor(type: string | undefined): string | undefined {
     const map: Record<string, string> = {
