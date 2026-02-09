@@ -6,6 +6,11 @@ www/client
 www/cards/*
 www/new-client/main.*
 db/full.sql
+db/d1.sql
+db/ifdb-archive.sql
+db/ifdb.sqlite
+db/ifdb-latest.zip
+db/full-ifdb.sql
 .idea/inspectionProfiles/
 .idea/dataSources.local.xml
 /games
