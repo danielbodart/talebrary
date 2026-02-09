@@ -4,15 +4,15 @@
 
 Replace the current one-time IFDB database import with an automated quarterly sync pipeline and our own curated `talebrary_*` schema. The system should be fully self-contained — if IFDB disappeared tomorrow, the app continues working with existing data.
 
-## Current State
+## Previous State (Before Migration)
 
 ### Data Source
 - IFDB publishes quarterly MySQL dumps as `ifdb-archive-YYYYMMDD.zip` at `https://ifarchive.org/if-archive/info/ifdb/`
 - Schedule: ~1st of Mar/Jun/Sep/Dec (quarterly)
 - Format: ZIP containing MariaDB 10.5.15 dump (~30MB compressed, ~80MB uncompressed)
-- Contains 42 tables; we use 4: `games`, `gamelinks`, `filetypes`, `reviews` + FTS5 `games_search`
+- Contains 42 tables; we used 4: `games`, `gamelinks`, `filetypes`, `reviews` + FTS5 `games_search`
 
-### Current Pipeline (Manual)
+### Old Pipeline (Manual)
 ```
 ifdb-archive.sql (MySQL)
   → db/mysql2sqlite (AWK) → full.sql (SQLite)
@@ -21,21 +21,12 @@ ifdb-archive.sql (MySQL)
   → wrangler d1 execute → Cloudflare D1
 ```
 
-### What the App Actually Uses
-| Table | Columns Used | Purpose |
-|-------|-------------|---------|
-| `games` | id, title, author, desc, genre, language, published, coverart, tags, seriesname | Game metadata |
-| `gamelinks` | gameid, url, fmtid, displayorder | Story file URLs |
-| `filetypes` | id, externid, extension | Format definitions |
-| `reviews` | gameid, rating | Average ratings |
-| `games_search` | FTS5(id, title, author, tags, desc, seriesname, genre) | Full-text search |
-
-### Problems
-1. Database is ~18 months stale — no mechanism to update
-2. We use someone else's schema with ~80% unused data
-3. No way to curate games (enable/disable, annotate, boost)
-4. No way to record our own data (transcripts, game state, custom ratings)
-5. If IFDB changes their schema, everything breaks
+### Problems (All Resolved)
+1. ~~Database is ~18 months stale — no mechanism to update~~ → Automated sync pipeline
+2. ~~We use someone else's schema with ~80% unused data~~ → Own `talebrary_*` schema (23MB vs 74MB)
+3. ~~No way to curate games (enable/disable, annotate, boost)~~ → `enabled` + `notes` fields
+4. ~~No way to record our own data (transcripts, game state, custom ratings)~~ → Schema supports future tables
+5. ~~If IFDB changes their schema, everything breaks~~ → Sync layer insulates app from IFDB
 
 ---
 
@@ -196,103 +187,20 @@ WHERE enabled = 1;
 
 ---
 
-## Pipeline Commands
+## Pipeline Commands (Implemented)
 
-### `db/run` additions
+All commands are in `db/run` — see the file for current source. Summary:
 
-```bash
-function download() {
-    # Try current quarter's dump, then previous quarter
-    local year=$(date +%Y)
-    local month=$(date +%m)
-    # Map to quarter start: 03, 06, 09, 12
-    local qmonth=$(( ((${month#0} - 1) / 3) * 3 + 3 ))
-    local qmonth_padded=$(printf "%02d" $qmonth)
-    local filename="ifdb-archive-${year}${qmonth_padded}01.zip"
-    local url="https://ifarchive.org/if-archive/info/ifdb/${filename}"
+| Command | Purpose |
+|---------|---------|
+| `./db/run download` | Download latest quarterly IFDB archive ZIP, extract to `ifdb-archive.sql` |
+| `./db/run convert-ifdb` | MySQL → SQLite via `mysql2sqlite`, creates `ifdb.sqlite` |
+| `./db/run sync` | ATTACH `ifdb.sqlite`, run `sync.sql` into `talebrary.sqlite` |
+| `./db/run upload` | `.dump` talebrary.sqlite → strip transactions → upload to D1 |
+| `./db/run pipeline` | All of the above in sequence |
+| `./db/run migrate` | One-time migration via `migrate-run.ts` (already executed) |
 
-    echo "Downloading: $url"
-    if ! curl -f -o "$SCRIPT_DIR/ifdb-latest.zip" "$url"; then
-        # Try previous quarter
-        if [ "$qmonth" -eq 3 ]; then
-            year=$((year - 1)); qmonth=12
-        else
-            qmonth=$((qmonth - 3))
-        fi
-        qmonth_padded=$(printf "%02d" $qmonth)
-        filename="ifdb-archive-${year}${qmonth_padded}01.zip"
-        url="https://ifarchive.org/if-archive/info/ifdb/${filename}"
-        echo "Trying previous quarter: $url"
-        curl -f -o "$SCRIPT_DIR/ifdb-latest.zip" "$url"
-    fi
-
-    unzip -o "$SCRIPT_DIR/ifdb-latest.zip" -d "$SCRIPT_DIR/"
-    # The ZIP contains a single .sql file
-    mv "$SCRIPT_DIR"/ifdb-archive-*.sql "$SCRIPT_DIR/ifdb-archive.sql"
-    rm "$SCRIPT_DIR/ifdb-latest.zip"
-}
-
-function convert-ifdb() {
-    pushd "$SCRIPT_DIR"
-    echo "Converting IFDB MySQL dump to SQLite..."
-    rm -f ifdb.sqlite full-ifdb.sql
-    ./mysql2sqlite ifdb-archive.sql > full-ifdb.sql
-    sqlite3 ifdb.sqlite < full-ifdb.sql
-    echo "IFDB SQLite created: $(sqlite3 ifdb.sqlite 'SELECT COUNT(*) FROM games;') games"
-    popd
-}
-
-function sync() {
-    pushd "$SCRIPT_DIR"
-    echo "Syncing IFDB → talebrary..."
-
-    # Ensure talebrary schema exists
-    sqlite3 talebrary.sqlite < schema/talebrary.sql
-
-    # Attach IFDB and run sync
-    sqlite3 talebrary.sqlite <<EOF
-ATTACH DATABASE 'ifdb.sqlite' AS ifdb;
-.read sync.sql
-DETACH DATABASE ifdb;
-EOF
-
-    local total=$(sqlite3 talebrary.sqlite "SELECT COUNT(*) FROM talebrary_games;")
-    local enabled=$(sqlite3 talebrary.sqlite "SELECT COUNT(*) FROM talebrary_games WHERE enabled = 1;")
-    local links=$(sqlite3 talebrary.sqlite "SELECT COUNT(*) FROM talebrary_gamelinks;")
-    echo "Sync complete: $total games ($enabled enabled), $links links"
-    popd
-}
-
-function upload() {
-    . "$SCRIPT_DIR/../commands.sh"
-    pushd "$SCRIPT_DIR"
-    sqlite3 talebrary.sqlite .dump > d1.sql
-    sed -i '/^BEGIN TRANSACTION;$/d; /^COMMIT;$/d' d1.sql
-    echo "Uploading to D1..."
-    wrangler d1 execute talebrary --remote --file="$SCRIPT_DIR/d1.sql"
-    echo "D1 upload complete."
-    popd
-}
-
-function pipeline() {
-    download
-    convert-ifdb
-    sync
-    upload
-}
-```
-
-### Root `./run` additions
-
-```bash
-function db-sync() {
-    ./db/run pipeline
-}
-
-function db-download() {
-    ./db/run download
-}
-```
+Root `./run` additions: `db-sync` → `./db/run pipeline`, `db-download` → `./db/run download`
 
 ---
 
@@ -462,96 +370,44 @@ LIMIT 1
 
 ---
 
-## Migration Plan (Big Bang)
+## Migration (Completed)
 
-### Pre-requisites
-- Take D1 Time Travel bookmark: `wrangler d1 time-travel bookmark create talebrary --tag pre-migration`
+### What Was Done
 
-### Step 1: Create Schema Files
+**Commit `4d582f2`** — Code changes:
+- Created `db/schema/talebrary.sql` (CREATE TABLE IF NOT EXISTS for all three tables)
+- Created `db/sync.sql` (incremental sync logic with ATTACH DATABASE)
+- Created `db/migrate.sql` (one-time migration from IFDB → talebrary schema)
+- Added `db/run` commands: `download`, `convert-ifdb`, `sync`, `upload`, `pipeline`
+- Updated `src/games/SqlGameFinder.ts` (new table names, simplified queries, removed reviews CTE)
+- Updated tests for new schema
 
-Create `db/schema/talebrary.sql` with `CREATE TABLE IF NOT EXISTS` for all three tables.
+**D1 Migration** — Executed 2025-02-09:
+- Pre-migration bookmark: `00000649-00000000-0000500d-636b11e2eb8929085ba2411292f547ce`
+- D1 **cannot execute large multi-statement files** — the single `migrate.sql` failed with `D1_RESET_DO` error
+- Had to split into 4 sequential steps (see D1 Constraints below)
+- Final state: 12,987 games, 19,376 links, 12,987 search entries
+- DB size: 74MB (old IFDB) → 23MB (talebrary schema + FTS5)
 
-### Step 2: Create Migration Script
+### D1 Constraints (Learned the Hard Way)
 
-`db/migrate.sql`:
-```sql
--- One-time migration from old schema to new schema
--- Run locally and on D1
+1. **No `time-travel bookmark create`** — only `time-travel info` (get current bookmark) and `time-travel restore` (restore to bookmark)
+2. **No `VACUUM`** — not supported on D1 remote databases
+3. **Complex multi-statement batches fail** — D1's Durable Object resets (`D1_RESET_DO`) when a single file contains too many heterogeneous operations (CREATE + INSERT...SELECT + DROP + CREATE VIRTUAL TABLE). Simple homogeneous batches (e.g. 44 DROP statements) work fine.
+4. **Split strategy**: Separate files executed sequentially, one concern per file:
+   - `migrate-1-create.sql` — CREATE TABLE statements
+   - `migrate-2-copy-data.sql` — INSERT...SELECT data migration
+   - `migrate-3-drop-old.sql` — DROP TABLE cleanup
+   - `migrate-4-search-index.sql` — CREATE VIRTUAL TABLE + FTS5 population
 
--- Create talebrary schema (IF NOT EXISTS for safety)
--- [contents of schema/talebrary.sql]
+### D1 Upload Strategy for Sync Pipeline
 
--- Migrate games
-INSERT INTO talebrary_games (
-    id, title, author, description, genre, language, published,
-    coverart, tags, seriesname, avg_rating, enabled, synced_at
-)
-SELECT
-    g.id, g.title, g.author, g.desc, g.genre, g.language, g.published,
-    g.coverart, g.tags, g.seriesname,
-    (SELECT AVG(r.rating) FROM reviews r WHERE r.gameid = g.id),
-    1,  -- enabled
-    datetime('now')
-FROM games g;
-
--- Migrate gamelinks (denormalise with filetypes)
-INSERT INTO talebrary_gamelinks (game_id, url, format, extension, display_order)
-SELECT l.gameid, l.url, f.externid, f.extension, l.displayorder
-FROM gamelinks l
-JOIN filetypes f ON l.fmtid = f.id;
-
--- Build FTS5 index
-INSERT INTO talebrary_search (id, title, author, tags, description, seriesname, genre)
-SELECT id, title, author, tags, description, seriesname, genre
-FROM talebrary_games
-WHERE enabled = 1;
-
--- Drop old tables
-DROP TABLE IF EXISTS games_search;
-DROP TABLE IF EXISTS reviews;
-DROP TABLE IF EXISTS gamelinks;
-DROP TABLE IF EXISTS filetypes;
-DROP TABLE IF EXISTS games;
--- Plus all unused tables from drop.sql
-```
-
-### Step 3: Update SqlGameFinder.ts
-
-Apply all query changes described above.
-
-### Step 4: Update Tests
-
-Update `GameFinderContract.test.ts` and `D1GameFinder.test.ts` to use new table names and include `enabled` field in test fixtures.
-
-### Step 5: Execute Migration
-
-```bash
-# Locally
-sqlite3 db/talebrary.sqlite < db/migrate.sql
-./run check
-./run test
-
-# D1
-wrangler d1 execute talebrary --remote --file=db/migrate.sql
-./run deploy
-```
-
-### Step 6: Verify
-
-```bash
-# Check D1
-wrangler d1 execute talebrary --remote --command="SELECT COUNT(*) FROM talebrary_games;"
-wrangler d1 execute talebrary --remote --command="SELECT COUNT(*) FROM talebrary_gamelinks;"
-
-# Test production
-curl -s https://talebrary.com/catalogue/genres/fantasy | grep -c 'card'
-```
+The `upload()` function in `db/run` dumps `talebrary.sqlite` via `.dump` and uploads the whole thing. This produces simple CREATE/INSERT statements (not complex cross-table operations), so it should work for D1's file upload mechanism. If it hits size limits in future, apply the same split strategy: separate schema creation from data insertion.
 
 ### Rollback
 
 ```bash
-wrangler d1 time-travel restore talebrary --tag pre-migration
-# Revert SqlGameFinder.ts
+bunx wrangler d1 time-travel restore talebrary --bookmark=00000649-00000000-0000500d-636b11e2eb8929085ba2411292f547ce
 git checkout HEAD -- src/games/SqlGameFinder.ts
 ./run deploy
 ```
@@ -585,25 +441,26 @@ These can be added to `sync.sql` incrementally:
 
 ## Build Sequence
 
-1. Create `db/schema/talebrary.sql`
-2. Create `db/sync.sql`
-3. Create `db/migrate.sql`
-4. Update `db/run` with new commands
-5. Update `src/games/SqlGameFinder.ts`
-6. Update tests
-7. Run migration locally + full test suite
-8. Take D1 backup, run migration on D1
-9. Deploy
-10. Create `.github/workflows/db-sync.yml`
-11. Test with manual workflow dispatch
-12. Remove old `db/drop.sql`, `db/fulltext.sql`
-13. Update `CLAUDE.md` with new pipeline docs
+1. ~~Create `db/schema/talebrary.sql`~~ — Done (commit `4d582f2`)
+2. ~~Create `db/sync.sql`~~ — Done (commit `4d582f2`)
+3. ~~Create `db/migrate.sql`~~ — Done (commit `4d582f2`)
+4. ~~Update `db/run` with new commands~~ — Done (commit `4d582f2`)
+5. ~~Update `src/games/SqlGameFinder.ts`~~ — Done (commit `4d582f2`)
+6. ~~Update tests~~ — Done (commit `4d582f2`)
+7. ~~Run migration locally + full test suite~~ — Done
+8. ~~Take D1 backup, run migration on D1~~ — Done (split into 4 steps, see Migration section)
+9. Deploy — **TODO**
+10. Create `.github/workflows/db-sync.yml` — **TODO**
+11. Test with manual workflow dispatch — **TODO**
+12. Remove old `db/drop.sql`, `db/fulltext.sql` — **TODO** (check if they still exist)
+13. Update `CLAUDE.md` with new pipeline docs — **TODO**
 
 ---
 
 ## Open Questions
 
 1. **Should we check `talebrary.sqlite` into the repo?** It's needed for local dev. Currently `talebrary.sqlite` is ~50MB. Could use Git LFS, or have developers run `./db/run pipeline` to bootstrap locally.
-2. **D1 import downtime**: Import blocks the database. For ~50MB SQL this is probably seconds, but worth monitoring.
+2. **D1 import downtime**: Import blocks the database. Migration took ~2s total across 4 steps. Quarterly sync upload (full `.dump`) may take longer — worth monitoring on first real sync.
 3. **Should the cron job also commit `talebrary.sqlite`?** Would keep the repo's local dev database fresh, but adds binary churn.
-4. **Data cleansing scope for v1**: Start with none (just schema migration) or include basic cleansing (strip HTML descriptions)?
+4. ~~**Data cleansing scope for v1**: Start with none (just schema migration) or include basic cleansing (strip HTML descriptions)?~~ — Decided: none for v1, can add to `sync.sql` incrementally.
+5. **D1 upload splitting**: The `upload()` function dumps the whole DB into one file. If this fails on D1 (like the migration did), we'll need to split the dump into schema + data batches. Monitor on first real sync run.
