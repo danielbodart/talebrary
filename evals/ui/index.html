@@ -32,7 +32,14 @@
     </main>
 
     <dialog id="lightbox">
-        <img id="lightbox-img" alt="">
+        <div class="lightbox-content">
+            <button class="lightbox-nav lightbox-prev" aria-label="Previous image">&#x2039;</button>
+            <figure class="lightbox-figure">
+                <img id="lightbox-img" alt="">
+                <figcaption id="lightbox-rating" class="human-rating"></figcaption>
+            </figure>
+            <button class="lightbox-nav lightbox-next" aria-label="Next image">&#x203a;</button>
+        </div>
     </dialog>
 
     <script src="/main.js" type="module"></script>

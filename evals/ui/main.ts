@@ -216,6 +216,7 @@ function renderModelCard(
 ): HTMLElement {
     const card = document.createElement("div");
     card.className = "model-card";
+    card.dataset.model = result.model;
 
     const header = document.createElement("div");
     header.className = "model-card-header";
@@ -313,6 +314,7 @@ function renderCases(container: HTMLElement, cases: CaseResult[], isImage: boole
     cases.forEach((c, caseIndex) => {
         const block = document.createElement("div");
         block.className = "case-block";
+        block.dataset.caseIndex = String(caseIndex);
 
         const header = document.createElement("div");
         header.className = "case-header";
@@ -504,14 +506,111 @@ function renderRun(run: EvalRun) {
 
 const lightbox = document.getElementById("lightbox") as HTMLDialogElement;
 const lightboxImg = document.getElementById("lightbox-img") as HTMLImageElement;
+const lightboxRating = document.getElementById("lightbox-rating") as HTMLElement;
+const lightboxPrev = lightbox.querySelector(".lightbox-prev") as HTMLButtonElement;
+const lightboxNext = lightbox.querySelector(".lightbox-next") as HTMLButtonElement;
+
+interface LightboxEntry {
+    src: string;
+    model: string;
+    caseIndex: number;
+    card: HTMLElement;
+}
+
+let lightboxEntries: LightboxEntry[] = [];
+let lightboxIndex = 0;
+
+function showLightboxEntry(index: number) {
+    lightboxIndex = index;
+    const entry = lightboxEntries[index];
+    lightboxImg.src = entry.src;
+
+    const run = loadedRuns.get(currentRunFile);
+    const humanScore = run?.cases[entry.caseIndex]?.humanScores?.[entry.model];
+
+    clear(lightboxRating);
+
+    const label = document.createElement("span");
+    label.className = "human-rating-label";
+    label.textContent = "Rate";
+    lightboxRating.appendChild(label);
+
+    for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = String(i);
+        if (humanScore === i) btn.classList.add("selected");
+        btn.addEventListener("click", async () => {
+            await fetch("/api/score", {
+                method: "POST",
+                headers: {"content-type": "application/json"},
+                body: JSON.stringify({runFile: currentRunFile, caseIndex: entry.caseIndex, model: entry.model, score: i}),
+            });
+            lightboxRating.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+            if (run) {
+                const c = run.cases[entry.caseIndex];
+                if (!c.humanScores) c.humanScores = {};
+                c.humanScores[entry.model] = i;
+            }
+            // Sync back to card
+            const cardBtns = entry.card.querySelectorAll(".human-rating button");
+            cardBtns.forEach(b => b.classList.remove("selected"));
+            cardBtns[i - 1]?.classList.add("selected");
+        });
+        lightboxRating.appendChild(btn);
+    }
+
+    // Hide arrows when only one image
+    const single = lightboxEntries.length <= 1;
+    lightboxPrev.hidden = single;
+    lightboxNext.hidden = single;
+}
 
 document.addEventListener("click", (e) => {
     const img = (e.target as HTMLElement).closest(".model-card img") as HTMLImageElement | null;
     if (!img) return;
-    lightboxImg.src = img.src;
+
+    const card = img.closest(".model-card") as HTMLElement;
+    const caseBlock = card.closest(".case-block") as HTMLElement;
+
+    lightboxEntries = [];
+    lightboxIndex = 0;
+    caseBlock.querySelectorAll(".model-card").forEach(c => {
+        const cardImg = c.querySelector("img") as HTMLImageElement | null;
+        if (!cardImg) return;
+        const idx = lightboxEntries.length;
+        lightboxEntries.push({
+            src: cardImg.src,
+            model: (c as HTMLElement).dataset.model ?? "",
+            caseIndex: parseInt(caseBlock.dataset.caseIndex ?? "0"),
+            card: c as HTMLElement,
+        });
+        if (c === card) lightboxIndex = idx;
+    });
+
+    showLightboxEntry(lightboxIndex);
     lightbox.showModal();
 });
 
-lightbox.addEventListener("click", () => lightbox.close());
+// Backdrop click closes, content clicks don't
+lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) lightbox.close();
+});
+
+// Arrow navigation
+function lightboxNav(delta: number) {
+    if (lightboxEntries.length <= 1) return;
+    lightboxIndex = (lightboxIndex + delta + lightboxEntries.length) % lightboxEntries.length;
+    showLightboxEntry(lightboxIndex);
+}
+
+lightboxPrev.addEventListener("click", () => lightboxNav(-1));
+lightboxNext.addEventListener("click", () => lightboxNav(1));
+
+// Keyboard navigation
+lightbox.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); lightboxNav(-1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); lightboxNav(1); }
+});
 
 loadRunList();

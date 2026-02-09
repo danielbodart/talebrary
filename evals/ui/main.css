@@ -448,11 +448,72 @@ main {
     background: rgba(0, 0, 0, 0.85);
 }
 
+.lightbox-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lightbox-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+}
+
 #lightbox img {
-    max-width: 90vw;
-    max-height: 90vh;
+    max-width: calc(90vw - 10rem);
+    max-height: calc(90vh - 4rem);
     object-fit: contain;
     border-radius: 4px;
+}
+
+.lightbox-nav {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 4rem;
+    cursor: pointer;
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.lightbox-nav:hover {
+    color: #fff;
+}
+
+.lightbox-nav:focus-visible {
+    outline: none;
+}
+
+#lightbox .human-rating {
+    justify-content: center;
+    margin-top: 0.75rem;
+    border-top: none;
+    padding-top: 0;
+}
+
+#lightbox .human-rating-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#lightbox .human-rating button {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+#lightbox .human-rating button:hover {
+    border-color: var(--accent);
+    color: #fff;
 }
 
 .model-card img {
