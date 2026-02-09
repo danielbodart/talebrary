@@ -4,6 +4,8 @@ import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
 import type {TalebraryAi} from "../ai/TalebraryAi.ts";
 
+export const defaultImageModel = '@cf/leonardo/phoenix-1.0';
+
 export interface IllustrationDependencies extends
     Dependency<'ai', TalebraryAi> {
 }
@@ -31,7 +33,7 @@ export class IllustrationHandler {
         const {path, query} = new Uri(request.url);
         const params = new URLSearchParams(query);
 
-        const model = params.get('model') ?? 'llama+flux';
+        const imageModel = params.get('model') ?? defaultImageModel;
 
         const rawPrompt = params.get('prompt');
         if (!rawPrompt) return new Response('Not Found', {status: 404});
@@ -43,9 +45,7 @@ export class IllustrationHandler {
             return errorResponse(400, 'Invalid JSON', String(e));
         }
 
-        if (model.startsWith('llama+')) {
-            const imageModel = '@cf/black-forest-labs/flux-2-klein-9b';
-
+        if (data.scene) {
             let result: PromptResult;
             try {
                 result = await this.deps.ai.generateText<PromptResult>('@cf/meta/llama-3.3-70b-instruct-fp8-fast', generateIllustrationPrompt(data));
@@ -74,7 +74,7 @@ export class IllustrationHandler {
         const promptText = illustrationPrompt(path, data);
         let image: Uint8Array;
         try {
-            image = await this.deps.ai.generateImage(model, {prompt: promptText});
+            image = await this.deps.ai.generateImage(imageModel, {prompt: promptText});
         } catch (e) {
             return errorResponse(500, 'Image generation failed', String(e));
         }

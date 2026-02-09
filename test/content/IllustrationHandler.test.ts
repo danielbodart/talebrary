@@ -20,7 +20,7 @@ describe("IllustrationHandler", () => {
         expect(response.status).toBe(404);
     });
 
-    describe("llama+stable-diffusion model (default)", () => {
+    describe("scene context (llama + image model)", () => {
         test("returns image response for valid scene context", async () => {
             const response = await handler.handle(requestWithPrompt(exampleRequest));
             expect(response.headers.get("content-type")).toBe("image/jpeg");
@@ -31,6 +31,20 @@ describe("IllustrationHandler", () => {
             const description = response.headers.get("description");
             expect(description).toBeString();
             expect(description!.length).toBeGreaterThan(0);
+        });
+    });
+
+    describe("non-scene data (direct prompt)", () => {
+        test("generates image from direct prompt", async () => {
+            const data: Describable = {title: "Adventure", description: "A great story"};
+            const response = await handler.handle(requestWithPrompt(data));
+            expect(response.headers.get("content-type")).toBe("image/jpeg");
+        });
+
+        test("uses specified model when provided", async () => {
+            const data: Describable = {title: "Test", description: "A scene"};
+            const response = await handler.handle(requestWithPrompt(data, "@cf/bytedance/stable-diffusion-xl-lightning"));
+            expect(response.headers.get("content-type")).toBe("image/jpeg");
         });
     });
 
@@ -57,14 +71,14 @@ describe("IllustrationHandler", () => {
             expect(body.reason).toContain("model unavailable");
         });
 
-        test("returns error when AI throws on direct model image generation", async () => {
+        test("returns error when AI throws on direct image generation", async () => {
             const badImageAi: TalebraryAi = {
                 generateText: async () => ({}) as any,
                 generateImage: async () => { throw new Error("quota exceeded"); },
             };
             const badHandler = new IllustrationHandler({ai: badImageAi});
             const data: Describable = {title: "Test", description: "A scene"};
-            const response = await badHandler.handle(requestWithPrompt(data, "@cf/bytedance/stable-diffusion-xl-lightning"));
+            const response = await badHandler.handle(requestWithPrompt(data));
             expect(response.status).toBe(500);
             const body = await response.json();
             expect(body.reason).toContain("quota exceeded");
@@ -85,14 +99,6 @@ describe("IllustrationHandler", () => {
             expect(response.status).toBe(200);
             expect(response.headers.get("content-type")).toBe("image/jpeg");
             expect(response.headers.get("description")).toContain(exampleRequest.story.title);
-        });
-    });
-
-    describe("direct model mode", () => {
-        test("passes prompt directly to specified model", async () => {
-            const data: Describable = {title: "Adventure", description: "A great story"};
-            const response = await handler.handle(requestWithPrompt(data, "@cf/bytedance/stable-diffusion-xl-lightning"));
-            expect(response.headers.get("content-type")).toBe("image/jpeg");
         });
     });
 });

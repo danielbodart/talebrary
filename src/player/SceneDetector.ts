@@ -3,8 +3,6 @@ import type {SuggestionTree} from "../prompts/SuggestionsTreePrompt.ts";
 import {treeToSuggestions} from "./PrefixTree.ts";
 
 export class SceneDetector {
-    private models = ['llama+flux'];
-
     detect(card: HTMLElement) {
         const hasHeader = card.querySelector('.header, .subheader');
         const hasNormal = card.querySelector('.normal');
@@ -26,18 +24,16 @@ export class SceneDetector {
             scene: current,
         };
 
-        for (const model of this.models) {
-            const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}&model=${encodeURIComponent(model)}`;
-            const img = document.createElement('img', {is: 'x-image'});
-            img.setAttribute('is', 'x-image');
-            img.setAttribute('reloadable', '');
-            img.className = 'image';
-            img.loading = 'lazy';
-            img.src = image;
-            img.alt = '';
-            img.setAttribute('aria-hidden', 'true');
-            card.insertBefore(img, card.firstChild);
-        }
+        const image = `/content/${id}/art?prompt=${encodeURIComponent(JSON.stringify(data))}`;
+        const img = document.createElement('img', {is: 'x-image'});
+        img.setAttribute('is', 'x-image');
+        img.setAttribute('reloadable', '');
+        img.className = 'image';
+        img.loading = 'lazy';
+        img.src = image;
+        img.alt = '';
+        img.setAttribute('aria-hidden', 'true');
+        card.insertBefore(img, card.firstChild);
 
         card.classList.add('scene');
 
