@@ -138,6 +138,18 @@ function purge() {
   rclone --config rclone.conf delete cloudflare:talebrary/content --include "**/${target}" --include "**/${target}/**" -v
 }
 
+function db-sync() {
+    ./db/run pipeline
+}
+
+function db-download() {
+    ./db/run download
+}
+
+function db-migrate() {
+    ./db/run migrate
+}
+
 function evals() {
   bun run evals/run-evals.ts "$@"
 }

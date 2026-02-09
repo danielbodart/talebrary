@@ -48,7 +48,7 @@ function databaseContractTests(name: string, setup: () => TalebraryDatabase) {
         test("all with bind returns filtered results", async () => {
             const db = setup();
             const result = await db.prepare(
-                "SELECT g.id FROM games g WHERE g.id = ?"
+                "SELECT g.id FROM talebrary_games g WHERE g.id = ?"
             ).bind("fft6pu91j85y4acv").all<{ id: string }>();
             expect(result.results.length).toBe(1);
             expect(result.results[0].id).toBe("fft6pu91j85y4acv");

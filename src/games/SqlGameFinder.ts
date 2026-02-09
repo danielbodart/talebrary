@@ -7,34 +7,25 @@ const supportedFormats = `('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo
                     'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')`;
 
 const playableSubquery = `(SELECT CASE WHEN count(*) > 0 THEN 1 ELSE 0 END
-                FROM gamelinks l
-                         JOIN filetypes f ON l.fmtid = f.id
-                WHERE l.gameid = g.id
-                  AND f.externid IN ${supportedFormats}
-                  AND (' ' || f.extension || ' ' LIKE
+                FROM talebrary_gamelinks l
+                WHERE l.game_id = g.id
+                  AND l.format IN ${supportedFormats}
+                  AND (' ' || l.extension || ' ' LIKE
                        '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
                                       INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
                        ' %')
                   AND l.url NOT LIKE '%.z6')`;
 
-const gameReviewsCte = `game_reviews AS (
-                SELECT g.id, avg(r.rating) AS rating
-                FROM filtered_games g
-                         JOIN reviews r ON g.id = r.gameid
-                GROUP BY g.id
-            )`;
-
 const selectGameInfo = `SELECT fg.id,
-                   gr.rating,
+                   fg.rating,
                    fg.rank,
                    fg.boost,
-                   fg.rank + fg.boost + gr.rating AS score,
+                   fg.rank + fg.boost + fg.rating AS score,
                    fg.title,
                    fg.author,
                    fg.description,
                    fg.playable
             FROM filtered_games fg
-                     JOIN game_reviews gr USING (id)
             WHERE fg.playable = 1
             ORDER BY score DESC
             LIMIT 20;`;
@@ -58,16 +49,15 @@ export class SqlGameFinder implements GameFinder {
 
     async find(search: string, languages?: string[]): Promise<GameInfo[]> {
         const lang = languageCondition(languages, 2);
-        const langWhere = lang.sql ? `WHERE ${lang.sql}` : '';
         const sql = `
             WITH ranks AS (
                 SELECT g.id, 0 as rank
-                FROM games g
-                WHERE ?1 = ''
+                FROM talebrary_games g
+                WHERE ?1 = '' AND g.enabled = 1
                 UNION
-                SELECT s.id, abs(bm25(games_search, 1, 2, 2)) AS rank
-                FROM games_search s
-                WHERE ?1 <> '' AND games_search = ?1
+                SELECT s.id, abs(bm25(talebrary_search, 1, 2, 2)) AS rank
+                FROM talebrary_search s
+                WHERE ?1 <> '' AND talebrary_search = ?1
             ),
             filtered_games AS (
                 SELECT g.id,
@@ -75,12 +65,13 @@ export class SqlGameFinder implements GameFinder {
                        CASE WHEN lower(g.title) = lower(?1) THEN 3 ELSE 0 END AS boost,
                        g.title,
                        g.author,
-                       g.desc AS description,
+                       g.description,
+                       COALESCE(g.avg_rating, 0) AS rating,
                        ${playableSubquery} AS playable
-                FROM ranks r JOIN games g ON g.id = r.id
-                ${langWhere}
-            ),
-            ${gameReviewsCte}
+                FROM ranks r JOIN talebrary_games g ON g.id = r.id
+                WHERE g.enabled = 1
+                ${lang.sql ? `AND ${lang.sql}` : ''}
+            )
             ${selectGameInfo}
         `;
         const statement = this.db.prepare(sql).bind(search ?? '', ...lang.params);
@@ -97,13 +88,14 @@ export class SqlGameFinder implements GameFinder {
                        0 AS boost,
                        g.title,
                        g.author,
-                       g.desc AS description,
+                       g.description,
+                       COALESCE(g.avg_rating, 0) AS rating,
                        ${playableSubquery} AS playable
-                FROM games g
+                FROM talebrary_games g
                 WHERE g.genre = ?1
+                AND g.enabled = 1
                 ${langAnd}
-            ),
-            ${gameReviewsCte}
+            )
             ${selectGameInfo}
         `;
         return (await this.db.prepare(sql).bind(genre, ...lang.params).all<GameInfo>()).results;
@@ -111,7 +103,7 @@ export class SqlGameFinder implements GameFinder {
 
     async findTopRated(languages?: string[]): Promise<GameInfo[]> {
         const lang = languageCondition(languages, 1);
-        const langWhere = lang.sql ? `WHERE ${lang.sql}` : '';
+        const langAnd = lang.sql ? `AND ${lang.sql}` : '';
         const sql = `
             WITH filtered_games AS (
                 SELECT g.id,
@@ -119,25 +111,25 @@ export class SqlGameFinder implements GameFinder {
                        0 AS boost,
                        g.title,
                        g.author,
-                       g.desc AS description,
+                       g.description,
+                       COALESCE(g.avg_rating, 0) AS rating,
                        ${playableSubquery} AS playable
-                FROM games g
-                ${langWhere}
-            ),
-            ${gameReviewsCte}
+                FROM talebrary_games g
+                WHERE g.enabled = 1
+                ${langAnd}
+            )
             SELECT fg.id,
-                   gr.rating,
+                   fg.rating,
                    fg.rank,
                    fg.boost,
-                   gr.rating AS score,
+                   fg.rating AS score,
                    fg.title,
                    fg.author,
                    fg.description,
                    fg.playable
             FROM filtered_games fg
-                     JOIN game_reviews gr USING (id)
             WHERE fg.playable = 1
-            ORDER BY gr.rating DESC
+            ORDER BY fg.rating DESC
             LIMIT 20;
         `;
         return (await this.db.prepare(sql).bind(...lang.params).all<GameInfo>()).results;
@@ -153,24 +145,24 @@ export class SqlGameFinder implements GameFinder {
                        0 AS boost,
                        g.title,
                        g.author,
-                       g.desc AS description,
+                       g.description,
+                       COALESCE(g.avg_rating, 0) AS rating,
                        ${playableSubquery} AS playable
-                FROM games g
+                FROM talebrary_games g
                 WHERE g.published IS NOT NULL
+                AND g.enabled = 1
                 ${langAnd}
-            ),
-            ${gameReviewsCte}
+            )
             SELECT fg.id,
-                   gr.rating,
+                   fg.rating,
                    fg.rank,
                    fg.boost,
-                   gr.rating AS score,
+                   fg.rating AS score,
                    fg.title,
                    fg.author,
                    fg.description,
                    fg.playable
             FROM filtered_games fg
-                     JOIN game_reviews gr USING (id)
             WHERE fg.playable = 1
             ORDER BY fg.id DESC
             LIMIT 20;
@@ -189,44 +181,44 @@ export class SqlGameFinder implements GameFinder {
                        0 AS boost,
                        g.title,
                        g.author,
-                       g.desc AS description,
+                       g.description,
+                       COALESCE(g.avg_rating, 0) AS rating,
                        ${playableSubquery} AS playable
-                FROM games g
+                FROM talebrary_games g
                 WHERE g.id IN (${placeholders})
+                AND g.enabled = 1
                 ${langAnd}
-            ),
-            ${gameReviewsCte}
+            )
             SELECT fg.id,
-                   gr.rating,
+                   fg.rating,
                    fg.rank,
                    fg.boost,
-                   gr.rating AS score,
+                   fg.rating AS score,
                    fg.title,
                    fg.author,
                    fg.description,
                    fg.playable
             FROM filtered_games fg
-                     JOIN game_reviews gr USING (id)
             WHERE fg.playable = 1
-            ORDER BY gr.rating DESC;
+            ORDER BY fg.rating DESC;
         `;
         return (await this.db.prepare(sql).bind(...ids, ...lang.params).all<GameInfo>()).results;
     }
 
     async get(id: string): Promise<GameStory | null> {
         const sql = `
-            select g.id, g.title, g.author, g.desc as description, l.url, f.externid as type, g.coverart
-            from games g
-                     join gamelinks l on g.id = l.gameid
-                     join filetypes f on l.fmtid = f.id
-            where g.id = ?
-              and f.externid IN ${supportedFormats}
-              and (' ' || f.extension || ' ' LIKE
+            SELECT g.id, g.title, g.author, g.description, l.url, l.format AS type, g.coverart
+            FROM talebrary_games g
+            JOIN talebrary_gamelinks l ON g.id = l.game_id
+            WHERE g.id = ?
+              AND g.enabled = 1
+              AND l.format IN ${supportedFormats}
+              AND (' ' || l.extension || ' ' LIKE
                    '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7), INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
                    ' %')
-              and l.url NOT LIKE '%.z6'
-            order by l.displayorder asc
-            limit 1
+              AND l.url NOT LIKE '%.z6'
+            ORDER BY l.display_order ASC
+            LIMIT 1
         `;
         return await this.db.prepare(sql).bind(id).first<GameStory>();
     }
