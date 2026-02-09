@@ -6,11 +6,23 @@ import {proxyHandler} from "./proxyHandler.ts";
 import {CloudflareAiAdapter} from "../ai/CloudflareAiAdapter.ts";
 import {CloudflareR2Adapter} from "../storage/CloudflareR2Adapter.ts";
 import {D1Adapter} from "../database/D1Adapter.ts";
+import {CloudflareWorkflowRunner} from "./CloudflareWorkflowRunner.ts";
+import {coverArtWorkflow} from "../workflows/coverArt.ts";
+// @ts-ignore
+import {WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep} from "cloudflare:workers";
+import type {CoverArtParams} from "../workflows/coverArt.ts";
 
 export {IfArchiveProxy} from "./IfArchiveProxy.ts";
 
 function app(env: Env) {
-    return application({http: ifArchiveHttp(env.IFARCHIVE_PROXY), digest: md5, db: new D1Adapter(env.db), bucket: new CloudflareR2Adapter(env.r2), ai: new CloudflareAiAdapter(env.ai)});
+    return application({
+        http: ifArchiveHttp(env.IFARCHIVE_PROXY),
+        digest: md5,
+        db: new D1Adapter(env.db),
+        bucket: new CloudflareR2Adapter(env.r2),
+        ai: new CloudflareAiAdapter(env.ai),
+        coverArtRunner: new CloudflareWorkflowRunner(env.WORKFLOW),
+    });
 }
 
 export default {
@@ -22,4 +34,13 @@ export default {
         }
         return app(env).handler(request as any) as any;
     },
+}
+
+export class CoverArtWorkflow extends WorkflowEntrypoint<Env, CoverArtParams> {
+    declare env: Env;
+
+    async run(event: WorkflowEvent<CoverArtParams>, step: WorkflowStep) {
+        const deps = app(this.env);
+        return coverArtWorkflow(deps)(event.payload, step);
+    }
 }

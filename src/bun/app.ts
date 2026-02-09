@@ -10,6 +10,8 @@ import {CloudflareAiAdapter} from "../ai/CloudflareAiAdapter.ts";
 import {client} from "../http/mod.ts";
 import {withProxy} from "./withProxy.ts";
 import type {TalebraryAi} from "../ai/TalebraryAi.ts";
+import {DirectRunner} from "../workflows/mod.ts";
+import {coverArtWorkflow} from "../workflows/coverArt.ts";
 
 const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, PROXY_URL, PROXY_TOKEN} = process.env;
 
@@ -31,12 +33,14 @@ if (PROXY_URL && PROXY_TOKEN) {
     http = withProxy(http, PROXY_URL, PROXY_TOKEN);
 }
 
+const aiInstance = ai();
 const deps = {
     http,
     db: talebrary(),
     bucket,
     digest: md5,
-    ai: ai(),
+    ai: aiInstance,
+    coverArtRunner: new DirectRunner(coverArtWorkflow({http, ai: aiInstance, bucket})),
 };
 const app = application(deps);
 const handler = (req: Request) => app.handler(req);

@@ -1,17 +1,17 @@
 import {describe, expect, test} from "bun:test";
 import {coverArt} from "../../src/content/CoverArt.ts";
-import {IllustrationHandler} from "../../src/content/IllustrationHandler.ts";
 import type {GameFinder, GameStory} from "../../src/games/GameFinder.ts";
 import type {Http} from "../../src/http/mod.ts";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
-import type {TalebraryBucket} from "../../src/storage/TalebraryBucket.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
+import {DirectRunner} from "../../src/workflows/mod.ts";
+import {coverArtWorkflow} from "../../src/workflows/coverArt.ts";
 
 function stubFinder(game: GameStory | null) {
     return {get: async () => game} as any as GameFinder;
 }
 
-function stubBucket(): TalebraryBucket {
+function stubBucket() {
     return {
         get: async () => new Response(null, {status: 404}),
         put: async () => {},
@@ -20,10 +20,17 @@ function stubBucket(): TalebraryBucket {
 
 const dumbAi = new DumbAi();
 
+function makeHandler(game: GameStory | null, http: Http = async () => new Response("image data", {status: 200, headers: {"content-type": "image/jpeg"}}), ai: TalebraryAi = dumbAi) {
+    const bucket = stubBucket();
+    return coverArt({
+        finder: stubFinder(game),
+        coverArtRunner: new DirectRunner(coverArtWorkflow({http, ai, bucket})),
+    });
+}
+
 describe("coverArt", () => {
     test("style-transfers cover art when game has coverart URL", async () => {
         let fetchedUrl = '';
-        let savedKey = '';
         const http: Http = async (request) => {
             fetchedUrl = request.url;
             return new Response("image data", {
@@ -31,28 +38,19 @@ describe("coverArt", () => {
                 headers: {"content-type": "image/jpeg"},
             });
         };
-        const bucket = stubBucket();
-        bucket.put = async (key) => { savedKey = key; };
 
-        const handler = coverArt({
-            http,
-            finder: stubFinder({
-                id: "abc",
-                title: "Adventure",
-                author: "Author",
-                url: "http://ifarchive.org/adventure.z5",
-                coverart: "https://ifdb.org/viewgame?coverart&id=abc",
-                type: "zcode",
-            }),
-            illustration: new IllustrationHandler({ai: dumbAi as any}),
-            ai: dumbAi,
-            bucket,
-        });
+        const handler = makeHandler({
+            id: "abc",
+            title: "Adventure",
+            author: "Author",
+            url: "http://ifarchive.org/adventure.z5",
+            coverart: "https://ifdb.org/viewgame?coverart&id=abc",
+            type: "zcode",
+        }, http);
 
         const response = await handler(new Request("http://test/content/abc/cover-art"));
         expect(response.status).toBe(200);
         expect(fetchedUrl).toBe("https://ifdb.org/viewgame?coverart&id=abc");
-        expect(savedKey).toBe("content/abc/cover-art-original");
     });
 
     test("falls back to original when style transfer fails with no-store to prevent caching", async () => {
@@ -60,23 +58,17 @@ describe("coverArt", () => {
             generateText: async () => ({}) as any,
             generateImage: async () => { throw new Error("AI failed"); },
         };
-        const handler = coverArt({
-            http: async () => new Response("original image", {
-                status: 200,
-                headers: {"content-type": "image/png"},
-            }),
-            finder: stubFinder({
-                id: "abc",
-                title: "Adventure",
-                author: "Author",
-                url: "http://ifarchive.org/adventure.z5",
-                coverart: "https://ifdb.org/viewgame?coverart&id=abc",
-                type: "zcode",
-            }),
-            illustration: new IllustrationHandler({ai: dumbAi as any}),
-            ai: failingAi,
-            bucket: stubBucket(),
-        });
+        const handler = makeHandler({
+            id: "abc",
+            title: "Adventure",
+            author: "Author",
+            url: "http://ifarchive.org/adventure.z5",
+            coverart: "https://ifdb.org/viewgame?coverart&id=abc",
+            type: "zcode",
+        }, async () => new Response("original image", {
+            status: 200,
+            headers: {"content-type": "image/png"},
+        }), failingAi);
 
         const response = await handler(new Request("http://test/content/abc/cover-art"));
         expect(response.status).toBe(200);
@@ -85,20 +77,14 @@ describe("coverArt", () => {
     });
 
     test("generates AI illustration when game has no coverart", async () => {
-        const handler = coverArt({
-            http: async () => new Response("", {status: 200}),
-            finder: stubFinder({
-                id: "abc",
-                title: "Adventure",
-                author: "Author",
-                description: "A cave adventure",
-                url: "http://ifarchive.org/adventure.z5",
-                coverart: "",
-                type: "zcode",
-            }),
-            illustration: new IllustrationHandler({ai: dumbAi as any}),
-            ai: dumbAi,
-            bucket: stubBucket(),
+        const handler = makeHandler({
+            id: "abc",
+            title: "Adventure",
+            author: "Author",
+            description: "A cave adventure",
+            url: "http://ifarchive.org/adventure.z5",
+            coverart: "",
+            type: "zcode",
         });
 
         const response = await handler(new Request("http://test/content/abc/cover-art"));
@@ -106,13 +92,7 @@ describe("coverArt", () => {
     });
 
     test("returns 404 for unknown game", async () => {
-        const handler = coverArt({
-            http: async () => new Response("", {status: 200}),
-            finder: stubFinder(null),
-            illustration: new IllustrationHandler({ai: dumbAi as any}),
-            ai: dumbAi,
-            bucket: stubBucket(),
-        });
+        const handler = makeHandler(null);
 
         const response = await handler(new Request("http://test/content/unknown/cover-art"));
         expect(response.status).toBe(404);

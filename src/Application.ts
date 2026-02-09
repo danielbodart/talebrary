@@ -25,13 +25,16 @@ import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
 import type {TalebraryDatabase} from "./database/TalebraryDatabase.ts";
+import type {WorkflowRunner} from "./workflows/mod.ts";
+import type {CoverArtParams, CoverArtResult} from "./workflows/coverArt.ts";
 
 export interface ApplicationDependencies extends
     Dependency<'http', Http>,
     Dependency<'db', TalebraryDatabase>,
     Dependency<'bucket', TalebraryBucket>,
     Dependency<'digest', Digest>,
-    Dependency<'ai', TalebraryAi> {
+    Dependency<'ai', TalebraryAi>,
+    Dependency<'coverArtRunner', WorkflowRunner<CoverArtParams, CoverArtResult>> {
 }
 
 

@@ -30,5 +30,4 @@ new_classes = ["IfArchiveProxy"]
 [[workflows]]
 name = "talebrary"
 binding = "WORKFLOW"
-class_name = "CloudflareWorkflow"
-script_name = "src/cloudflare/CloudflareWorkflow.ts"
+class_name = "CoverArtWorkflow"
