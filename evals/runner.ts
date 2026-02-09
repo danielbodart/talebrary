@@ -98,8 +98,9 @@ export async function runImageEvals(
             const start = performance.now();
             const output = await ai.generateImage(model, input);
             const latencyMs = performance.now() - start;
+            const cachePath = await ai.imagePathFor(model, input, output);
 
-            results.push({model, output: String(output), latencyMs, cached: false});
+            results.push({model, output: cachePath, latencyMs, cached: false});
 
             const modelScores: Score[] = [];
             if (enableVisionJudge) {
@@ -152,11 +153,13 @@ export async function runImg2ImgEvals(
         const scores: Record<string, Score[]> = {};
 
         for (const model of img2imgModels) {
+            const input = {prompt: sdPrompt, sourceImage: sourceBase64};
             const start = performance.now();
-            const output = await ai.generateImage(model, {prompt: sdPrompt, sourceImage: sourceBase64});
+            const output = await ai.generateImage(model, input);
             const latencyMs = performance.now() - start;
+            const cachePath = await ai.imagePathFor(model, input, output);
 
-            results.push({model, output: String(output), latencyMs, cached: false});
+            results.push({model, output: cachePath, latencyMs, cached: false});
 
             const modelScores: Score[] = [];
             if (enableVisionJudge) {
@@ -196,11 +199,13 @@ export async function runStyleTransferEvals(
 
         for (const model of img2imgModels) {
             try {
+                const input = {prompt, sourceImage: sourceBase64};
                 const start = performance.now();
-                const output = await ai.generateImage(model, {prompt, sourceImage: sourceBase64});
+                const output = await ai.generateImage(model, input);
                 const latencyMs = performance.now() - start;
+                const cachePath = await ai.imagePathFor(model, input, output);
 
-                results.push({model, output: String(output), latencyMs, cached: false});
+                results.push({model, output: cachePath, latencyMs, cached: false});
 
                 const modelScores: Score[] = [];
                 if (enableVisionJudge) {

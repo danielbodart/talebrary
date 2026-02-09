@@ -20,7 +20,7 @@ function errorResponse(status: number, statusText: string, reason: string): Resp
 }
 
 function defaultBookCoverPrompt(title: string): string {
-    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic.`;
+    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic. No border or frame.`;
 }
 
 export class IllustrationHandler {

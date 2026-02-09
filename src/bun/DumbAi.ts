@@ -25,7 +25,7 @@ export class DumbAi implements TalebraryAi {
         if (system?.content.includes('command tree')) {
             return this.suggestions(user?.content);
         }
-        if (system?.content.includes('stable diffusion')) {
+        if (system?.content.includes('image generation model')) {
             return this.illustrationPrompt(user?.content);
         }
         return 'Unsupported prompt';

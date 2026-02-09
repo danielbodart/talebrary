@@ -24,7 +24,7 @@ export class CloudflareRestAi {
 
         if (!response.ok) {
             const text = await response.text();
-            throw new Error(`Cloudflare AI API error ${response.status}: ${text}`);
+            throw new Error(`Cloudflare AI API error ${response.status} for ${model}: ${text}`);
         }
 
         const responseContentType = response.headers.get('content-type') ?? '';
@@ -47,10 +47,35 @@ export class CloudflareRestAi {
         return result;
     }
 
-    private buildBody(_model: string, input: any): {body: BodyInit; contentType: string | null} {
+    private buildBody(model: string, input: any): {body: BodyInit; contentType: string | null} {
         if (input.multipart) {
-            return {body: input.multipart.body, contentType: input.multipart.contentType};
+            // The adapter produces multipart.body/contentType for the native
+            // Cloudflare Workers binding (ReadableStream + boundary).
+            // The REST API has different requirements per model:
+            // - flux-2-klein: multipart FormData with input_image_0
+            // - Other img2img (e.g. sd-v1-5-img2img): JSON with image_b64
+            // - Text-to-image: JSON with just prompt
+            if (model.includes('flux-2-klein')) {
+                return {body: this.buildFormData(input), contentType: null};
+            }
+            const {multipart, ...jsonFields} = input;
+            if (jsonFields.sourceImage) {
+                jsonFields.image_b64 = jsonFields.sourceImage;
+                delete jsonFields.sourceImage;
+            }
+            return {body: JSON.stringify(jsonFields), contentType: 'application/json'};
         }
         return {body: JSON.stringify(input), contentType: 'application/json'};
+    }
+
+    private buildFormData(input: any): FormData {
+        const form = new FormData();
+        form.append('prompt', input.prompt);
+        if (input.num_steps) form.append('num_steps', String(input.num_steps));
+        if (input.sourceImage) {
+            const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
+            form.append('input_image_0', new Blob([bytes]));
+        }
+        return form;
     }
 }

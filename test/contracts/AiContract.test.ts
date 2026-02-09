@@ -76,7 +76,7 @@ aiContractTests("CloudflareAiAdapter (native binding)", () => {
                     }
                 });
             }
-            const isIllustration = input.messages?.some((m: any) => m.content?.includes('stable diffusion') || m.content?.includes('Stable Diffusion'));
+            const isIllustration = input.messages?.some((m: any) => m.content?.includes('image generation model'));
             return {response: JSON.stringify(isIllustration ? cannedIllustrationResponse : cannedSuggestionsResponse)};
         }
     };
@@ -119,7 +119,7 @@ aiContractTests("CloudflareAiAdapter", () => {
         let isIllustration: boolean;
         if (contentType.includes('application/json')) {
             const body = await request.json() as any;
-            isIllustration = body.messages?.some((m: any) => m.content?.includes('stable diffusion') || m.content?.includes('Stable Diffusion'));
+            isIllustration = body.messages?.some((m: any) => m.content?.includes('image generation model'));
         } else {
             isIllustration = false;
         }

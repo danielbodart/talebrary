@@ -41,16 +41,9 @@ describe("CloudflareRestAi", () => {
         expect(result).toEqual(imageBytes);
     });
 
-    test("sends multipart stream when multipart wrapper provided", async () => {
+    test("sends multipart for flux-2-klein when multipart wrapper provided", async () => {
         const responseImage = new Uint8Array([0x89, 0x50, 0x4E, 0x47]);
         const responseBase64 = Buffer.from(responseImage).toString("base64");
-
-        // Serialize FormData to stream + content type (as CloudflareAiAdapter does)
-        // Content type must be read before body due to Bun lazy-init quirk
-        const form = new FormData();
-        form.append("prompt", "a cat in a hat");
-        const serialized = new Request('http://localhost', {method: 'POST', body: form});
-        const contentType = serialized.headers.get('content-type');
 
         const ai = new CloudflareRestAi("test-account", "test-token", async (request) => {
             expect(request.headers.get('Content-Type')).toContain("multipart/form-data");
@@ -64,11 +57,58 @@ describe("CloudflareRestAi", () => {
             });
         });
 
-        const result = await ai.run("@cf/bytedance/stable-diffusion-xl-lightning", {
-            multipart: {body: serialized.body, contentType},
+        const result = await ai.run("@cf/black-forest-labs/flux-2-klein-9b", {
+            prompt: "a cat in a hat",
+            num_steps: 4,
+            multipart: {body: "ignored", contentType: "ignored"},
         });
         expect(result).toBeInstanceOf(Uint8Array);
         expect(result).toEqual(responseImage);
+    });
+
+    test("sends JSON with image_b64 for non-flux img2img models with sourceImage", async () => {
+        const imageBytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
+        const sourceBase64 = Buffer.from(new Uint8Array([1, 2, 3])).toString("base64");
+
+        const ai = new CloudflareRestAi("test-account", "test-token", async (request) => {
+            expect(request.headers.get('Content-Type')).toBe("application/json");
+
+            const body = await request.json() as any;
+            expect(body.prompt).toBe("a cat");
+            expect(body.image_b64).toBe(sourceBase64);
+            expect(body.sourceImage).toBeUndefined();
+            expect(body.multipart).toBeUndefined();
+
+            return new Response(imageBytes, {headers: {"content-type": "image/jpeg"}});
+        });
+
+        const result = await ai.run("@cf/runwayml/stable-diffusion-v1-5-img2img", {
+            prompt: "a cat",
+            sourceImage: sourceBase64,
+            multipart: {body: "ignored", contentType: "ignored"},
+        });
+        expect(result).toBeInstanceOf(Uint8Array);
+        expect(result).toEqual(imageBytes);
+    });
+
+    test("falls back to JSON for non-flux-2-klein models even with multipart wrapper", async () => {
+        const imageBytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
+
+        const ai = new CloudflareRestAi("test-account", "test-token", async (request) => {
+            expect(request.headers.get('Content-Type')).toBe("application/json");
+            const body = await request.json() as any;
+            expect(body.prompt).toBe("a cat");
+            expect(body.multipart).toBeUndefined();
+
+            return new Response(imageBytes, {headers: {"content-type": "image/jpeg"}});
+        });
+
+        const result = await ai.run("@cf/bytedance/stable-diffusion-xl-lightning", {
+            prompt: "a cat",
+            multipart: {body: "ignored", contentType: "ignored"},
+        });
+        expect(result).toBeInstanceOf(Uint8Array);
+        expect(result).toEqual(imageBytes);
     });
 
     test("unwraps chat completion response from result.response", async () => {
@@ -93,6 +133,6 @@ describe("CloudflareRestAi", () => {
             new Response("Unauthorized", {status: 401}));
 
         await expect(ai.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {}))
-            .rejects.toThrow("Cloudflare AI API error 401: Unauthorized");
+            .rejects.toThrow("Cloudflare AI API error 401 for @cf/meta/llama-3.3-70b-instruct-fp8-fast: Unauthorized");
     });
 });

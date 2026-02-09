@@ -49,18 +49,20 @@ function toCloudflareImageInput(model: string, input: ImagePrompt): any {
     if (input.num_steps) form.append('num_steps', String(input.num_steps));
 
     if (input.sourceImage) {
+        const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
         if (model.includes('flux-2-klein')) {
-            const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
             form.append('input_image_0', new Blob([bytes]));
         } else {
-            form.append('image_b64', input.sourceImage);
+            form.append('image', new Blob([bytes]));
         }
     }
 
     // Serialize FormData to get the stream body and content type with boundary,
     // as required by the Cloudflare Workers AI binding.
     // Content type must be read before body due to Bun lazy-init quirk.
+    // Raw ImagePrompt fields are spread alongside so CloudflareRestAi can
+    // fall back to JSON for models whose REST endpoint rejects multipart.
     const request = new Request('http://localhost', {method: 'POST', body: form});
     const contentType = request.headers.get('content-type');
-    return {multipart: {body: request.body, contentType}};
+    return {...input, multipart: {body: request.body, contentType}};
 }

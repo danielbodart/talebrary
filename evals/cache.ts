@@ -67,7 +67,8 @@ export class CachedAi implements TalebraryAi {
         return output;
     }
 
-    imageCachePath(model: string, inputKey: string, bytes: Uint8Array): string {
+    async imagePathFor(model: string, input: ImagePrompt, bytes: Uint8Array): Promise<string> {
+        const inputKey = await hash(JSON.stringify(input));
         return `${sanitiseModel(model)}/${inputKey}.${imageExtension(bytes)}`;
     }
 }

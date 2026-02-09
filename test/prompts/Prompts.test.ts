@@ -80,9 +80,9 @@ describe("generateIllustrationPrompt", () => {
         expect(result.messages[1].content).toBe(JSON.stringify(exampleRequest));
     });
 
-    test("system message mentions stable diffusion", () => {
+    test("system message mentions image generation", () => {
         const result = generateIllustrationPrompt(exampleRequest);
-        expect(result.messages[0].content).toContain("stable diffusion");
+        expect(result.messages[0].content).toContain("image generation model");
     });
 });
 
