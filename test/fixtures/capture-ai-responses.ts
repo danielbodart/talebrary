@@ -10,7 +10,7 @@
  */
 import {CloudflareRestAi} from "../../src/bun/CloudflareRestAi.ts";
 import {client} from "../../src/http/mod.ts";
-import {suggestionsPrompt, ExamplePrompt} from "../../src/prompts/SuggestionsPrompt.ts";
+import {suggestionsTreePrompt, ExampleInput} from "../../src/prompts/SuggestionsTreePrompt.ts";
 import {generateIllustrationPrompt, exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import type {SceneContext} from "../../src/types.ts";
 
@@ -24,7 +24,7 @@ const ai = new CloudflareRestAi(CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, cli
 const model = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
 const scenes = [
-    ExamplePrompt,
+    ExampleInput,
     {title: "Dark Cave", description: "You are in a dark cave. Water drips from the ceiling. To the north, a faint light glimmers."},
     {title: "Ship Deck", description: "You stand on the deck of a sailing ship. The captain barks orders to his crew. A chest sits near the mast."},
     {title: "Empty Room", description: "This is a bare room with white walls. There is nothing here."},
@@ -53,7 +53,7 @@ interface CapturedFixture {
 async function captureSuggestions() {
     const fixtures: CapturedFixture[] = [];
     for (const scene of scenes) {
-        const prompt = suggestionsPrompt(scene);
+        const prompt = suggestionsTreePrompt(scene);
         console.log(`Capturing suggestions for: ${scene.title}`);
         try {
             const output = await ai.run(model, prompt as any);

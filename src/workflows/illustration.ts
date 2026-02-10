@@ -4,7 +4,7 @@ import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {Workflow, StepConfig} from "./mod.ts";
 
-const noRetry: StepConfig = {retries: {limit: 0}};
+const noRetry: StepConfig = {retries: {limit: 0, delay: "1 second"}};
 
 const defaultImageModel = '@cf/leonardo/phoenix-1.0';
 const textModel = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';

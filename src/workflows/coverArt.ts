@@ -8,7 +8,7 @@ import {detectMimeType} from "../http/DetectMimeType.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {Workflow, StepConfig} from "./mod.ts";
 
-const noRetry: StepConfig = {retries: {limit: 0}};
+const noRetry: StepConfig = {retries: {limit: 0, delay: 0}};
 
 const styleTransferModel = '@cf/black-forest-labs/flux-2-klein-9b';
 const defaultImageModel = '@cf/leonardo/phoenix-1.0';

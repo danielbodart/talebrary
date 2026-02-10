@@ -1,5 +1,5 @@
 export interface StepConfig {
-    retries?: { limit: number; delay?: string | number; backoff?: 'constant' | 'linear' | 'exponential' };
+    retries?: { limit: number; delay: string | number; backoff?: 'constant' | 'linear' | 'exponential' };
     timeout?: string | number;
 }
 

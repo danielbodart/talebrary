@@ -90,11 +90,6 @@ export const coverArtCases: EvalCase<CoverArtInput>[] = [
     {name: "svt-cover", input: {story: svtStory, imagePath: "evals/covers/svt.jpg"}},
 ];
 
-export const suggestionCases: EvalCase<Describable>[] = [
-    {name: "adventure-end-of-road", input: adventureEndOfRoad.scene},
-    {name: "adventure-inside-building", input: adventureInsideBuilding.scene},
-];
-
 export const suggestionTreeCases: EvalCase<Describable>[] = [
     {name: "adventure-end-of-road", input: adventureEndOfRoad.scene},
     {name: "adventure-inside-building", input: adventureInsideBuilding.scene},

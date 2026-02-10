@@ -50,6 +50,12 @@ function aiContractTests(name: string, createAi: () => TalebraryAi) {
                 const result = await ai.generateImage("@cf/leonardo/phoenix-1.0", {prompt: "a cat"});
                 expect(result).toBeInstanceOf(Uint8Array);
             });
+
+            test("flux-2-klein: returns Uint8Array (multipart text-to-image)", async () => {
+                const ai = createAi();
+                const result = await ai.generateImage("@cf/black-forest-labs/flux-2-klein-9b", {prompt: "a cat", num_steps: 4});
+                expect(result).toBeInstanceOf(Uint8Array);
+            });
         });
     });
 }
@@ -126,6 +132,13 @@ aiContractTests("CloudflareAiAdapter", () => {
         if (model === "@cf/leonardo/phoenix-1.0") {
             return new Response(new Uint8Array([0xFF, 0xD8, 0xFF]), {
                 headers: {"content-type": "image/jpeg"},
+            });
+        }
+
+        if (model?.includes("flux-2-klein")) {
+            const responseBase64 = Buffer.from(new Uint8Array([0x89, 0x50, 0x4E, 0x47])).toString("base64");
+            return new Response(JSON.stringify({result: {image: responseBase64}}), {
+                headers: {"content-type": "application/json"},
             });
         }
 

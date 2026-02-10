@@ -1,5 +1,4 @@
 import {describe, expect, test} from "bun:test";
-import {suggestionsPrompt, ExamplePrompt, ExampleSuggestions} from "../../src/prompts/SuggestionsPrompt.ts";
 import {suggestionsTreePrompt, ExampleInput} from "../../src/prompts/SuggestionsTreePrompt.ts";
 import {generateIllustrationPrompt, exampleRequest, exampleResponse} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import {illustrationPrompt} from "../../src/prompts/IllustrationPrompt.ts";
@@ -7,32 +6,6 @@ import {scenePrompt} from "../../src/prompts/ScenePrompt.ts";
 import {storyPrompt} from "../../src/prompts/StoryPrompt.ts";
 import {cardPrompt} from "../../src/prompts/CardPrompt.ts";
 import type {SceneContext} from "../../src/types.ts";
-
-describe("suggestionsPrompt", () => {
-    test("returns ScopedPrompt with system and user messages", () => {
-        const result = suggestionsPrompt(ExamplePrompt);
-        expect(result.messages).toHaveLength(2);
-        expect(result.messages[0].role).toBe("system");
-        expect(result.messages[1].role).toBe("user");
-    });
-
-    test("system message contains commands list", () => {
-        const result = suggestionsPrompt(ExamplePrompt);
-        expect(result.messages[0].content).toContain("commands list:");
-    });
-
-    test("system message contains example prompt and suggestions", () => {
-        const result = suggestionsPrompt(ExamplePrompt);
-        expect(result.messages[0].content).toContain(JSON.stringify(ExamplePrompt));
-        expect(result.messages[0].content).toContain(JSON.stringify(ExampleSuggestions));
-    });
-
-    test("user message is JSON-stringified input", () => {
-        const input = {title: "Test", description: "A test scene"};
-        const result = suggestionsPrompt(input);
-        expect(result.messages[1].content).toBe(JSON.stringify(input));
-    });
-});
 
 describe("suggestionsTreePrompt", () => {
     test("returns ScopedPrompt with system and user messages", () => {

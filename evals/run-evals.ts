@@ -3,12 +3,10 @@ import {CloudflareAiAdapter} from "../src/ai/CloudflareAiAdapter.ts";
 import {client} from "../src/http/mod.ts";
 import {CachedAi} from "./cache.ts";
 import {allModels, imageModels, img2imgModels, textModels} from "./models.ts";
-import {suggestionCases, suggestionTreeCases, illustrationCases, coverArtCases} from "./fixtures.ts";
-import {suggestionsPrompt} from "../src/prompts/SuggestionsPrompt.ts";
+import {suggestionTreeCases, illustrationCases, coverArtCases} from "./fixtures.ts";
 import {suggestionsTreePrompt} from "../src/prompts/SuggestionsTreePrompt.ts";
 import {jsonValid, schemaMatch} from "./scorers/json.ts";
-import {commandsFromList, nounsFromScene, actionCount} from "./scorers/suggestions.ts";
-import {validTree, verbsFromList, nounsFromScene as treeNounsFromScene, treeSize, treeDepth} from "./scorers/suggestion-tree.ts";
+import {validTree, verbsFromList, nounsFromScene, treeSize, treeDepth} from "./scorers/suggestion-tree.ts";
 import {runTextEvals, runImageEvals, runImg2ImgEvals, runStyleTransferEvals} from "./runner.ts";
 import type {EvalRun, ModelOutput, Score} from "./types.ts";
 import {mkdir} from "node:fs/promises";
@@ -65,37 +63,20 @@ function printSummary(run: EvalRun<any, any>): void {
 
 async function runSuggestions() {
     console.log("\n--- Suggestion Evals ---");
-    const suggestionScorers = [
-        jsonValid,
-        schemaMatch(["people", "nouns", "commands", "actions"]),
-        commandsFromList,
-        nounsFromScene,
-        actionCount,
-    ];
-    const run = await runTextEvals(
-        ai, "suggestions", suggestionCases,
-        allModels(textModels), suggestionsPrompt, suggestionScorers,
-    );
-    await saveRun("suggestions", run);
-    printSummary(run);
-}
-
-async function runSuggestionsTree() {
-    console.log("\n--- Suggestion Tree Evals ---");
-    const treeScorers = [
+    const scorers = [
         jsonValid,
         schemaMatch(["people", "tree"]),
         validTree,
         verbsFromList,
-        treeNounsFromScene,
+        nounsFromScene,
         treeSize,
         treeDepth,
     ];
     const run = await runTextEvals(
-        ai, "suggestions-tree", suggestionTreeCases,
-        allModels(textModels), suggestionsTreePrompt, treeScorers,
+        ai, "suggestions", suggestionTreeCases,
+        allModels(textModels), suggestionsTreePrompt, scorers,
     );
-    await saveRun("suggestions-tree", run);
+    await saveRun("suggestions", run);
     printSummary(run);
 }
 
@@ -150,7 +131,6 @@ async function runStyleTransfer() {
 
 const suites: Record<string, () => Promise<void>> = {
     suggestions: runSuggestions,
-    "suggestions-tree": runSuggestionsTree,
     prompts: runIllustrationPrompts,
     images: runImages,
     img2img: runImg2Img,

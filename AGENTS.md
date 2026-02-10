@@ -63,6 +63,7 @@
 7. Workflow
    - When starting fresh work with no outstanding changes, rebase to master first (`git pull --rebase origin master`) to get the latest
    - After pushing, always monitor GitHub Actions with `gh run watch`
+   - **Never run `./run deploy` locally** — deployment is done by GitHub Actions on push. The only exception is debugging a CI deployment failure that can't be reproduced otherwise
    - Use `/frontend-design` skill for any UI work
    - Run `/code-review:code-review-local` before committing significant changes (new endpoints, database changes, major refactors)
 
@@ -93,7 +94,13 @@
     - Test workflows directly with `InMemoryStep` — no runner needed
     - Cloudflare entrypoints live in `src/cloudflare/app.ts`, reuse `app(env)` for deps
 
-11. wasiglk Dependency
+11. Cloudflare AI Models
+    - The REST API (`CloudflareRestAi`) and the native Workers binding (`env.AI`) can have **different input format requirements** for the same model — always check [Cloudflare's model docs](https://developers.cloudflare.com/workers-ai/models/) before adding or changing model support
+    - **flux-2-klein** models always require `multipart/form-data`, even for text-to-image with no source image — other models (Leonardo, SD, flux-1-schnell) accept plain JSON
+    - `CloudflareAiAdapter.toCloudflareImageInput()` handles model-specific input formatting; `CloudflareRestAi.buildBody()` handles REST-specific serialisation
+    - When adding a new image model, check both paths and add contract tests in `test/contracts/AiContract.test.ts`
+
+12. wasiglk Dependency
     - wasiglk lives at `/home/dan/Projects/wasiglk`, published to JSR as `@bodar/wasiglk`
     - talebrary uses it via `npm:@jsr/bodar__wasiglk@<version>` in package.json
     - **Update flow**: commit+push wasiglk → wait for CI to publish to JSR → update version in talebrary package.json → `bun install` → `./run build` → commit+push talebrary
