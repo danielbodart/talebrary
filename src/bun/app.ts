@@ -42,7 +42,7 @@ const deps = {
     digest: md5,
     ai: aiInstance,
     coverArtRunner: new DirectRunner(coverArtWorkflow({http, ai: aiInstance, bucket})),
-    illustrationRunner: new DirectRunner(illustrationWorkflow({ai: aiInstance})),
+    illustrationRunner: new DirectRunner(illustrationWorkflow({ai: aiInstance, bucket})),
 };
 const app = application(deps);
 const handler = (req: Request) => app.handler(req);

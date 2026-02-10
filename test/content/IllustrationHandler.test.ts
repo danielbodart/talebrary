@@ -7,10 +7,13 @@ import {exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 import {DirectRunner} from "../../src/workflows/mod.ts";
 import {illustrationWorkflow} from "../../src/workflows/illustration.ts";
+import {stubBucket} from "../stubBucket.ts";
 
 function makeHandler(ai: TalebraryAi) {
+    const bucket = stubBucket();
     return new IllustrationHandler({
-        illustrationRunner: new DirectRunner(illustrationWorkflow({ai})),
+        bucket,
+        illustrationRunner: new DirectRunner(illustrationWorkflow({ai, bucket})),
     });
 }
 

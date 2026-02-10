@@ -1,4 +1,5 @@
 import type {TalebraryAi} from "../ai/TalebraryAi.ts";
+import type {TalebraryBucket} from "../storage/TalebraryBucket.ts";
 import {generateIllustrationPrompt} from "../prompts/GenerateIllustrationPrompt.ts";
 import {illustrationPrompt} from "../prompts/IllustrationPrompt.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
@@ -16,13 +17,14 @@ export interface IllustrationParams {
 }
 
 export interface IllustrationResult {
-    image: Uint8Array;
+    bucketKey: string;
     contentType: string;
     description?: string;
 }
 
 export interface IllustrationWorkflowDeps extends
-    Dependency<'ai', TalebraryAi> {
+    Dependency<'ai', TalebraryAi>,
+    Dependency<'bucket', TalebraryBucket> {
 }
 
 interface PromptResult {
@@ -54,18 +56,24 @@ export function illustrationWorkflow(deps: IllustrationWorkflowDeps): Workflow<I
                 return result.prompt!;
             });
 
-            const image = await step.do('generate-image', noRetry, () =>
-                deps.ai.generateImage(imageModel, {prompt})
-            );
+            const bucketKey = await step.do('generate-image', noRetry, async () => {
+                const image = await deps.ai.generateImage(imageModel, {prompt});
+                const key = `workflow-images/${crypto.randomUUID()}`;
+                await deps.bucket.put(key, image, {contentType: 'image/jpeg'});
+                return key;
+            });
 
-            return {image, contentType: 'image/jpeg', description: prompt};
+            return {bucketKey, contentType: 'image/jpeg', description: prompt};
         }
 
         const promptText = illustrationPrompt(path, data);
-        const image = await step.do('generate-image', noRetry, () =>
-            deps.ai.generateImage(imageModel, {prompt: promptText})
-        );
+        const bucketKey = await step.do('generate-image', noRetry, async () => {
+            const image = await deps.ai.generateImage(imageModel, {prompt: promptText});
+            const key = `workflow-images/${crypto.randomUUID()}`;
+            await deps.bucket.put(key, image, {contentType: 'image/jpeg'});
+            return key;
+        });
 
-        return {image, contentType: 'image/jpeg'};
+        return {bucketKey, contentType: 'image/jpeg'};
     };
 }

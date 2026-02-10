@@ -4,15 +4,8 @@ import {InMemoryStep} from "../../src/workflows/mod.ts";
 import {DumbAi} from "../../src/bun/DumbAi.ts";
 import type {GameStory} from "../../src/games/GameFinder.ts";
 import type {Http} from "../../src/http/mod.ts";
-import type {TalebraryBucket} from "../../src/storage/TalebraryBucket.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
-
-function stubBucket(): TalebraryBucket {
-    return {
-        get: async () => new Response(null, {status: 404}),
-        put: async () => {},
-    };
-}
+import {stubBucket} from "../stubBucket.ts";
 
 function game(overrides: Partial<GameStory> = {}): GameStory {
     return {
@@ -32,7 +25,6 @@ describe("coverArtWorkflow", () => {
     describe("with coverart URL", () => {
         test("fetches original, stores it, and style-transfers", async () => {
             let fetchedUrl = '';
-            let storedKey = '';
             const http: Http = async (request) => {
                 fetchedUrl = request.url;
                 return new Response("image data", {
@@ -41,17 +33,14 @@ describe("coverArtWorkflow", () => {
                 });
             };
             const bucket = stubBucket();
-            bucket.put = async (key) => { storedKey = key; };
 
             const step = new InMemoryStep();
             const workflow = coverArtWorkflow({http, ai: dumbAi, bucket});
             const result = await workflow({game: game()}, step);
 
             expect(fetchedUrl).toBe("https://ifdb.org/viewgame?coverart&id=abc");
-            expect(storedKey).toBe("content/abc/cover-art-original");
-            expect(result.image).toBeInstanceOf(Uint8Array);
-            expect(step.results.has('fetch-original')).toBe(true);
-            expect(step.results.has('store-original')).toBe(true);
+            expect(result.bucketKey).toStartWith("workflow-images/");
+            expect(step.results.has('fetch-and-store-original')).toBe(true);
             expect(step.results.has('style-transfer')).toBe(true);
         });
 
@@ -78,7 +67,7 @@ describe("coverArtWorkflow", () => {
 
             const result = await workflow({game: game()}, step);
 
-            expect(result.image).toEqual(new Uint8Array([1, 2, 3]));
+            expect(result.bucketKey).toStartWith("workflow-images/");
             expect(step.results.has('style-transfer-fallback')).toBe(true);
             expect(result.cacheControl).toBeUndefined();
         });
@@ -104,7 +93,7 @@ describe("coverArtWorkflow", () => {
 
             const result = await workflow({game: game()}, step);
 
-            expect(result.image).toEqual(new Uint8Array([4, 5, 6]));
+            expect(result.bucketKey).toStartWith("workflow-images/");
             expect(result.contentType).toBe("image/jpeg");
             expect(result.description).toContain("Adventure");
             expect(result.description).toContain("library");
@@ -136,6 +125,7 @@ describe("coverArtWorkflow", () => {
             expect(result.contentType).toBe("image/jpeg");
             expect(result.description).toBeString();
             expect(result.description!.length).toBeGreaterThan(0);
+            expect(result.bucketKey).toStartWith("workflow-images/");
             expect(step.results.has('generate-prompt')).toBe(true);
             expect(step.results.has('generate-image')).toBe(true);
         });

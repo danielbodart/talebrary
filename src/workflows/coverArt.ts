@@ -20,7 +20,7 @@ export interface CoverArtParams {
 }
 
 export interface CoverArtResult {
-    image: Uint8Array;
+    bucketKey: string;
     contentType: string;
     description?: string;
     cacheControl?: string;
@@ -46,45 +46,56 @@ function defaultBookCoverPrompt(title: string): string {
 export function coverArtWorkflow(deps: CoverArtWorkflowDeps): Workflow<CoverArtParams, CoverArtResult> {
     return async ({game}, step) => {
         if (game.coverart) {
-            const original = await step.do('fetch-original', noRetry, async () => {
+            const originalKey = `content/${game.id}/cover-art-original`;
+
+            await step.do('fetch-and-store-original', noRetry, async () => {
                 const response = await deps.http(get(game.coverart));
                 if (!response.ok) throw new Error(`Failed to fetch cover art: ${response.status}`);
-                return new Uint8Array(await response.arrayBuffer());
-            });
-
-            await step.do('store-original', noRetry, async () => {
-                await deps.bucket.put(`content/${game.id}/cover-art-original`, original, {
+                const original = new Uint8Array(await response.arrayBuffer());
+                await deps.bucket.put(originalKey, original, {
                     contentType: await detectMimeType(original),
                     cacheControl: 'public, max-age=31536000',
                 });
             });
 
-            const sourceImage = Buffer.from(original).toString('base64');
             const prompt = styleTransferPrompt({title: game.title, description: game.description ?? ''});
 
             try {
-                const stylized = await step.do('style-transfer', noRetry, async () =>
-                    deps.ai.generateImage(styleTransferModel, {prompt, sourceImage})
-                );
-                return {image: stylized, contentType: await detectMimeType(stylized)};
+                const result = await step.do('style-transfer', noRetry, async () => {
+                    const sourceImage = await readBase64(deps.bucket, originalKey);
+                    const image = await deps.ai.generateImage(styleTransferModel, {prompt, sourceImage});
+                    const key = `workflow-images/${crypto.randomUUID()}`;
+                    const contentType = await detectMimeType(image);
+                    await deps.bucket.put(key, image, {contentType});
+                    return {bucketKey: key, contentType};
+                });
+                return result;
             } catch (e) {
                 console.error('Style transfer (9b) failed:', e);
             }
 
             try {
-                const stylized = await step.do('style-transfer-fallback', noRetry, async () =>
-                    deps.ai.generateImage(styleTransferFallbackModel, {prompt, sourceImage})
-                );
-                return {image: stylized, contentType: await detectMimeType(stylized)};
+                const result = await step.do('style-transfer-fallback', noRetry, async () => {
+                    const sourceImage = await readBase64(deps.bucket, originalKey);
+                    const image = await deps.ai.generateImage(styleTransferFallbackModel, {prompt, sourceImage});
+                    const key = `workflow-images/${crypto.randomUUID()}`;
+                    const contentType = await detectMimeType(image);
+                    await deps.bucket.put(key, image, {contentType});
+                    return {bucketKey: key, contentType};
+                });
+                return result;
             } catch (e) {
                 console.error('Style transfer (4b) failed:', e);
             }
 
             const defaultPrompt = defaultBookCoverPrompt(game.title);
-            const generated = await step.do('generate-default', noRetry, () =>
-                deps.ai.generateImage(defaultImageModel, {prompt: defaultPrompt})
-            );
-            return {image: generated, contentType: 'image/jpeg', description: defaultPrompt};
+            const bucketKey = await step.do('generate-default', noRetry, async () => {
+                const image = await deps.ai.generateImage(defaultImageModel, {prompt: defaultPrompt});
+                const key = `workflow-images/${crypto.randomUUID()}`;
+                await deps.bucket.put(key, image, {contentType: 'image/jpeg'});
+                return key;
+            });
+            return {bucketKey, contentType: 'image/jpeg', description: defaultPrompt};
         }
 
         const describable = {title: game.title, description: game.description ?? ''};
@@ -97,10 +108,20 @@ export function coverArtWorkflow(deps: CoverArtWorkflowDeps): Workflow<CoverArtP
             return result.prompt!;
         });
 
-        const image = await step.do('generate-image', noRetry, () =>
-            deps.ai.generateImage(defaultImageModel, {prompt})
-        );
+        const bucketKey = await step.do('generate-image', noRetry, async () => {
+            const image = await deps.ai.generateImage(defaultImageModel, {prompt});
+            const key = `workflow-images/${crypto.randomUUID()}`;
+            await deps.bucket.put(key, image, {contentType: 'image/jpeg'});
+            return key;
+        });
 
-        return {image, contentType: 'image/jpeg', description: prompt};
+        return {bucketKey, contentType: 'image/jpeg', description: prompt};
     };
+}
+
+async function readBase64(bucket: TalebraryBucket, key: string): Promise<string> {
+    const response = await bucket.get(key);
+    if (!response.ok) throw new Error(`Failed to read ${key} from bucket: ${response.status}`);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    return Buffer.from(bytes).toString('base64');
 }

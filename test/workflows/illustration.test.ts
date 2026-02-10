@@ -5,6 +5,7 @@ import {DumbAi} from "../../src/bun/DumbAi.ts";
 import {exampleRequest} from "../../src/prompts/GenerateIllustrationPrompt.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 import type {Describable} from "../../src/types.ts";
+import {stubBucket} from "../stubBucket.ts";
 
 const dumbAi = new DumbAi();
 
@@ -12,12 +13,13 @@ describe("illustrationWorkflow", () => {
     describe("scene context (multi-step)", () => {
         test("generates prompt then image", async () => {
             const step = new InMemoryStep();
-            const workflow = illustrationWorkflow({ai: dumbAi});
+            const workflow = illustrationWorkflow({ai: dumbAi, bucket: stubBucket()});
             const result = await workflow({data: exampleRequest, path: '/content/123/art'}, step);
 
             expect(result.contentType).toBe("image/jpeg");
             expect(result.description).toBeString();
             expect(result.description!.length).toBeGreaterThan(0);
+            expect(result.bucketKey).toStartWith("workflow-images/");
             expect(step.results.has('generate-prompt')).toBe(true);
             expect(step.results.has('generate-image')).toBe(true);
         });
@@ -27,7 +29,7 @@ describe("illustrationWorkflow", () => {
                 generateText: async () => ({status: 404, statusText: "No Scene Found", reason: "Not visual"}) as any,
                 generateImage: async () => new Uint8Array(0),
             };
-            const workflow = illustrationWorkflow({ai: noSceneAi});
+            const workflow = illustrationWorkflow({ai: noSceneAi, bucket: stubBucket()});
             const result = await workflow({data: exampleRequest, path: '/content/123/art'}, new InMemoryStep());
 
             expect(result.description).toContain(exampleRequest.story.title);
@@ -39,7 +41,7 @@ describe("illustrationWorkflow", () => {
                 generateText: async () => ({status: 500, statusText: "Server Error", reason: "Overloaded"}) as any,
                 generateImage: async () => new Uint8Array(0),
             };
-            const workflow = illustrationWorkflow({ai: errorAi});
+            const workflow = illustrationWorkflow({ai: errorAi, bucket: stubBucket()});
 
             expect(workflow({data: exampleRequest, path: '/content/123/art'}, new InMemoryStep()))
                 .rejects.toThrow("Server Error");
@@ -50,7 +52,7 @@ describe("illustrationWorkflow", () => {
                 generateText: async () => { throw new Error("not valid json"); },
                 generateImage: async () => new Uint8Array(0),
             };
-            const workflow = illustrationWorkflow({ai: badAi});
+            const workflow = illustrationWorkflow({ai: badAi, bucket: stubBucket()});
 
             expect(workflow({data: exampleRequest, path: '/content/123/art'}, new InMemoryStep()))
                 .rejects.toThrow("Expected JSON response");
@@ -61,7 +63,7 @@ describe("illustrationWorkflow", () => {
                 generateText: async () => ({prompt: "a test prompt"}) as any,
                 generateImage: async () => { throw new Error("model unavailable"); },
             };
-            const workflow = illustrationWorkflow({ai: badImageAi});
+            const workflow = illustrationWorkflow({ai: badImageAi, bucket: stubBucket()});
 
             expect(workflow({data: exampleRequest, path: '/content/123/art'}, new InMemoryStep()))
                 .rejects.toThrow("model unavailable");
@@ -72,17 +74,18 @@ describe("illustrationWorkflow", () => {
         test("generates image from direct prompt", async () => {
             const data: Describable = {title: "Adventure", description: "A great story"};
             const step = new InMemoryStep();
-            const workflow = illustrationWorkflow({ai: dumbAi});
+            const workflow = illustrationWorkflow({ai: dumbAi, bucket: stubBucket()});
             const result = await workflow({data, path: '/content/123/art'}, step);
 
             expect(result.contentType).toBe("image/jpeg");
             expect(result.description).toBeUndefined();
+            expect(result.bucketKey).toStartWith("workflow-images/");
             expect(step.results.has('generate-image')).toBe(true);
         });
 
         test("uses specified model", async () => {
             const data: Describable = {title: "Test", description: "A scene"};
-            const workflow = illustrationWorkflow({ai: dumbAi});
+            const workflow = illustrationWorkflow({ai: dumbAi, bucket: stubBucket()});
             const result = await workflow({data, imageModel: '@cf/bytedance/stable-diffusion-xl-lightning', path: '/content/123/art'}, new InMemoryStep());
 
             expect(result.contentType).toBe("image/jpeg");
@@ -94,7 +97,7 @@ describe("illustrationWorkflow", () => {
                 generateImage: async () => { throw new Error("quota exceeded"); },
             };
             const data: Describable = {title: "Test", description: "A scene"};
-            const workflow = illustrationWorkflow({ai: badAi});
+            const workflow = illustrationWorkflow({ai: badAi, bucket: stubBucket()});
 
             expect(workflow({data, path: '/content/123/art'}, new InMemoryStep()))
                 .rejects.toThrow("quota exceeded");

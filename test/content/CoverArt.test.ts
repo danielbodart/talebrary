@@ -6,16 +6,10 @@ import {DumbAi} from "../../src/bun/DumbAi.ts";
 import type {TalebraryAi} from "../../src/ai/TalebraryAi.ts";
 import {DirectRunner} from "../../src/workflows/mod.ts";
 import {coverArtWorkflow} from "../../src/workflows/coverArt.ts";
+import {stubBucket} from "../stubBucket.ts";
 
 function stubFinder(game: GameStory | null) {
     return {get: async () => game} as any as GameFinder;
-}
-
-function stubBucket() {
-    return {
-        get: async () => new Response(null, {status: 404}),
-        put: async () => {},
-    };
 }
 
 const dumbAi = new DumbAi();
@@ -24,6 +18,7 @@ function makeHandler(game: GameStory | null, http: Http = async () => new Respon
     const bucket = stubBucket();
     return coverArt({
         finder: stubFinder(game),
+        bucket,
         coverArtRunner: new DirectRunner(coverArtWorkflow({http, ai, bucket})),
     });
 }

@@ -1,10 +1,12 @@
 import {Uri} from "../http/Uri.ts";
+import type {TalebraryBucket} from "../storage/TalebraryBucket.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {WorkflowRunner} from "../workflows/mod.ts";
 import type {IllustrationParams, IllustrationResult} from "../workflows/illustration.ts";
 
 export interface IllustrationDependencies extends
-    Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>> {
+    Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>>,
+    Dependency<'bucket', TalebraryBucket> {
 }
 
 export class IllustrationHandler {
@@ -32,7 +34,9 @@ export class IllustrationHandler {
                 imageModel: params.get('model') ?? undefined,
                 path,
             });
-            return new Response(result.image as any, {
+            const image = await this.deps.bucket.get(result.bucketKey);
+            if (!image.ok) return new Response('Image not found', {status: 500});
+            return new Response(image.body, {
                 headers: {
                     'content-type': result.contentType,
                     ...(result.description ? {'description': result.description} : {}),
