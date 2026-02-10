@@ -8,6 +8,10 @@
 - JSX via `@bodar/jsx2dom` (JSR) — types derived from TS DOM lib; ambient extensions in `src/jsx-global.d.ts`
 - `Http` type defined in `src/http/mod.ts`: `(request: Request) => Promise<Response>` — used everywhere
 - **Mobile-first**: Everything must work well on both mobile and desktop
+- **HTML rendering**: JSX via `@bodar/jsx2dom` + `linkedom` — handlers return full `<html>` documents, `TemplateHandler` wraps them in a layout (see `src/templates/`)
+- **Template selection**: Set `<meta name="template" content="card"/>` in `<head>` to select a layout — `card` (with `/card.css`) or `default`; omitting the meta tag skips template wrapping
+- **Slot system**: `baseTemplate` uses `<slot name="head">` and `<slot name="body">` to project page content into the layout; `<slot src="/path">` fetches and inlines partials via HTTP
+- **Shared chrome**: `baseTemplate` provides fonts, favicon, viewport meta, and analytics footer — never duplicate these in handlers
 
 # Core Rules
 
