@@ -11,6 +11,7 @@ import type {Workflow, StepConfig} from "./mod.ts";
 const noRetry: StepConfig = {retries: {limit: 0, delay: 0}};
 
 const styleTransferModel = '@cf/black-forest-labs/flux-2-klein-9b';
+const styleTransferFallbackModel = '@cf/black-forest-labs/flux-2-klein-4b';
 const defaultImageModel = '@cf/leonardo/phoenix-1.0';
 const textModel = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 
@@ -39,7 +40,7 @@ interface PromptResult {
 }
 
 function defaultBookCoverPrompt(title: string): string {
-    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic. No border or frame.`;
+    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover, resting on a wooden shelf in a warm, cozy library filled with books. Soft lamplight, rich wood tones. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic. No border or frame.`;
 }
 
 export function coverArtWorkflow(deps: CoverArtWorkflowDeps): Workflow<CoverArtParams, CoverArtResult> {
@@ -58,18 +59,32 @@ export function coverArtWorkflow(deps: CoverArtWorkflowDeps): Workflow<CoverArtP
                 });
             });
 
-            try {
-                const stylized = await step.do('style-transfer', noRetry, async () => {
-                    const sourceImage = Buffer.from(original).toString('base64');
-                    const prompt = styleTransferPrompt({title: game.title, description: game.description ?? ''});
-                    return deps.ai.generateImage(styleTransferModel, {prompt, sourceImage});
-                });
+            const sourceImage = Buffer.from(original).toString('base64');
+            const prompt = styleTransferPrompt({title: game.title, description: game.description ?? ''});
 
+            try {
+                const stylized = await step.do('style-transfer', noRetry, async () =>
+                    deps.ai.generateImage(styleTransferModel, {prompt, sourceImage})
+                );
                 return {image: stylized, contentType: await detectMimeType(stylized)};
             } catch (e) {
-                console.error('Style transfer failed, falling back to original:', e);
-                return {image: original, contentType: await detectMimeType(original), cacheControl: 'no-store'};
+                console.error('Style transfer (9b) failed:', e);
             }
+
+            try {
+                const stylized = await step.do('style-transfer-fallback', noRetry, async () =>
+                    deps.ai.generateImage(styleTransferFallbackModel, {prompt, sourceImage})
+                );
+                return {image: stylized, contentType: await detectMimeType(stylized)};
+            } catch (e) {
+                console.error('Style transfer (4b) failed:', e);
+            }
+
+            const defaultPrompt = defaultBookCoverPrompt(game.title);
+            const generated = await step.do('generate-default', noRetry, () =>
+                deps.ai.generateImage(defaultImageModel, {prompt: defaultPrompt})
+            );
+            return {image: generated, contentType: 'image/jpeg', description: defaultPrompt};
         }
 
         const describable = {title: game.title, description: game.description ?? ''};

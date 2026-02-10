@@ -53,10 +53,13 @@ describe("coverArt", () => {
         expect(fetchedUrl).toBe("https://ifdb.org/viewgame?coverart&id=abc");
     });
 
-    test("falls back to original when style transfer fails with no-store to prevent caching", async () => {
+    test("falls back to default artwork when both style transfer models fail", async () => {
         const failingAi: TalebraryAi = {
             generateText: async () => ({}) as any,
-            generateImage: async () => { throw new Error("AI failed"); },
+            generateImage: async (_model, input) => {
+                if (input.sourceImage) throw new Error("AI failed");
+                return new Uint8Array([1, 2, 3]);
+            },
         };
         const handler = makeHandler({
             id: "abc",
@@ -72,8 +75,8 @@ describe("coverArt", () => {
 
         const response = await handler(new Request("http://test/content/abc/cover-art"));
         expect(response.status).toBe(200);
-        expect(await response.text()).toBe("original image");
-        expect(response.headers.get("cache-control")).toBe("no-store");
+        expect(response.headers.get("content-type")).toBe("image/jpeg");
+        expect(response.headers.get("description")).toContain("Adventure");
     });
 
     test("generates AI illustration when game has no coverart", async () => {

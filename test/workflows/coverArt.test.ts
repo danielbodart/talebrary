@@ -55,12 +55,44 @@ describe("coverArtWorkflow", () => {
             expect(step.results.has('style-transfer')).toBe(true);
         });
 
-        test("falls back to original when style transfer fails", async () => {
-            const failingAi: TalebraryAi = {
+        test("falls back to 4b model when 9b style transfer fails", async () => {
+            let callCount = 0;
+            const failFirstAi: TalebraryAi = {
                 generateText: async () => ({}) as any,
-                generateImage: async () => { throw new Error("AI failed"); },
+                generateImage: async () => {
+                    callCount++;
+                    if (callCount === 1) throw new Error("9b failed");
+                    return new Uint8Array([1, 2, 3]);
+                },
             };
 
+            const step = new InMemoryStep();
+            const workflow = coverArtWorkflow({
+                http: async () => new Response("original image", {
+                    status: 200,
+                    headers: {"content-type": "image/png"},
+                }),
+                ai: failFirstAi,
+                bucket: stubBucket(),
+            });
+
+            const result = await workflow({game: game()}, step);
+
+            expect(result.image).toEqual(new Uint8Array([1, 2, 3]));
+            expect(step.results.has('style-transfer-fallback')).toBe(true);
+            expect(result.cacheControl).toBeUndefined();
+        });
+
+        test("falls back to default artwork when both style transfer models fail", async () => {
+            const failingAi: TalebraryAi = {
+                generateText: async () => ({}) as any,
+                generateImage: async (_model, input) => {
+                    if (input.sourceImage) throw new Error("AI failed");
+                    return new Uint8Array([4, 5, 6]);
+                },
+            };
+
+            const step = new InMemoryStep();
             const workflow = coverArtWorkflow({
                 http: async () => new Response("original image", {
                     status: 200,
@@ -70,10 +102,13 @@ describe("coverArtWorkflow", () => {
                 bucket: stubBucket(),
             });
 
-            const result = await workflow({game: game()}, new InMemoryStep());
+            const result = await workflow({game: game()}, step);
 
-            expect(result.cacheControl).toBe("no-store");
-            expect(new TextDecoder().decode(result.image)).toBe("original image");
+            expect(result.image).toEqual(new Uint8Array([4, 5, 6]));
+            expect(result.contentType).toBe("image/jpeg");
+            expect(result.description).toContain("Adventure");
+            expect(result.description).toContain("library");
+            expect(step.results.has('generate-default')).toBe(true);
         });
 
         test("throws when original fetch fails", async () => {

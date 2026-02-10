@@ -33,7 +33,7 @@ interface PromptResult {
 }
 
 function defaultBookCoverPrompt(title: string): string {
-    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic. No border or frame.`;
+    return `Illustration of a leather-bound book with the title "${title}" embossed on the cover, resting on a wooden shelf in a warm, cozy library filled with books. Soft lamplight, rich wood tones. Graphic novel style, bold linework, rich colours, detailed hand-drawn. Vintage adventure book aesthetic. No border or frame.`;
 }
 
 export function illustrationWorkflow(deps: IllustrationWorkflowDeps): Workflow<IllustrationParams, IllustrationResult> {
