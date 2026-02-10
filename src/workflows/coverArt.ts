@@ -123,5 +123,7 @@ async function readBase64(bucket: TalebraryBucket, key: string): Promise<string>
     const response = await bucket.get(key);
     if (!response.ok) throw new Error(`Failed to read ${key} from bucket: ${response.status}`);
     const bytes = new Uint8Array(await response.arrayBuffer());
-    return Buffer.from(bytes).toString('base64');
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary);
 }
