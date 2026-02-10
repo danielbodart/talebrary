@@ -1,5 +1,4 @@
 import {header} from "./header.tsx";
-import {footer} from "./footer.tsx";
 import {html5} from "./LinkedomHelpers.ts";
 
 export function baseTemplate(document: Document, stylesheets: string[] = []) {
@@ -11,7 +10,7 @@ export function baseTemplate(document: Document, stylesheets: string[] = []) {
             <slot name="head"></slot>
         </head>
         <body class={document.body.className} is={document.body.getAttribute('is') || ''}>
-        <><slot name="body"></slot>{footer(jsx)}</>
+        <slot name="body"></slot>
         </body>
         </html>);
 }
