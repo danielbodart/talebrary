@@ -16,7 +16,6 @@ db/full-ifdb.sql
 /games
 wrangler-local.toml
 .env
-*.png
 tools
 .playwright-mcp/
 .claude/settings.local.json
