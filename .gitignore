@@ -19,6 +19,7 @@ wrangler-local.toml
 *.png
 tools
 .playwright-mcp/
+.claude/settings.local.json
 
 # build-client outputs
 www/player/main.js

@@ -1,115 +1,64 @@
 @Web
 
+# Talebrary
+
+Interactive fiction library — Bun (local dev) + Cloudflare Workers (production).
+
+# Commands
+
+All commands via `./run [command]`. Check `./run` before inventing build steps — if a command is missing, add it there.
+
+- `start` — Dev server with watch mode
+- `start-dynamic` — Dev server on random port (for Playwright testing)
+- `startw` — Wrangler dev --remote (for CF-specific features: AI, D1, R2, Durable Objects)
+- `check` — TypeScript type-check (run after any TS change)
+- `test [file]` — Run all tests or a specific file
+- `build` — Full build: check + complexity + build-client + test
+- `deploy` — **CI only.** Never run locally unless debugging a CI deployment failure.
+
 # Architecture
 
-- Two runtimes: **Bun** (local dev) and **Cloudflare Workers** (production)
-- `src/bun/app.ts` is the local composition root, `src/cloudflare/app.ts` is production
-- Dependency injection via `@bodar/yadic` (JSR) — all deps passed through `application()` in `Application.ts`
-- JSX via `@bodar/jsx2dom` (JSR) — types derived from TS DOM lib; ambient extensions in `src/jsx-global.d.ts`
-- `Http` type defined in `src/http/mod.ts`: `(request: Request) => Promise<Response>` — used everywhere
-- **Mobile-first**: Everything must work well on both mobile and desktop
-- **HTML rendering**: JSX via `@bodar/jsx2dom` + `linkedom` — handlers return full `<html>` documents, `TemplateHandler` wraps them in a layout (see `src/templates/`)
-- **Template selection**: Set `<meta name="template" content="card"/>` in `<head>` to select a layout — `card` (with `/card.css`) or `default`; omitting the meta tag skips template wrapping
-- **Slot system**: `baseTemplate` uses `<slot name="head">` and `<slot name="body">` to project page content into the layout; `<slot src="/path">` fetches and inlines partials via HTTP
-- **Shared chrome**: `baseTemplate` provides fonts, favicon, viewport meta, and analytics footer — never duplicate these in handlers
+- Composition roots: `src/bun/app.ts` (Bun), `src/cloudflare/app.ts` (Workers)
+- DI via `@bodar/yadic` — deps wired through `application()` in `Application.ts`. DI is mandatory for all new services.
+- JSX via `@bodar/jsx2dom` + `linkedom` — ambient type extensions in `src/jsx-global.d.ts`
+- `Http`: `(request: Request) => Promise<Response>` — defined in `src/http/mod.ts`, used everywhere
+- Mobile-first — must work on both mobile and desktop
+- Templates: `TemplateHandler` wraps pages; `<meta name="template" content="card"/>` selects layout
+- `baseTemplate` provides fonts, favicon, viewport, analytics — never duplicate in handlers
+- Slot system: `<slot name="head/body">` for projection, `<slot src="/path">` for HTTP partials
 
-# Core Rules
+# Implementation
 
-1. Communication
-   - Be concise in chat responses
-   - Generate minimal, efficient code
-   - No repetition in explanations or implementations
-   - Never add "helpful" extras without explicit request
-   - If something seems helpful, ask first
+IMPORTANT: Investigate before fixing — read code, check logs, understand the root cause. No conjectural fixes.
 
-2. Documentation First
-   - Search and read latest documentation before making suggestions
-   - If you can't find documentation look for the source code and read that
-   - Verify exact syntax and options
-   - State explicitly if documentation is unclear or unavailable
-   - Never make up syntax or options
-   - Always cite at least one source for each suggestion
+- Do NOT get ahead of the user. When asked for research, deliver only that. Wait for explicit instructions before implementing.
+- When fixing a bug, grep for the same pattern across ALL similar files. Fix everything in one pass.
+- Only implement explicitly requested features. Ask before adding "helpful" extras.
+- Inject dependencies explicitly via yadic — never default to globals like `fetch`
+- Check existing types (`src/http/mod.ts`, `src/types.ts`) before defining new ones
+- jsx2dom missing attributes → add to `src/jsx-global.d.ts` — never use spreads or casts
+- Check `package.json` for existing libraries. Ask before adding new ones.
+- Verify documentation before suggesting. If docs unavailable, read the source. Cite sources. Never make up syntax.
+- Use async/await unless you need special Promise handling
+- Use `bun:sqlite` for SQLite operations — never sqlite3 CLI
+- Use wrangler for Cloudflare interactions but do NOT use it to deploy — deployments are CI only
 
-3. Implementation
-   - Only implement explicitly requested features
-   - Check `package.json` for existing libraries and prefer them over adding new ones
-   - Always ask before adding new libraries
-   - Use async/await unless you need to do something special with Promises
-   - Inject dependencies explicitly — don't default to globals like `fetch`, pass them at the composition root
-   - Check existing types first (`src/http/mod.ts`, `src/types.ts`, etc.) before defining new types
-   - If jsx2dom types don't recognise an HTML attribute, add an ambient declaration to `src/jsx-global.d.ts` — never hack with spreads or casts
-   - Run `./run check` for TypeScript changes
+# Testing
 
-4. Testing
-   - Maintain existing tests, never delete without approval
-   - Add tests for new code
-   - Use in-memory test doubles over mocks
-   - Never use mocks, especially not for HTTP
-   - HTTP is a pure function (request in, response out) — inject it as a dependency, never mock it
-   - In tests, use Http as a simple lambda — no servers or network needed
-   - Maintain contract tests across interfaces (e.g. `TalebraryAi`, `TalebraryBucket`)
-   - Run `./run test` (all) or `./run test [specific test file]`
-   - Always visually verify UI changes with Playwright before saying work is finished — tests passing doesn't mean it looks right
+- In-memory test doubles only — never mocks, especially not for HTTP
+- Http is a pure function — use as lambda in tests, no servers or network needed
+- Contract tests across interfaces (`TalebraryAi`, `TalebraryBucket`)
+- Never delete existing tests without approval
+- Visually verify UI changes with Playwright — tests passing does not mean it looks right
+- Use `/frontend-design` skill for any UI work
 
-5. Command Execution
-   - Use `./run [command] [args]` when available
-   - Always check `./run` first for available commands before inventing build steps
-   - If a needed command is missing from `./run`, add it there — keep build knowledge centralised
-   - Key commands: `start`, `startw` (wrangler dev --remote), `check`, `test`, `build`, `deploy`
-   - Use `./run startw` instead of `./run start` when testing Cloudflare-specific features (AI bindings, D1, R2, Durable Objects) — it uses the real `env.AI` binding via wrangler dev --remote, while `start` uses a REST API adapter that may behave differently
+# Workflow
 
-6. Worktree Setup
-   - Main repo: `/home/dan/Projects/talebrary` (master)
-   - Worktrees live in `/home/dan/Projects/talebrary-worktrees/<branch-name>`
-   - When creating a new worktree, symlink `.env` from main repo: `ln -s /home/dan/Projects/talebrary/.env <worktree>/.env`
-   - The `./run` script sources `.env` if present
+- Rebase before fresh work: `git pull --rebase origin master`
+- After push: `gh run watch` to monitor CI
+- Run `/code-review:code-review-local` before committing significant changes (new endpoints, DB changes, major refactors)
+- Be concise. No repetition. Minimal code.
 
-7. Workflow
-   - When starting fresh work with no outstanding changes, rebase to master first (`git pull --rebase origin master`) to get the latest
-   - After pushing, always monitor GitHub Actions with `gh run watch`
-   - **Never run `./run deploy` locally** — deployment is done by GitHub Actions on push. The only exception is debugging a CI deployment failure that can't be reproduced otherwise
-   - Use `/frontend-design` skill for any UI work
-   - Run `/code-review:code-review-local` before committing significant changes (new endpoints, database changes, major refactors)
+# Learning from Corrections
 
-8. Playwright
-   - Never wait for pages to load — our pages are fast, Playwright snapshots are instant
-   - Playwright MCP is configured with `--isolated` so each agent gets its own browser context
-   - When testing with Playwright, use `./run start-dynamic` to start the dev server on a random free port (PORT=0)
-   - This avoids port conflicts when multiple agents run concurrently across worktrees
-   - The server prints its URL on startup — use that URL in Playwright navigation
-
-9. IF Archive Proxy
-   - `PROXY_URL` and `PROXY_TOKEN` in `.env` enable local dev to proxy ifarchive.org requests through the deployed worker
-   - The worker secret `PROXY_TOKEN` must also be set via `wrangler secret put PROXY_TOKEN` with the same value
-   - Without these env vars, local dev fetches ifarchive.org directly (will 451 in UK)
-   - If a game story returns **HTTP 451**, the `.env` is missing or not being sourced — check the symlink exists and `bootstrap.sh` sources it
-   - The server logs `Using IF Archive proxy via <url>` on startup when the proxy is active — if you don't see this, the env is not loaded
-
-10. Durable Workflows
-    - Multi-step processes (multiple AI calls, fetch + transform, etc.) must use the workflow abstraction in `src/workflows/`
-    - Single-step handlers (one AI call, one fetch) do not need workflows
-    - Workflow definition: `Workflow<Params, Result> = (params, step) => Promise<Result>` — portable, no Cloudflare imports
-    - `Step.do(name, fn)` matches Cloudflare's `WorkflowStep.do()` natively — no adapter needed
-    - `WorkflowRunner<P, R>` abstracts execution: `DirectRunner` (Bun/tests), `CloudflareWorkflowRunner` (production polling)
-    - **Every workflow must have its own Cloudflare Workflow binding** — `DirectRunner` is only for Bun/tests, never in `cloudflare/app.ts`
-    - Each workflow gets: a `[[workflows]]` entry in `wrangler.toml`, an entrypoint class in `cloudflare/app.ts`, and a `CloudflareWorkflowRunner` binding
-    - HTTP handlers stay thin: parse request → call `runner.run(params)` → build response
-    - `BucketCachingHandler` remains as the outer HTTP caching wrapper
-    - Test workflows directly with `InMemoryStep` — no runner needed
-    - Cloudflare entrypoints live in `src/cloudflare/app.ts`, reuse `app(env)` for deps
-
-11. Cloudflare AI Models
-    - The REST API (`CloudflareRestAi`) and the native Workers binding (`env.AI`) can have **different input format requirements** for the same model — always check [Cloudflare's model docs](https://developers.cloudflare.com/workers-ai/models/) before adding or changing model support
-    - **flux-2-klein** models always require `multipart/form-data`, even for text-to-image with no source image — other models (Leonardo, SD, flux-1-schnell) accept plain JSON
-    - `CloudflareAiAdapter.toCloudflareImageInput()` handles model-specific input formatting; `CloudflareRestAi.buildBody()` handles REST-specific serialisation
-    - When adding a new image model, check both paths and add contract tests in `test/contracts/AiContract.test.ts`
-
-12. wasiglk Dependency
-    - wasiglk lives at `/home/dan/Projects/wasiglk`, published to JSR as `@bodar/wasiglk`
-    - talebrary uses it via `npm:@jsr/bodar__wasiglk@<version>` in package.json
-    - **Update flow**: commit+push wasiglk → wait for CI to publish to JSR → update version in talebrary package.json → `bun install` → `./run build` → commit+push talebrary
-    - **Never** manually build worker.js from wasiglk source without going through JSR publish first
-    - wasiglk commands: `./run clean` (always before rebuilding), `./run build`
-
-
-On the first start of every chat, tell me the number of Core Rules that have been read
+IMPORTANT: When the user corrects you or points out a better approach, update CLAUDE.md or the relevant `.claude/rules/` file to capture that knowledge. The only exception is if the correction is clearly a one-off workaround (e.g. "just do this temporarily"). Always tell the user what you recorded and where.
