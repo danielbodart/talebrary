@@ -43,33 +43,30 @@ async function normalizeImageResponse(result: any): Promise<Uint8Array> {
     throw new Error(`Unexpected image response format: ${JSON.stringify(result)?.slice(0, 100)}`);
 }
 
+function detectImageType(bytes: Uint8Array): string {
+    if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return 'image/jpeg';
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return 'image/png';
+    if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) return 'image/webp';
+    return 'image/png';
+}
+
 function toCloudflareImageInput(model: string, input: ImagePrompt): any {
-    const needsMultipart = model.includes('flux-2-klein');
+    // Only flux-2-klein requires multipart FormData; all other models use plain JSON.
+    if (!model.includes('flux-2-klein')) return input;
 
-    // Text-to-image: pass plain JSON for models that accept it (e.g. Leonardo Phoenix).
-    // flux-2-klein always requires multipart, even without a source image.
-    if (!input.sourceImage && !needsMultipart) return input;
-
-    // Build multipart FormData for the native Workers AI binding
     const form = new FormData();
     form.append('prompt', input.prompt);
     if (input.num_steps) form.append('num_steps', String(input.num_steps));
-
     if (input.sourceImage) {
         const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
-        if (needsMultipart) {
-            form.append('input_image_0', new Blob([bytes]));
-        } else {
-            form.append('image', new Blob([bytes]));
-        }
+        form.append('input_image_0', new Blob([bytes], {type: detectImageType(bytes)}));
     }
 
-    // Serialize FormData to get the stream body and content type with boundary,
-    // as required by the Cloudflare Workers AI binding.
-    // Content type must be read before body due to Bun lazy-init quirk.
-    // Raw ImagePrompt fields are spread alongside so CloudflareRestAi can
-    // fall back to JSON for models whose REST endpoint rejects multipart.
-    const request = new Request('http://localhost', {method: 'POST', body: form});
-    const contentType = request.headers.get('content-type');
-    return {...input, multipart: {body: request.body, contentType}};
+    // Serialize FormData via Response to get a ReadableStream body + content-type with boundary.
+    // The env.AI binding requires a stream (not raw FormData) — passing FormData directly fails with 3043.
+    // Do NOT include extra fields alongside multipart — the native binding rejects them (HTTP 414).
+    // IMPORTANT: Read content-type BEFORE accessing .body — Bun clears headers after body access.
+    const response = new Response(form);
+    const contentType = response.headers.get('content-type');
+    return {multipart: {body: response.body, contentType}};
 }

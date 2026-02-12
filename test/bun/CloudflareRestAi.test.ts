@@ -41,9 +41,17 @@ describe("CloudflareRestAi", () => {
         expect(result).toEqual(imageBytes);
     });
 
-    test("sends multipart for flux-2-klein when multipart wrapper provided", async () => {
+    test("forwards multipart stream for flux-2-klein", async () => {
         const responseImage = new Uint8Array([0x89, 0x50, 0x4E, 0x47]);
         const responseBase64 = Buffer.from(responseImage).toString("base64");
+
+        // Simulate what CloudflareAiAdapter does: serialize FormData via Response
+        const form = new FormData();
+        form.append('prompt', 'a cat in a hat');
+        form.append('num_steps', '4');
+        const serialized = new Response(form);
+        // Read content-type BEFORE accessing .body (Bun clears headers after body access)
+        const contentType = serialized.headers.get('content-type');
 
         const ai = new CloudflareRestAi("test-account", "test-token", async (request) => {
             expect(request.headers.get('Content-Type')).toContain("multipart/form-data");
@@ -51,6 +59,7 @@ describe("CloudflareRestAi", () => {
 
             const receivedForm = await request.formData();
             expect(receivedForm.get("prompt")).toBe("a cat in a hat");
+            expect(receivedForm.get("num_steps")).toBe("4");
 
             return new Response(JSON.stringify({result: {image: responseBase64}}), {
                 headers: {"content-type": "application/json"},
@@ -58,25 +67,27 @@ describe("CloudflareRestAi", () => {
         });
 
         const result = await ai.run("@cf/black-forest-labs/flux-2-klein-9b", {
-            prompt: "a cat in a hat",
-            num_steps: 4,
-            multipart: {body: "ignored", contentType: "ignored"},
+            multipart: {body: serialized.body, contentType},
         });
         expect(result).toBeInstanceOf(Uint8Array);
         expect(result).toEqual(responseImage);
     });
 
-    test("sends multipart for flux-2-klein text-to-image without sourceImage", async () => {
+    test("forwards multipart stream with input_image_0 for flux-2-klein img2img", async () => {
         const responseImage = new Uint8Array([0x89, 0x50, 0x4E, 0x47]);
         const responseBase64 = Buffer.from(responseImage).toString("base64");
+        const sourceBytes = new Uint8Array([1, 2, 3]);
+
+        const form = new FormData();
+        form.append('prompt', 'stylize this');
+        form.append('input_image_0', new Blob([sourceBytes]));
+        const serialized = new Response(form);
+        const contentType = serialized.headers.get('content-type');
 
         const ai = new CloudflareRestAi("test-account", "test-token", async (request) => {
-            expect(request.headers.get('Content-Type')).toContain("multipart/form-data");
-
             const receivedForm = await request.formData();
-            expect(receivedForm.get("prompt")).toBe("a sunset");
-            expect(receivedForm.get("num_steps")).toBe("4");
-            expect(receivedForm.has("input_image_0")).toBe(false);
+            expect(receivedForm.get("prompt")).toBe("stylize this");
+            expect(receivedForm.has("input_image_0")).toBe(true);
 
             return new Response(JSON.stringify({result: {image: responseBase64}}), {
                 headers: {"content-type": "application/json"},
@@ -84,15 +95,13 @@ describe("CloudflareRestAi", () => {
         });
 
         const result = await ai.run("@cf/black-forest-labs/flux-2-klein-9b", {
-            prompt: "a sunset",
-            num_steps: 4,
-            multipart: {body: "ignored", contentType: "ignored"},
+            multipart: {body: serialized.body, contentType},
         });
         expect(result).toBeInstanceOf(Uint8Array);
         expect(result).toEqual(responseImage);
     });
 
-    test("sends JSON with image_b64 for non-flux img2img models with sourceImage", async () => {
+    test("sends JSON with image_b64 for non-flux img2img models", async () => {
         const imageBytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
         const sourceBase64 = Buffer.from(new Uint8Array([1, 2, 3])).toString("base64");
 
@@ -103,7 +112,6 @@ describe("CloudflareRestAi", () => {
             expect(body.prompt).toBe("a cat");
             expect(body.image_b64).toBe(sourceBase64);
             expect(body.sourceImage).toBeUndefined();
-            expect(body.multipart).toBeUndefined();
 
             return new Response(imageBytes, {headers: {"content-type": "image/jpeg"}});
         });
@@ -111,27 +119,6 @@ describe("CloudflareRestAi", () => {
         const result = await ai.run("@cf/runwayml/stable-diffusion-v1-5-img2img", {
             prompt: "a cat",
             sourceImage: sourceBase64,
-            multipart: {body: "ignored", contentType: "ignored"},
-        });
-        expect(result).toBeInstanceOf(Uint8Array);
-        expect(result).toEqual(imageBytes);
-    });
-
-    test("falls back to JSON for non-flux-2-klein models even with multipart wrapper", async () => {
-        const imageBytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
-
-        const ai = new CloudflareRestAi("test-account", "test-token", async (request) => {
-            expect(request.headers.get('Content-Type')).toBe("application/json");
-            const body = await request.json() as any;
-            expect(body.prompt).toBe("a cat");
-            expect(body.multipart).toBeUndefined();
-
-            return new Response(imageBytes, {headers: {"content-type": "image/jpeg"}});
-        });
-
-        const result = await ai.run("@cf/bytedance/stable-diffusion-xl-lightning", {
-            prompt: "a cat",
-            multipart: {body: "ignored", contentType: "ignored"},
         });
         expect(result).toBeInstanceOf(Uint8Array);
         expect(result).toEqual(imageBytes);

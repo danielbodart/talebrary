@@ -8,7 +8,7 @@ export class CloudflareRestAi {
     }
 
     async run(model: string, input: any): Promise<any> {
-        const {body, contentType} = this.buildBody(model, input);
+        const {body, contentType} = await this.buildBody(input);
         const headers: Record<string, string> = {
             'Authorization': `Bearer ${this.apiToken}`,
         };
@@ -47,35 +47,20 @@ export class CloudflareRestAi {
         return result;
     }
 
-    private buildBody(model: string, input: any): {body: BodyInit; contentType: string | null} {
+    private async buildBody(input: any): Promise<{body: BodyInit; contentType: string | null}> {
         if (input.multipart) {
-            // The adapter produces multipart.body/contentType for the native
-            // Cloudflare Workers binding (ReadableStream + boundary).
-            // The REST API has different requirements per model:
-            // - flux-2-klein: multipart FormData with input_image_0
-            // - Other img2img (e.g. sd-v1-5-img2img): JSON with image_b64
-            // - Text-to-image: JSON with just prompt
-            if (model.includes('flux-2-klein')) {
-                return {body: this.buildFormData(input), contentType: null};
-            }
-            const {multipart, ...jsonFields} = input;
-            if (jsonFields.sourceImage) {
-                jsonFields.image_b64 = jsonFields.sourceImage;
-                delete jsonFields.sourceImage;
-            }
-            return {body: JSON.stringify(jsonFields), contentType: 'application/json'};
+            // flux-2-klein: adapter serializes FormData via Response, giving us a ReadableStream
+            // body and a content-type with boundary. Consume the stream to bytes so the Request
+            // constructor doesn't interfere with the Content-Type header.
+            const bytes = new Uint8Array(await new Response(input.multipart.body).arrayBuffer());
+            return {body: bytes, contentType: input.multipart.contentType};
         }
-        return {body: JSON.stringify(input), contentType: 'application/json'};
-    }
-
-    private buildFormData(input: any): FormData {
-        const form = new FormData();
-        form.append('prompt', input.prompt);
-        if (input.num_steps) form.append('num_steps', String(input.num_steps));
-        if (input.sourceImage) {
-            const bytes = Uint8Array.from(atob(input.sourceImage), c => c.charCodeAt(0));
-            form.append('input_image_0', new Blob([bytes]));
+        // Non-flux img2img: REST API expects JSON with image_b64 (not sourceImage)
+        const jsonInput = {...input};
+        if (jsonInput.sourceImage) {
+            jsonInput.image_b64 = jsonInput.sourceImage;
+            delete jsonInput.sourceImage;
         }
-        return form;
+        return {body: JSON.stringify(jsonInput), contentType: 'application/json'};
     }
 }

@@ -3,11 +3,12 @@ import {CloudflareAiAdapter} from "../src/ai/CloudflareAiAdapter.ts";
 import {client} from "../src/http/mod.ts";
 import {CachedAi} from "./cache.ts";
 import {allModels, imageModels, img2imgModels, textModels} from "./models.ts";
-import {suggestionTreeCases, illustrationCases, coverArtCases} from "./fixtures.ts";
+import {suggestionTreeCases, illustrationCases, coverArtCases, sceneDetectionCases, coverArtSceneCases} from "./fixtures.ts";
 import {suggestionsTreePrompt} from "../src/prompts/SuggestionsTreePrompt.ts";
 import {jsonValid, schemaMatch} from "./scorers/json.ts";
 import {validTree, verbsFromList, nounsFromScene, treeSize, treeDepth} from "./scorers/suggestion-tree.ts";
-import {runTextEvals, runImageEvals, runImg2ImgEvals, runStyleTransferEvals} from "./runner.ts";
+import {hasPrompt, matchesExpectation} from "./scorers/scene-detection.ts";
+import {runTextEvals, runImageEvals, runStyleTransferEvals} from "./runner.ts";
 import type {EvalRun, ModelOutput, Score} from "./types.ts";
 import {mkdir} from "node:fs/promises";
 
@@ -106,22 +107,11 @@ async function runImages() {
     printSummary(run);
 }
 
-async function runImg2Img() {
-    console.log("\n--- Image-to-Image Evals ---");
-    const run = await runImg2ImgEvals(
-        ai, "img2img", illustrationCases,
-        textModels.reference, imageModels.reference,
-        allModels(img2imgModels),
-        enableVisionJudge,
-    );
-    await saveRun("img2img", run);
-    printSummary(run);
-}
-
 async function runStyleTransfer() {
     console.log("\n--- Style Transfer Evals ---");
     const run = await runStyleTransferEvals(
         ai, "style-transfer", coverArtCases,
+        textModels.reference,
         allModels(img2imgModels),
         enableVisionJudge,
     );
@@ -129,11 +119,38 @@ async function runStyleTransfer() {
     printSummary(run);
 }
 
+async function runSceneDetection() {
+    console.log("\n--- Scene Detection Evals ---");
+    const {generateIllustrationPrompt} = await import("../src/prompts/GenerateIllustrationPrompt.ts");
+    const run = await runTextEvals(
+        ai, "scene-detection", sceneDetectionCases,
+        allModels(textModels),
+        (c) => generateIllustrationPrompt(c.input),
+        [jsonValid, hasPrompt, matchesExpectation],
+    );
+    await saveRun("scene-detection", run);
+    printSummary(run);
+}
+
+async function runCoverArtScene() {
+    console.log("\n--- Cover Art Scene Detection Evals ---");
+    const {coverArtScenePrompt} = await import("../src/prompts/CoverArtScenePrompt.ts");
+    const run = await runTextEvals(
+        ai, "cover-art-scene", coverArtSceneCases,
+        allModels(textModels),
+        (c) => coverArtScenePrompt(c.story),
+        [jsonValid, hasPrompt, matchesExpectation],
+    );
+    await saveRun("cover-art-scene", run);
+    printSummary(run);
+}
+
 const suites: Record<string, () => Promise<void>> = {
     suggestions: runSuggestions,
     prompts: runIllustrationPrompts,
+    "scene-detection": runSceneDetection,
+    "cover-art-scene": runCoverArtScene,
     images: runImages,
-    img2img: runImg2Img,
     "style-transfer": runStyleTransfer,
 };
 

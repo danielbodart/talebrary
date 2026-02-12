@@ -12,6 +12,7 @@ function game(overrides: Partial<GameStory> = {}): GameStory {
         id: "abc",
         title: "Adventure",
         author: "Author",
+        description: "A cave adventure with mysterious underground passages",
         url: "http://ifarchive.org/adventure.z5",
         coverart: "https://ifdb.org/viewgame?coverart&id=abc",
         type: "zcode",
@@ -44,13 +45,13 @@ describe("coverArtWorkflow", () => {
             expect(step.results.has('style-transfer')).toBe(true);
         });
 
-        test("falls back to 4b model when 9b style transfer fails", async () => {
-            let callCount = 0;
+        test("falls back to scene-enhanced style transfer when simple fails", async () => {
+            let imageCallCount = 0;
             const failFirstAi: TalebraryAi = {
-                generateText: async () => ({}) as any,
+                generateText: async () => ({prompt: "A dark cave entrance"}) as any,
                 generateImage: async () => {
-                    callCount++;
-                    if (callCount === 1) throw new Error("9b failed");
+                    imageCallCount++;
+                    if (imageCallCount === 1) throw new Error("simple style transfer failed");
                     return new Uint8Array([1, 2, 3]);
                 },
             };
@@ -68,16 +69,15 @@ describe("coverArtWorkflow", () => {
             const result = await workflow({game: game()}, step);
 
             expect(result.bucketKey).toStartWith("workflow-images/");
-            expect(step.results.has('style-transfer-fallback')).toBe(true);
-            expect(result.cacheControl).toBeUndefined();
+            expect(step.results.has('style-transfer-scene')).toBe(true);
         });
 
-        test("falls back to default artwork when both style transfer models fail", async () => {
+        test("falls back to default artwork when both style transfers fail", async () => {
             const failingAi: TalebraryAi = {
-                generateText: async () => ({}) as any,
+                generateText: async () => ({prompt: "A cave scene"}) as any,
                 generateImage: async (_model, input) => {
                     if (input.sourceImage) throw new Error("AI failed");
-                    return new Uint8Array([4, 5, 6]);
+                    return new Uint8Array(0);
                 },
             };
 
@@ -94,9 +94,34 @@ describe("coverArtWorkflow", () => {
             const result = await workflow({game: game()}, step);
 
             expect(result.bucketKey).toStartWith("workflow-images/");
-            expect(result.contentType).toBe("image/jpeg");
             expect(result.description).toContain("Adventure");
             expect(result.description).toContain("library");
+            expect(step.results.has('generate-default')).toBe(true);
+        });
+
+        test("falls back to default when scene extraction also fails", async () => {
+            const failingAi: TalebraryAi = {
+                generateText: async () => ({}) as any,
+                generateImage: async (_model, input) => {
+                    if (input.sourceImage) throw new Error("AI failed");
+                    return new Uint8Array(0);
+                },
+            };
+
+            const step = new InMemoryStep();
+            const workflow = coverArtWorkflow({
+                http: async () => new Response("original image", {
+                    status: 200,
+                    headers: {"content-type": "image/png"},
+                }),
+                ai: failingAi,
+                bucket: stubBucket(),
+            });
+
+            const result = await workflow({game: game()}, step);
+
+            expect(result.bucketKey).toStartWith("workflow-images/");
+            expect(result.description).toContain("Adventure");
             expect(step.results.has('generate-default')).toBe(true);
         });
 
@@ -112,7 +137,7 @@ describe("coverArtWorkflow", () => {
     });
 
     describe("without coverart URL (AI generation)", () => {
-        test("generates prompt then image", async () => {
+        test("generates scene prompt then image", async () => {
             const step = new InMemoryStep();
             const workflow = coverArtWorkflow({
                 http: async () => new Response("", {status: 200}),
@@ -122,15 +147,14 @@ describe("coverArtWorkflow", () => {
 
             const result = await workflow({game: game({coverart: ""})}, step);
 
-            expect(result.contentType).toBe("image/jpeg");
             expect(result.description).toBeString();
-            expect(result.description!.length).toBeGreaterThan(0);
+            expect(result.description).toContain("Graphic novel illustration");
             expect(result.bucketKey).toStartWith("workflow-images/");
             expect(step.results.has('generate-prompt')).toBe(true);
             expect(step.results.has('generate-image')).toBe(true);
         });
 
-        test("falls back to default book cover prompt when AI returns 404", async () => {
+        test("falls back to default book cover prompt when scene returns 404", async () => {
             const noSceneAi: TalebraryAi = {
                 generateText: async () => ({status: 404, statusText: "No Scene Found", reason: "Not visual"}) as any,
                 generateImage: async () => new Uint8Array(0),
@@ -145,23 +169,7 @@ describe("coverArtWorkflow", () => {
             const result = await workflow({game: game({coverart: ""})}, new InMemoryStep());
 
             expect(result.description).toContain("Adventure");
-            expect(result.contentType).toBe("image/jpeg");
-        });
-
-        test("throws when prompt generation returns error status", async () => {
-            const errorAi: TalebraryAi = {
-                generateText: async () => ({status: 500, statusText: "Server Error", reason: "Overloaded"}) as any,
-                generateImage: async () => new Uint8Array(0),
-            };
-
-            const workflow = coverArtWorkflow({
-                http: async () => new Response("", {status: 200}),
-                ai: errorAi,
-                bucket: stubBucket(),
-            });
-
-            expect(workflow({game: game({coverart: ""})}, new InMemoryStep()))
-                .rejects.toThrow("Prompt generation failed");
+            expect(result.description).toContain("library");
         });
     });
 });

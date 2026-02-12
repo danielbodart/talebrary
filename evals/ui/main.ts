@@ -9,6 +9,7 @@ interface ModelOutput {
     output: any;
     latencyMs: number;
     cached: boolean;
+    prompt?: string;
 }
 
 interface CaseResult {
@@ -24,13 +25,13 @@ interface EvalRun {
     cases: CaseResult[];
 }
 
-type PanelKey = "text" | "images" | "img2img" | "summary";
+type PanelKey = "text" | "images" | "style-transfer" | "summary";
 
 const runSelect = document.getElementById("run-select") as HTMLSelectElement;
 const panels: Record<PanelKey, HTMLElement> = {
     text: document.getElementById("text")!,
     images: document.getElementById("images")!,
-    img2img: document.getElementById("img2img")!,
+    "style-transfer": document.getElementById("style-transfer")!,
     summary: document.getElementById("summary")!,
 };
 
@@ -44,9 +45,10 @@ let activePanel: PanelKey = "text";
 const runTypeToPanel: Record<string, PanelKey> = {
     suggestions: "text",
     "illustration-prompts": "text",
+    "scene-detection": "text",
+    "cover-art-scene": "text",
     images: "images",
-    img2img: "img2img",
-    "style-transfer": "img2img",
+    "style-transfer": "style-transfer",
 };
 
 function runPrefix(filename: string): string {
@@ -80,7 +82,7 @@ function switchTab(panel: PanelKey, updateHash = true) {
     populateRunSelect(panel);
 }
 
-const validPanels: PanelKey[] = ["text", "images", "img2img", "summary"];
+const validPanels: PanelKey[] = ["text", "images", "style-transfer", "summary"];
 const hashPanel = location.hash.slice(1) as PanelKey;
 if (validPanels.includes(hashPanel)) {
     activePanel = hashPanel;
@@ -299,6 +301,11 @@ function renderModelCard(
 }
 
 function formatPrompt(input: any): string {
+    if (input?.story?.title && input?.imagePath) {
+        const parts = [input.story.title];
+        if (input.story.description) parts.push(input.story.description);
+        return parts.join(" — ");
+    }
     if (input?.scene?.description) {
         const parts = [];
         if (input.story?.title) parts.push(input.story.title);
@@ -323,22 +330,88 @@ function renderCases(container: HTMLElement, cases: CaseResult[], isImage: boole
         header.appendChild(title);
         block.appendChild(header);
 
-        const promptDisplay = document.createElement("div");
-        promptDisplay.className = "prompt-display";
-        promptDisplay.textContent = formatPrompt(c.case.input);
-        promptDisplay.addEventListener("click", () => promptDisplay.classList.toggle("expanded"));
-        block.appendChild(promptDisplay);
+        const hasPromptVariants = c.results.some(r => r.prompt);
 
-        const grid = document.createElement("div");
-        grid.className = isImage ? "model-grid image-grid" : "model-grid";
+        if (hasPromptVariants) {
+            const groups = new Map<string, ModelOutput[]>();
+            for (const result of c.results) {
+                const key = result.prompt ?? "";
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key)!.push(result);
+            }
 
-        for (const result of c.results) {
-            const scores = c.scores[result.model] ?? [];
-            const humanScore = c.humanScores?.[result.model];
-            grid.appendChild(renderModelCard(result, scores, humanScore, currentRunFile, caseIndex, isImage));
+            for (const [prompt, results] of groups) {
+                const promptDisplay = document.createElement("div");
+                promptDisplay.className = "prompt-display";
+                promptDisplay.textContent = prompt;
+                promptDisplay.addEventListener("click", () => promptDisplay.classList.toggle("expanded"));
+                block.appendChild(promptDisplay);
+
+                const grid = document.createElement("div");
+                grid.className = "model-grid image-grid";
+
+                if (c.case.input?.imagePath) {
+                    const card = document.createElement("div");
+                    card.className = "model-card original-card";
+                    const hdr = document.createElement("div");
+                    hdr.className = "model-card-header";
+                    const nameEl = document.createElement("div");
+                    nameEl.className = "model-name";
+                    nameEl.textContent = "Original";
+                    hdr.appendChild(nameEl);
+                    card.appendChild(hdr);
+                    const img = document.createElement("img");
+                    img.src = `/api/cover/${c.case.input.imagePath}`;
+                    img.alt = "Original cover art";
+                    img.loading = "lazy";
+                    card.appendChild(img);
+                    grid.appendChild(card);
+                }
+
+                for (const result of results) {
+                    const scores = c.scores[result.model] ?? [];
+                    const humanScore = c.humanScores?.[result.model];
+                    grid.appendChild(renderModelCard(result, scores, humanScore, currentRunFile, caseIndex, isImage));
+                }
+
+                block.appendChild(grid);
+            }
+        } else {
+            const promptDisplay = document.createElement("div");
+            promptDisplay.className = "prompt-display";
+            promptDisplay.textContent = formatPrompt(c.case.input);
+            promptDisplay.addEventListener("click", () => promptDisplay.classList.toggle("expanded"));
+            block.appendChild(promptDisplay);
+
+            const grid = document.createElement("div");
+            grid.className = isImage ? "model-grid image-grid" : "model-grid";
+
+            if (isImage && c.case.input?.imagePath) {
+                const card = document.createElement("div");
+                card.className = "model-card original-card";
+                const hdr = document.createElement("div");
+                hdr.className = "model-card-header";
+                const nameEl = document.createElement("div");
+                nameEl.className = "model-name";
+                nameEl.textContent = "Original";
+                hdr.appendChild(nameEl);
+                card.appendChild(hdr);
+                const img = document.createElement("img");
+                img.src = `/api/cover/${c.case.input.imagePath}`;
+                img.alt = "Original cover art";
+                img.loading = "lazy";
+                card.appendChild(img);
+                grid.appendChild(card);
+            }
+
+            for (const result of c.results) {
+                const scores = c.scores[result.model] ?? [];
+                const humanScore = c.humanScores?.[result.model];
+                grid.appendChild(renderModelCard(result, scores, humanScore, currentRunFile, caseIndex, isImage));
+            }
+
+            block.appendChild(grid);
         }
-
-        block.appendChild(grid);
         container.appendChild(block);
     });
 }
@@ -487,7 +560,7 @@ function renderSummary(container: HTMLElement, runs: EvalRun[]) {
 }
 
 function renderRun(run: EvalRun) {
-    const isImage = run.name === "images" || run.name === "img2img" || run.name === "style-transfer";
+    const isImage = run.name === "images" || run.name === "style-transfer";
     const target = panelForRun(currentRunFile) === "summary"
         ? panels.text
         : panels[panelForRun(currentRunFile)];

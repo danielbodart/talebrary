@@ -28,6 +28,9 @@ export class DumbAi implements TalebraryAi {
         if (system?.content.includes('image generation model')) {
             return this.illustrationPrompt(user?.content);
         }
+        if (system?.content.includes('cover art API')) {
+            return this.coverArtScene(user?.content);
+        }
         return 'Unsupported prompt';
     }
 
@@ -46,6 +49,19 @@ export class DumbAi implements TalebraryAi {
         for (const d of Arrays.unique(dir)) tree[d] = [];
         if (dir.length) tree["go"] = Arrays.unique(dir);
         return {people, tree} satisfies SuggestionTree;
+    }
+
+    private coverArtScene(userContent: string | undefined): object {
+        if (!userContent) return {status: 404, statusText: "No Scene Found", reason: "No input provided"};
+        try {
+            const data = JSON.parse(userContent);
+            if (data.description) {
+                return {prompt: `${data.title || 'Untitled'}. ${data.description}`};
+            }
+            return {status: 404, statusText: "No Scene Found", reason: "No visual elements"};
+        } catch {
+            return {status: 500, statusText: "Parse Error", reason: "Could not parse input"};
+        }
     }
 
     private illustrationPrompt(userContent: string | undefined): object {

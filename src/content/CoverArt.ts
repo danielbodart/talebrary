@@ -29,6 +29,7 @@ export function coverArt(deps: CoverArtDeps): Http {
                     'content-type': result.contentType,
                     ...(result.description ? {'description': result.description} : {}),
                     ...(result.cacheControl ? {'cache-control': result.cacheControl} : {}),
+                    ...(result.errors?.length ? {'x-cover-art-errors': result.errors.join(' | ')} : {}),
                 },
             });
         } catch (e) {

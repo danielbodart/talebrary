@@ -14,6 +14,13 @@
 - **HTTP 451** = `.env` missing or not sourced — check symlink exists and `bootstrap.sh` sources it
 - Server logs `Using IF Archive proxy via <url>` on startup when active — no log = env not loaded
 
+# Wrangler Dev
+
+- `./run startw` uses `wrangler dev` (NOT `--remote`) with `remote: true` bindings in `wrangler.toml`
+- This runs worker + workflow code **locally** while D1, R2, and AI connect to remote Cloudflare services
+- Do NOT use `wrangler dev --remote` — it runs workflow code on the deployed version, not the local preview
+- The AI binding always uses remote regardless of config (with a warning if `remote: true` not set)
+
 # Playwright Testing
 
 - Never wait for pages to load — pages are fast, snapshots are instant

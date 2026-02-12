@@ -10,11 +10,13 @@ head_sampling_rate = 1
 binding = "db"
 database_name = "talebrary"
 database_id = "72a0543e-663c-4bf0-bc0e-c24bcd666888"
+remote = true
 
 [[r2_buckets]]
 binding = 'r2'
 bucket_name = 'talebrary'
 preview_bucket_name = 'talebrary'
+remote = true
 
 [ai]
 binding = "ai"

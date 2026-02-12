@@ -56,6 +56,17 @@ function aiContractTests(name: string, createAi: () => TalebraryAi) {
                 const result = await ai.generateImage("@cf/black-forest-labs/flux-2-klein-9b", {prompt: "a cat", num_steps: 4});
                 expect(result).toBeInstanceOf(Uint8Array);
             });
+
+            test("flux-2-klein: returns Uint8Array (multipart img2img with sourceImage)", async () => {
+                const ai = createAi();
+                const sourceImage = btoa(String.fromCharCode(...new Uint8Array([1, 2, 3, 4])));
+                const result = await ai.generateImage("@cf/black-forest-labs/flux-2-klein-9b", {
+                    prompt: "graphic novel style",
+                    sourceImage,
+                    num_steps: 4,
+                });
+                expect(result).toBeInstanceOf(Uint8Array);
+            });
         });
     });
 }
@@ -77,11 +88,13 @@ aiContractTests("CloudflareAiAdapter (native binding)", () => {
         async run(model: string, input: any): Promise<any> {
             const isImageModel = model.includes('stable-diffusion') || model.includes('flux') || model.includes('leonardo');
             if (isImageModel) {
-                if (!input.prompt) throw new Error('prompt is required');
                 if (input.multipart) {
-                    // Img2img: validate multipart format
+                    // flux-2-klein: multipart serialized via Response — body is ReadableStream,
+                    // contentType includes boundary (e.g. "multipart/form-data; boundary=...")
                     if (!(input.multipart.body instanceof ReadableStream)) throw new Error('multipart.body must be a ReadableStream');
-                    if (!input.multipart.contentType?.includes('boundary=')) throw new Error('multipart.contentType must include boundary');
+                    if (!input.multipart.contentType?.startsWith('multipart/form-data')) throw new Error('multipart.contentType must start with "multipart/form-data"');
+                } else {
+                    if (!input.prompt) throw new Error('prompt is required');
                 }
                 const bytes = new Uint8Array([0xFF, 0xD8, 0xFF]);
                 return new ReadableStream({

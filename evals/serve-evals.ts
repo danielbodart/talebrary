@@ -101,6 +101,15 @@ const server = Bun.serve({
             return new Response(bytes as unknown as BodyInit, {headers: {"content-type": mimeTypes[ext ?? ""] ?? "application/octet-stream"}});
         }
 
+        if (path.startsWith("/api/cover/")) {
+            const coverPath = path.slice("/api/cover/".length);
+            const f = file(coverPath);
+            if (!await f.exists()) return new Response("Not found", {status: 404});
+            const ext = coverPath.split(".").pop();
+            const mimeTypes: Record<string, string> = {jpg: "image/jpeg", png: "image/png", webp: "image/webp"};
+            return new Response(f, {headers: {"content-type": mimeTypes[ext ?? ""] ?? "application/octet-stream"}});
+        }
+
         if (path === "/api/images") {
             return Response.json(await listCacheImages());
         }

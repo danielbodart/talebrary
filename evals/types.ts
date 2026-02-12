@@ -16,6 +16,7 @@ export interface ModelOutput<O> {
     output: O;
     latencyMs: number;
     cached: boolean;
+    prompt?: string;
 }
 
 export interface CaseResult<I, O> {

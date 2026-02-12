@@ -104,7 +104,7 @@ function start-dynamic() {
 function startw() {
   check
   build-client
-  bunx wrangler dev --remote --port 3000
+  bunx wrangler dev --port 3000
 }
 
 function tail() {

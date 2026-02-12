@@ -105,3 +105,40 @@ export const illustrationCases: EvalCase<SceneContext>[] = [
     {name: "svt-orbiting-boony", input: svtOrbitingBoony},
     {name: "tobys-nose-drawing-room", input: tobysNoseDrawingRoom},
 ];
+
+export interface CoverArtSceneCase {
+    story: Describable;
+    expectScene: boolean;
+}
+
+export const coverArtSceneCases: EvalCase<CoverArtSceneCase>[] = [
+    {name: "zork1", input: {story: zork1Story, expectScene: true}},
+    {name: "zork2", input: {story: zork2Story, expectScene: true}},
+    {name: "zork3", input: {story: zork3Story, expectScene: true}},
+    {name: "pirate-adventure", input: {story: pirateAdventureStory, expectScene: true}},
+    {name: "tobys-nose", input: {story: tobysNoseStory, expectScene: true}},
+    {name: "adventure", input: {story: adventureStory, expectScene: false}},  // no description
+    {name: "svt", input: {story: svtStory, expectScene: false}},  // purely abstract
+];
+
+// Scene detection cases — mix of real scenes (should produce prompts)
+// and story descriptions used as scenes (borderline — some are visual enough)
+export interface SceneDetectionCase {
+    input: SceneContext;
+    expectScene: boolean; // should the LLM generate a prompt (true) or 404 (false)?
+}
+
+export const sceneDetectionCases: EvalCase<SceneDetectionCase>[] = [
+    // Real scenes — should always produce a prompt
+    {name: "adventure-end-of-road", input: {input: adventureEndOfRoad, expectScene: true}},
+    {name: "adventure-inside-building", input: {input: adventureInsideBuilding, expectScene: true}},
+    {name: "adventure-below-grate", input: {input: adventureBelowGrate, expectScene: true}},
+    {name: "svt-orbiting-boony", input: {input: svtOrbitingBoony, expectScene: true}},
+    {name: "tobys-nose-drawing-room", input: {input: tobysNoseDrawingRoom, expectScene: true}},
+    // Story descriptions as scenes — visually descriptive ones should still produce a prompt
+    {name: "zork1-as-scene", input: {input: {story: zork1Story, scene: {title: "Cover Art", description: zork1Story.description}}, expectScene: true}},
+    {name: "zork2-as-scene", input: {input: {story: zork2Story, scene: {title: "Cover Art", description: zork2Story.description}}, expectScene: true}},
+    {name: "zork3-as-scene", input: {input: {story: zork3Story, scene: {title: "Cover Art", description: zork3Story.description}}, expectScene: true}},
+    {name: "pirate-adventure-as-scene", input: {input: {story: pirateAdventureStory, scene: {title: "Cover Art", description: pirateAdventureStory.description}}, expectScene: true}},
+    {name: "svt-as-scene", input: {input: {story: svtStory, scene: {title: "Cover Art", description: svtStory.description}}, expectScene: false}},
+];
