@@ -1,86 +1,136 @@
 import {describe, expect, test} from "bun:test";
-import {AtriumHandler} from "../../src/catalogue/AtriumHandler.tsx";
-import {WingHandler} from "../../src/catalogue/WingHandler.tsx";
-import {AisleHandler} from "../../src/catalogue/AisleHandler.tsx";
+import {CatalogueHandler} from "../../src/catalogue/CatalogueHandler.tsx";
 import {SqlGameFinder} from "../../src/games/SqlGameFinder.ts";
 import {talebrary} from "../../src/bun/SqliteDatabase.ts";
 
-describe("CatalogueHandlers", () => {
+describe("CatalogueHandler", () => {
     const db = talebrary();
     const finder = new SqlGameFinder({db});
+    const handler = new CatalogueHandler({finder});
 
-    describe("AtriumHandler", () => {
-        const handler = new AtriumHandler();
-
+    describe("atrium", () => {
         test("renders homepage with wings", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue"));
+            const response = await handler.handle(new Request("http://test/"));
             expect(response.status).toBe(200);
             const html = await response.text();
             expect(html).toContain("The Talebrary Athenaeum");
             expect(html).toContain("The Atrium");
-            expect(html).toContain("/catalogue/genres");
-            expect(html).toContain("/catalogue/collections");
-            expect(html).toContain("go genres");
-            expect(html).toContain("go collections");
+            expect(html).toContain("/genres");
+            expect(html).toContain("/collections");
+        });
+
+        test("renders go... suggestion with exit completions", async () => {
+            const response = await handler.handle(new Request("http://test/"));
+            const html = await response.text();
+            expect(html).toContain("go...");
+            expect(html).toContain("genres");
+            expect(html).toContain("collections");
+        });
+
+        test("always shows ask... suggestion with librarian and topics", async () => {
+            const response = await handler.handle(new Request("http://test/"));
+            const html = await response.text();
+            expect(html).toContain("ask...");
+            expect(html).toContain("librarian");
+            expect(html).toContain("about the athenaeum");
         });
 
         test("illustration uses x-image custom element with reloadable", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue"));
+            const response = await handler.handle(new Request("http://test/"));
             const html = await response.text();
             expect(html).toContain('is="x-image"');
             expect(html).toContain('reloadable');
         });
+
+        test("breadcrumb shows atrium only", async () => {
+            const response = await handler.handle(new Request("http://test/"));
+            const html = await response.text();
+            expect(html).toContain('"name":"Atrium"');
+        });
+
+        test("/catalogue path still resolves to atrium", async () => {
+            const response = await handler.handle(new Request("http://test/catalogue"));
+            expect(response.status).toBe(200);
+            const html = await response.text();
+            expect(html).toContain("The Atrium");
+        });
+
+        test("scene card has scroll class", async () => {
+            const response = await handler.handle(new Request("http://test/"));
+            const html = await response.text();
+            expect(html).toContain('scene-card scroll');
+        });
     });
 
-    describe("WingHandler", () => {
-        const handler = new WingHandler();
-
+    describe("wing", () => {
         test("renders genres wing", async () => {
+            const response = await handler.handle(new Request("http://test/genres"));
+            expect(response.status).toBe(200);
+            const html = await response.text();
+            expect(html).toContain("Genre Wings");
+            expect(html).toContain("/genres/fantasy");
+        });
+
+        test("renders collections wing", async () => {
+            const response = await handler.handle(new Request("http://test/collections"));
+            expect(response.status).toBe(200);
+            const html = await response.text();
+            expect(html).toContain("Special Collections");
+            expect(html).toContain("/collections/top-rated");
+        });
+
+        test("has go back exit", async () => {
+            const response = await handler.handle(new Request("http://test/genres"));
+            const html = await response.text();
+            expect(html).toContain("go back");
+        });
+
+        test("returns 404 for unknown wing", async () => {
+            const response = await handler.handle(new Request("http://test/unknown"));
+            expect(response.status).toBe(404);
+        });
+
+        test("breadcrumb shows atrium and wing", async () => {
+            const response = await handler.handle(new Request("http://test/genres"));
+            const html = await response.text();
+            expect(html).toContain('"name":"Atrium"');
+            expect(html).toContain('"item":"/"');
+            expect(html).toContain('"name":"Genre Wings"');
+        });
+
+        test("/catalogue/genres still resolves", async () => {
             const response = await handler.handle(new Request("http://test/catalogue/genres"));
             expect(response.status).toBe(200);
             const html = await response.text();
             expect(html).toContain("Genre Wings");
-            expect(html).toContain("/catalogue/genres/fantasy");
-            expect(html).toContain("go fantasy");
-            expect(html).toContain("go back");
-        });
-
-        test("renders collections wing", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/collections"));
-            expect(response.status).toBe(200);
-            const html = await response.text();
-            expect(html).toContain("Special Collections");
-            expect(html).toContain("/catalogue/collections/top-rated");
-        });
-
-        test("returns 404 for unknown wing", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/unknown"));
-            expect(response.status).toBe(404);
         });
     });
 
-    describe("AisleHandler", () => {
-        const handler = new AisleHandler({finder});
-
+    describe("aisle", () => {
         test("renders fantasy aisle with games", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/genres/fantasy"));
+            const response = await handler.handle(new Request("http://test/genres/fantasy"));
             expect(response.status).toBe(200);
             const html = await response.text();
             expect(html).toContain("Fantasy Aisle");
             expect(html).toContain("Dragons, wizards");
-            expect(html).toContain("go back");
             expect(html).toContain('class="play"');
         });
 
+        test("has go back exit", async () => {
+            const response = await handler.handle(new Request("http://test/genres/fantasy"));
+            const html = await response.text();
+            expect(html).toContain("go back");
+        });
+
         test("cover art images use x-image custom element with reloadable", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/genres/fantasy"));
+            const response = await handler.handle(new Request("http://test/genres/fantasy"));
             const html = await response.text();
             expect(html).toContain('is="x-image"');
             expect(html).toContain('reloadable');
         });
 
         test("renders top-rated collection with games", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/collections/top-rated"));
+            const response = await handler.handle(new Request("http://test/collections/top-rated"));
             expect(response.status).toBe(200);
             const html = await response.text();
             expect(html).toContain("Highest Rated");
@@ -88,7 +138,7 @@ describe("CatalogueHandlers", () => {
         });
 
         test("renders classics collection with hand-picked games", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/collections/classics"));
+            const response = await handler.handle(new Request("http://test/collections/classics"));
             expect(response.status).toBe(200);
             const html = await response.text();
             expect(html).toContain("Classics");
@@ -96,23 +146,59 @@ describe("CatalogueHandlers", () => {
         });
 
         test("returns 404 for unknown wing", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/unknown/fantasy"));
+            const response = await handler.handle(new Request("http://test/unknown/fantasy"));
             expect(response.status).toBe(404);
         });
 
         test("returns 404 for unknown category", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/genres/unknown"));
+            const response = await handler.handle(new Request("http://test/genres/unknown"));
             expect(response.status).toBe(404);
         });
 
-        test("aisle page has breadcrumb navigation", async () => {
-            const response = await handler.handle(new Request("http://test/catalogue/genres/horror"));
+        test("breadcrumb shows atrium, wing and aisle", async () => {
+            const response = await handler.handle(new Request("http://test/genres/horror"));
             const html = await response.text();
-            expect(html).toContain('application/ld+json');
             expect(html).toContain('"name":"Atrium"');
-            expect(html).toContain('"item":"/catalogue"');
-            expect(html).toContain('"item":"/catalogue/genres"');
+            expect(html).toContain('"item":"/"');
+            expect(html).toContain('"item":"/genres"');
             expect(html).toContain('"name":"Horror Aisle"');
+        });
+
+        test("/catalogue/genres/fantasy still resolves", async () => {
+            const response = await handler.handle(new Request("http://test/catalogue/genres/fantasy"));
+            expect(response.status).toBe(200);
+            const html = await response.text();
+            expect(html).toContain("Fantasy Aisle");
+        });
+    });
+
+    describe("inline search", () => {
+        test("atrium search returns games", async () => {
+            const response = await handler.handle(new Request("http://test/?search=adventure"));
+            expect(response.status).toBe(200);
+            const html = await response.text();
+            expect(html).toContain("The Atrium");
+            expect(html).toContain("librarian");
+        });
+
+        test("/content/?search=X routes to catalogue with search", async () => {
+            const response = await handler.handle(new Request("http://test/content/?search=zork"));
+            expect(response.status).toBe(200);
+            const html = await response.text();
+            expect(html).toContain("The Atrium");
+        });
+
+        test("search input preserves search value", async () => {
+            const response = await handler.handle(new Request("http://test/?search=adventure"));
+            const html = await response.text();
+            expect(html).toContain('value="adventure"');
+        });
+
+        test("librarian response shown for search", async () => {
+            const response = await handler.handle(new Request("http://test/?search=zork"));
+            const html = await response.text();
+            expect(html).toContain("librarian");
+            expect(html).toContain("librarian-card");
         });
     });
 });

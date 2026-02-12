@@ -1,5 +1,32 @@
 import type {Describable} from "../types.ts";
 
+export interface Exit {
+    path: string;
+    label: string;
+}
+
+export interface BreadcrumbItem {
+    name: string;
+    item?: string;
+}
+
+export interface GameQuery {
+    type: 'genre' | 'top-rated' | 'recent' | 'hand-picked' | 'search';
+    genre?: string;
+    ids?: string[];
+    search?: string;
+}
+
+export interface Room {
+    title: string;
+    pageTitle: string;
+    narrative: string;
+    illustration: Describable;
+    exits: Exit[];
+    breadcrumb: BreadcrumbItem[];
+    gameQuery?: GameQuery;
+}
+
 export interface Category {
     id: string;
     title: string;
@@ -189,4 +216,82 @@ export function findWing(wingId: string): Wing | undefined {
 
 export function findCategory(wing: Wing, categoryId: string): AnyCategory | undefined {
     return wing.categories.find(c => c.id === categoryId);
+}
+
+export const atriumIllustration: Describable = {
+    title: 'The Atrium',
+    description: 'A vast library atrium with a librarian at a desk, towering bookshelves, grand archways leading to different wings of the collection.',
+};
+
+function categoryToQuery(category: AnyCategory): GameQuery {
+    if (isGenreCategory(category)) return {type: 'genre', genre: category.genre};
+    if (isHandPickedCategory(category)) return {type: 'hand-picked', ids: category.games};
+    return {type: category.type};
+}
+
+export function resolveRoom(path: string, search?: string): Room | undefined {
+    const segments = path.replace(/\/+$/, '').split('/').filter(Boolean);
+    // Strip optional /catalogue prefix for backwards compat
+    if (segments[0] === 'catalogue' || segments[0] === 'content') segments.shift();
+
+    // / (atrium)
+    if (segments.length === 0) {
+        return {
+            title: 'The Atrium',
+            pageTitle: 'The Talebrary Athenaeum',
+            narrative: 'You find yourself standing in the atrium of a vast library. Before you stands the librarian, ready to help you find whatever adventure you require. To either side, grand archways lead to different wings of the collection. A brass plaque on the wall reads: "Over 3,000 playable adventures await within."',
+            illustration: atriumIllustration,
+            exits: CATALOGUE.map(w => ({path: `/${w.id}`, label: w.id})),
+            breadcrumb: [{name: 'Atrium'}],
+            gameQuery: search ? {type: 'search', search} : undefined,
+        };
+    }
+
+    // /<wingId>
+    if (segments.length === 1) {
+        const wing = findWing(segments[0]);
+        if (!wing) return undefined;
+        return {
+            title: wing.title,
+            pageTitle: `${wing.title} - Talebrary`,
+            narrative: wing.narrative,
+            illustration: wing.illustration,
+            exits: [
+                {path: '/', label: 'back'},
+                ...wing.categories.map(c => ({path: `/${wing.id}/${c.id}`, label: c.id})),
+            ],
+            breadcrumb: [
+                {name: 'Atrium', item: '/'},
+                {name: wing.title},
+            ],
+            gameQuery: search ? {type: 'search', search} : undefined,
+        };
+    }
+
+    // /<wingId>/<categoryId>
+    if (segments.length === 2) {
+        const wing = findWing(segments[0]);
+        if (!wing) return undefined;
+        const category = findCategory(wing, segments[1]);
+        if (!category) return undefined;
+        const siblings = wing.categories.filter(c => c.id !== category.id).slice(0, 2);
+        return {
+            title: category.title,
+            pageTitle: `${category.title} - ${wing.title} - Talebrary`,
+            narrative: category.narrative,
+            illustration: category.illustration,
+            exits: [
+                {path: `/${wing.id}`, label: 'back'},
+                ...siblings.map(c => ({path: `/${wing.id}/${c.id}`, label: c.id})),
+            ],
+            breadcrumb: [
+                {name: 'Atrium', item: '/'},
+                {name: wing.title, item: `/${wing.id}`},
+                {name: category.title},
+            ],
+            gameQuery: search ? {type: 'search', search} : categoryToQuery(category),
+        };
+    }
+
+    return undefined;
 }

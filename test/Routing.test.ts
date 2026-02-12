@@ -18,52 +18,55 @@ function stubBucket() {
 function createRouting(overrides: Partial<RouterDependencies> = {}): Routing {
     return new Routing({
         bucket: stubBucket(),
-        search: stubHandler('search') as any,
+        catalogue: stubHandler('catalogue') as any,
         coverArt: stubHandler('coverArt') as any,
         story: stubHandler('story') as any,
         content: stubHandler('content') as any,
         art: stubHandler('art') as any,
         suggestions: stubHandler('suggestions') as any,
         events: stubHandler('events') as any,
-        atrium: stubHandler('atrium') as any,
-        wing: stubHandler('wing') as any,
-        aisle: stubHandler('aisle') as any,
         ...overrides,
     } as any);
 }
 
 describe("Routing", () => {
     describe("catalogue routes", () => {
-        test("/ routes to atrium", async () => {
+        test("/ routes to catalogue", async () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/"));
-            expect(await response.text()).toBe("atrium");
+            expect(await response.text()).toBe("catalogue");
         });
 
-        test("/catalogue routes to atrium", async () => {
+        test("/genres routes to catalogue", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/genres"));
+            expect(await response.text()).toBe("catalogue");
+        });
+
+        test("/genres/fantasy routes to catalogue", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/genres/fantasy"));
+            expect(await response.text()).toBe("catalogue");
+        });
+
+        test("/catalogue backwards-compat routes to catalogue", async () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/catalogue"));
-            expect(await response.text()).toBe("atrium");
+            expect(await response.text()).toBe("catalogue");
         });
 
-        test("/catalogue/genres routes to wing", async () => {
+        test("/catalogue/genres backwards-compat routes to catalogue", async () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/catalogue/genres"));
-            expect(await response.text()).toBe("wing");
-        });
-
-        test("/catalogue/genres/fantasy routes to aisle", async () => {
-            const routing = createRouting();
-            const response = await routing.handle(new Request("http://test/catalogue/genres/fantasy"));
-            expect(await response.text()).toBe("aisle");
+            expect(await response.text()).toBe("catalogue");
         });
     });
 
     describe("content routes", () => {
-        test("/content routes to search", async () => {
+        test("/content routes to catalogue", async () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/content"));
-            expect(await response.text()).toBe("search");
+            expect(await response.text()).toBe("catalogue");
         });
 
         test("/content/123 routes to content", async () => {
@@ -120,19 +123,10 @@ describe("Routing", () => {
             expect(response.status).toBe(200);
         });
 
-        test("appends index.html to trailing slash paths", async () => {
-            let requestedKey = '';
-            const routing = createRouting({
-                bucket: {
-                    get: async (key: string) => {
-                        requestedKey = key;
-                        return new Response('index', {headers: {'content-type': 'text/html'}});
-                    },
-                    put: async () => {},
-                } as any,
-            });
-            await routing.handle(new Request("http://test/some/path/"));
-            expect(requestedKey).toBe("some/path/index.html");
+        test("unknown paths without file extension route to catalogue", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/some/path"));
+            expect(await response.text()).toBe("catalogue");
         });
     });
 });

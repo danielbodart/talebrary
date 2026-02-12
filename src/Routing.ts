@@ -1,26 +1,20 @@
-import type {ContentSearch} from "./content/ContentSearch.tsx";
 import type {BucketCachingHandler} from "./storage/BucketCachingHandler.ts";
 import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {EventHandler} from "./events/EventHandler.ts";
-import type {AtriumHandler} from "./catalogue/AtriumHandler.tsx";
-import type {WingHandler} from "./catalogue/WingHandler.tsx";
-import type {AisleHandler} from "./catalogue/AisleHandler.tsx";
+import type {CatalogueHandler} from "./catalogue/CatalogueHandler.tsx";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface RouterDependencies extends
     Dependency<'bucket', TalebraryBucket>,
-    Dependency<'search', ContentSearch>,
+    Dependency<'catalogue', CatalogueHandler>,
     Dependency<'coverArt', BucketCachingHandler>,
     Dependency<'story', BucketCachingHandler>,
     Dependency<'content', ContentHandler>,
     Dependency<'art', BucketCachingHandler>,
     Dependency<'suggestions', BucketCachingHandler>,
-    Dependency<'events', EventHandler>,
-    Dependency<'atrium', AtriumHandler>,
-    Dependency<'wing', WingHandler>,
-    Dependency<'aisle', AisleHandler> {}
+    Dependency<'events', EventHandler> {}
 
 export class Routing {
     constructor(private deps: RouterDependencies) {
@@ -30,12 +24,6 @@ export class Routing {
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
         const [, section, id, subsection] = uri.path.split('/')
-
-        if (!section || (section === 'catalogue' && !id?.includes('.'))) {
-            if (!id) return this.deps.atrium.handle(request);
-            if (!subsection) return this.deps.wing.handle(request);
-            return this.deps.aisle.handle(request);
-        }
 
         if (section === 'content') {
             if (subsection === 'cover-art') {
@@ -58,7 +46,7 @@ export class Routing {
                 return this.deps.content.handle(request);
             }
 
-            return this.deps.search.handle(request);
+            return this.deps.catalogue.handle(request);
         }
 
         if (section === 'cards') {
@@ -71,10 +59,13 @@ export class Routing {
             return this.deps.events.handle(request);
         }
 
-        if (uri.path.endsWith('/')) {
-            uri.path += 'index.html';
+        // Static files (path contains file extension)
+        const lastSegment = uri.path.split('/').pop() ?? '';
+        if (lastSegment.includes('.')) {
+            return this.deps.bucket.get(uri.path.slice(1));
         }
 
-        return this.deps.bucket.get(uri.path.slice(1));
+        // Everything else → catalogue rooms
+        return this.deps.catalogue.handle(request);
     }
 }

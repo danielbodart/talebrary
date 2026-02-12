@@ -36,6 +36,14 @@
     font-weight: 700;
 }
 
+.catalogue .suggestions.nav a.hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
 .catalogue .suggestions.nav a:hover,
 .catalogue .suggestions.nav x-instruction:hover {
     text-decoration: none;
@@ -45,13 +53,67 @@
 
 /* --- Search form --- */
 
-/* --- Scene card: push below sticky bar --- */
+/* --- Scene card: first one pushes below sticky breadcrumb bar --- */
 
-.catalogue .scene-card {
-    margin-top: calc(38px + var(--border-size) + var(--padding));
+/* --- Play button: full-width bar matching input/suggestions style --- */
+
+.catalogue .play {
+    position: static;
+    transform: none;
+    display: block;
+    width: 100%;
+    background-color: var(--eerie-black);
+    color: var(--white-smoke);
+    font-family: "League Spartan", sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 10px;
+    border: none;
+    border-top: var(--border-size-small) ridge var(--sunset);
+    border-radius: 0;
+    box-sizing: border-box;
+    cursor: pointer;
 }
 
-.catalogue .window.grid + .scene-card,
+.catalogue .play::after {
+    display: none;
+}
+
+.catalogue .play:not([href]) {
+    color: var(--dim-gray);
+    background-color: var(--eerie-black);
+    border-color: var(--sunset);
+    cursor: default;
+}
+
+/* --- Hide ratings in catalogue --- */
+
+.catalogue .rating {
+    display: none;
+}
+
+/* --- Remove extra margin before in-flow play button --- */
+
+.catalogue .author:has(+ .play),
+.catalogue .description:has(+ .play) {
+    margin-bottom: 0;
+}
+
+/* --- Consistent card spacing --- */
+
+.catalogue .window.buffer .card {
+    margin: var(--padding) auto;
+}
+
+/* --- Scene card: first one pushes below sticky breadcrumb bar --- */
+
+.catalogue .window.grid + .scene-card {
+    margin-top: calc(56px + var(--border-size) + var(--padding));
+}
+
 .catalogue .window.grid + .window.buffer .card:first-child {
     margin-top: calc(56px + var(--border-size) + var(--padding));
 }

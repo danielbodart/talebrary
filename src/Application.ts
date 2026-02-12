@@ -1,5 +1,4 @@
 import type {TalebraryAi} from "./ai/TalebraryAi.ts";
-import {ContentSearch} from "./content/ContentSearch.tsx";
 import {SqlGameFinder} from "./games/SqlGameFinder.ts";
 import {type Http} from "./http/mod.ts";
 import {Routing} from "./Routing.ts";
@@ -18,9 +17,7 @@ import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {EventHandler} from "./events/EventHandler.ts";
-import {AtriumHandler} from "./catalogue/AtriumHandler.tsx";
-import {WingHandler} from "./catalogue/WingHandler.tsx";
-import {AisleHandler} from "./catalogue/AisleHandler.tsx";
+import {CatalogueHandler} from "./catalogue/CatalogueHandler.tsx";
 import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
@@ -51,16 +48,13 @@ export function application(deps: ApplicationDependencies) {
         .set('eventSender', _ => ({ send: async () => {} }))
         .set('events', constructor(EventHandler))
         .set('finder', constructor(SqlGameFinder))
-        .set('search', constructor(ContentSearch))
         .set('illustration', constructor(IllustrationHandler))
         .set('coverArt', deps => new BucketCachingHandler(deps, coverArt(deps)))
         .set('story', deps => new BucketCachingHandler(deps, story(deps)))
         .set('art', deps => new BucketCachingHandler(deps, request => deps.illustration.handle(request)))
         .set('suggestions', constructor(SuggestionsHandler))
         .decorate('suggestions', deps => new BucketCachingHandler(deps, request => deps.suggestions.handle(request)))
-        .set('atrium', constructor(AtriumHandler))
-        .set('wing', constructor(WingHandler))
-        .set('aisle', constructor(AisleHandler))
+        .set('catalogue', constructor(CatalogueHandler))
         .set('content', constructor(ContentHandler))
         .set('handler', constructor(Routing))
         .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request), renderers))
