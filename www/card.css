@@ -276,9 +276,11 @@ body.search {
 }
 
 .image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     flex-shrink: 0;
     object-fit: contain;
-    width: 100%;
     background-color: #000;
     background-image: url("/icons/loader.svg");
     background-size: 100px 100px;
@@ -287,10 +289,7 @@ body.search {
 }
 
 .scene .image, .cards .image {
-    width: 100%;
     min-height: 50%;
-    display: block;
-    aspect-ratio: 1/1;
 }
 
 .ctrl img[reloadable]:hover {
