@@ -12,7 +12,7 @@ export const librarianTopics: LibrarianTopic[] = [
     },
     {
         id: 'about the illustrations',
-        response: 'The librarian gestures at the images adorning the walls. "An enchantment older than any of us. As each story describes its world \u2014 a dimly lit cave, a bustling marketplace, a ship on stormy seas \u2014 the magic reads those words and conjures an image to match. Every illustration you see was born from the tale\u2019s own descriptions." He smiles. "No two readings are quite alike, for the enchantment interprets the words anew each time."',
+        response: 'The librarian gestures at the images adorning the walls. "An enchantment older than any of us. As each story describes its world \u2014 a dimly lit cave, a bustling marketplace, a ship on stormy seas \u2014 the magic reads those words and conjures an image to match. Every illustration you see was born from the tale\u2019s own descriptions."',
     },
     {
         id: 'about the collection',

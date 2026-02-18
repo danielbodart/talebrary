@@ -55,38 +55,78 @@
 
 /* --- Scene card: first one pushes below sticky breadcrumb bar --- */
 
-/* --- Play button: full-width bar matching input/suggestions style --- */
+/* --- Play bar: full-width black strip with ridge border --- */
+
+.catalogue .play-bar {
+    display: flex;
+    justify-content: center;
+    background-color: var(--eerie-black);
+    border-top: var(--border-size-small) ridge var(--sunset);
+    padding: 10px;
+}
+
+/* --- Play button: pill style matching suggestion buttons --- */
 
 .catalogue .play {
     position: static;
     transform: none;
-    display: block;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: auto;
+    margin: 0;
     background-color: var(--eerie-black);
     color: var(--white-smoke);
-    font-family: "League Spartan", sans-serif;
     font-weight: 700;
-    font-size: 1.2rem;
+    font-family: inherit;
+    font-size: 1rem;
     text-align: center;
     text-decoration: none;
-    text-transform: uppercase;
-    padding: 10px;
-    border: none;
-    border-top: var(--border-size-small) ridge var(--sunset);
-    border-radius: 0;
+    text-transform: none;
+    padding: 6px 14px 6px 10px;
+    border: 2px solid var(--white-smoke);
+    border-radius: 7px;
     box-sizing: border-box;
     cursor: pointer;
+}
+
+.catalogue .play::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    background-color: currentColor;
+    mask-image: url('icons/play-solid.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
 }
 
 .catalogue .play::after {
     display: none;
 }
 
+.catalogue .play[href]:hover {
+    background-color: var(--white-smoke);
+    color: var(--eerie-black);
+}
+
 .catalogue .play:not([href]) {
     color: var(--dim-gray);
-    background-color: var(--eerie-black);
-    border-color: var(--sunset);
+    border-color: var(--dim-gray);
     cursor: default;
+}
+
+/* --- Subtle separator between author and description --- */
+
+.catalogue .description {
+    border-top: 1px solid var(--sunset);
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 /* --- Hide ratings in catalogue --- */
@@ -97,8 +137,8 @@
 
 /* --- Remove extra margin before in-flow play button --- */
 
-.catalogue .author:has(+ .play),
-.catalogue .description:has(+ .play) {
+.catalogue .author:has(+ .play-bar),
+.catalogue .description:has(+ .play-bar) {
     margin-bottom: 0;
 }
 

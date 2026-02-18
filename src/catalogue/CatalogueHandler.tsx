@@ -1,5 +1,5 @@
 import type {GameFinder, GameInfo} from "../games/GameFinder.ts";
-import {wellFormed} from "../templates/misc.ts";
+import {wellFormed, safeHtml} from "../templates/misc.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
 import {type GameQuery, type Room, resolveRoom} from "./CatalogueConfig.ts";
 import {Uri} from "../http/Uri.ts";
@@ -115,11 +115,13 @@ function render(room: Room, search: string | undefined, games: GameInfo[]): stri
                              aria-hidden="true"></img>
                         <div class="title">{wellFormed(game.title)}</div>
                         <div class="author">{wellFormed(game.author)}</div>
-                        {game.description ? <div class="description">{wellFormed(game.description)}</div> : ''}
-                        {game.playable ?
-                            <a class="play" href={`/content/${game.id}/`}>Play</a> :
-                            <a class="play">Play</a>
-                        }
+                        {game.description ? <div class="description">{safeHtml(game.description)}</div> : ''}
+                        <div class="play-bar">
+                            {game.playable ?
+                                <a class="play" href={`/content/${game.id}/`}>play</a> :
+                                <a class="play">play</a>
+                            }
+                        </div>
                     </div>
                 )}
             </div> : ''}
