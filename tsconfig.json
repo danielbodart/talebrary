@@ -28,5 +28,6 @@
     "jsx": "react",
     "jsxFactory": "jsx.createElement",
     "jsxFragmentFactory": "null"
-  }
+  },
+  "include": ["src", "test", "worker-configuration.d.ts"]
 }
