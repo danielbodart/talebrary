@@ -24,7 +24,7 @@ All commands via `./run [command]`. Check `./run` before inventing build steps �
 - `Http`: `(request: Request) => Promise<Response>` — defined in `src/http/mod.ts`, used everywhere
 - Mobile-first — must work on both mobile and desktop
 - Templates: `TemplateHandler` wraps pages; `<meta name="template" content="card"/>` selects layout
-- `baseTemplate` provides fonts, favicon, viewport, analytics — never duplicate in handlers
+- `baseTemplate` (via `header.tsx`) provides fonts, favicon, viewport, and the Cloudflare Web Analytics beacon — never duplicate in handlers. The beacon is injected manually in `header.tsx` because CF auto-injection does not run on Worker responses
 - Slot system: `<slot name="head/body">` for projection, `<slot src="/path">` for HTTP partials
 
 # Implementation
