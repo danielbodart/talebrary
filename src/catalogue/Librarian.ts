@@ -8,7 +8,7 @@ export interface LibrarianTopic {
 export const librarianTopics: LibrarianTopic[] = [
     {
         id: 'about the athenaeum',
-        response: 'The librarian settles into his chair. "The Athenaeum is no ordinary library. These shelves hold over two thousand playable tales \u2014 stories that respond to your words and let you shape the narrative. Many were written decades ago, their worlds described only in text. But this place has a way of bringing them to life." He gestures at the walls around you. "Ancient enchantments woven into the very stones conjure illustrations from the stories\u2019 own words, illuminate paths through their worlds, and make even the oldest tales accessible to new readers. Step into any aisle, choose a volume, and the story becomes yours to live."',
+        response: 'The librarian settles into his chair. "The Athenaeum is no ordinary library. These shelves hold thousands of interactive tales \u2014 stories that respond to your words and let you shape the narrative. Many were written decades ago, their worlds described only in text. But this place has a way of bringing them to life." He gestures at the walls around you. "Ancient enchantments woven into the very stones conjure illustrations from the stories\u2019 own words, illuminate paths through their worlds, and make even the oldest tales accessible to new readers. Step into any aisle, choose a volume, and the story becomes yours to live."',
     },
     {
         id: 'about the illustrations',
@@ -16,7 +16,7 @@ export const librarianTopics: LibrarianTopic[] = [
     },
     {
         id: 'about the collection',
-        response: 'The librarian\u2019s voice takes on a reverent tone. "Over two thousand playable tales rest on these shelves, spanning half a century of storytelling. The earliest date from the 1970s \u2014 a time when pioneers first discovered that stories could be more than words on a page. They could be conversations. Adventures you step into rather than merely read." He pauses. "The collection spans every genre you can imagine \u2014 fantasy, mystery, horror, science fiction, and many more. Browse the wings, or simply tell me what you seek."',
+        response: 'The librarian\u2019s voice takes on a reverent tone. "Over two thousand interactive tales rest on these shelves, spanning half a century of storytelling. The earliest date from the 1970s \u2014 a time when pioneers first discovered that stories could be more than words on a page. They could be conversations. Adventures you step into rather than merely read." He pauses. "The collection spans every genre you can imagine \u2014 fantasy, mystery, horror, science fiction, and many more. Browse the wings, or simply tell me what you seek."',
     },
 ];
 
