@@ -3,6 +3,6 @@ declare module "fs-xattr"
 
 declare global {
     namespace crypto {
-        DigestStream: any
+        const DigestStream: any
     }
 }
