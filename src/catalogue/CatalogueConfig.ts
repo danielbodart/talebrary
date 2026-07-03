@@ -239,7 +239,7 @@ export function resolveRoom(path: string, search?: string): Room | undefined {
         return {
             title: 'The Atrium',
             pageTitle: 'The Talebrary Athenaeum',
-            narrative: 'You find yourself standing in the atrium of a vast library. Before you stands the librarian, ready to help you find whatever adventure you require. To either side, grand archways lead to different wings of the collection. A brass plaque on the wall reads: "Over 3,000 playable adventures await within."',
+            narrative: 'You find yourself standing in the atrium of a vast library. Before you stands the librarian, ready to help you find whatever adventure you require. To either side, grand archways lead to different wings of the collection. A brass plaque on the wall reads: "Over 2,000 playable adventures await within."',
             illustration: atriumIllustration,
             exits: CATALOGUE.map(w => ({path: `/${w.id}`, label: w.id})),
             breadcrumb: [{name: 'Atrium'}],
