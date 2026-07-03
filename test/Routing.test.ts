@@ -24,6 +24,8 @@ function createRouting(overrides: Partial<RouterDependencies> = {}): Routing {
         content: stubHandler('content') as any,
         art: stubHandler('art') as any,
         suggestions: stubHandler('suggestions') as any,
+        sitemap: stubHandler('sitemap') as any,
+        robots: stubHandler('robots') as any,
         events: stubHandler('events') as any,
         ...overrides,
     } as any);
@@ -113,6 +115,20 @@ describe("Routing", () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/events"));
             expect(await response.text()).toBe("events");
+        });
+    });
+
+    describe("sitemap and robots routes", () => {
+        test("/sitemap.xml routes to sitemap handler", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/sitemap.xml"));
+            expect(await response.text()).toBe("sitemap");
+        });
+
+        test("/robots.txt routes to robots handler", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/robots.txt"));
+            expect(await response.text()).toBe("robots");
         });
     });
 

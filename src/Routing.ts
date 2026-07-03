@@ -4,6 +4,8 @@ import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {EventHandler} from "./events/EventHandler.ts";
 import type {CatalogueHandler} from "./catalogue/CatalogueHandler.tsx";
+import type {SitemapHandler} from "./sitemap/SitemapHandler.ts";
+import type {RobotsHandler} from "./sitemap/RobotsHandler.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface RouterDependencies extends
@@ -14,6 +16,8 @@ export interface RouterDependencies extends
     Dependency<'content', ContentHandler>,
     Dependency<'art', BucketCachingHandler>,
     Dependency<'suggestions', BucketCachingHandler>,
+    Dependency<'sitemap', SitemapHandler>,
+    Dependency<'robots', RobotsHandler>,
     Dependency<'events', EventHandler> {}
 
 export class Routing {
@@ -57,6 +61,14 @@ export class Routing {
 
         if(section === 'events') {
             return this.deps.events.handle(request);
+        }
+
+        if (section === 'sitemap.xml') {
+            return this.deps.sitemap.handle(request);
+        }
+
+        if (section === 'robots.txt') {
+            return this.deps.robots.handle(request);
         }
 
         // Static files (path contains file extension)

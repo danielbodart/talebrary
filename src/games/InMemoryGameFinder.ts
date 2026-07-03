@@ -39,6 +39,10 @@ export class InMemoryGameFinder implements GameFinder {
         return this.games.filter(g => ids.includes(g.id));
     }
 
+    async findAllIds(): Promise<string[]> {
+        return this.games.filter(g => g.playable === 1).map(g => g.id);
+    }
+
     async get(id: string): Promise<GameStory | null> {
         return this.stories.get(id) ?? null;
     }

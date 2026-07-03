@@ -205,6 +205,17 @@ export class SqlGameFinder implements GameFinder {
         return (await this.db.prepare(sql).bind(...ids, ...lang.params).all<GameInfo>()).results;
     }
 
+    async findAllIds(): Promise<string[]> {
+        const sql = `
+            SELECT g.id
+            FROM talebrary_games g
+            WHERE g.enabled = 1
+              AND ${playableSubquery} = 1
+            ORDER BY g.id
+        `;
+        return (await this.db.prepare(sql).all<{ id: string }>()).results.map(r => r.id);
+    }
+
     async get(id: string): Promise<GameStory | null> {
         const sql = `
             SELECT g.id, g.title, g.author, g.description, l.url, l.format AS type, g.coverart

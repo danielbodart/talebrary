@@ -18,6 +18,8 @@ import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {EventHandler} from "./events/EventHandler.ts";
 import {CatalogueHandler} from "./catalogue/CatalogueHandler.tsx";
+import {SitemapHandler} from "./sitemap/SitemapHandler.ts";
+import {RobotsHandler} from "./sitemap/RobotsHandler.ts";
 import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
@@ -56,6 +58,8 @@ export function application(deps: ApplicationDependencies) {
         .decorate('suggestions', deps => new BucketCachingHandler(deps, request => deps.suggestions.handle(request)))
         .set('catalogue', constructor(CatalogueHandler))
         .set('content', constructor(ContentHandler))
+        .set('sitemap', constructor(SitemapHandler))
+        .set('robots', constructor(RobotsHandler))
         .set('handler', constructor(Routing))
         .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request), renderers))
         .decorate('handler', ({handler}) => cacheControlHandler(handler))

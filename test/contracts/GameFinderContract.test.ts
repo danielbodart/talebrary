@@ -79,6 +79,22 @@ function gameFinderContractTests(name: string, setup: () => GameFinder) {
             const result = await finder.get('nonexistent-id-999');
             expect(result).toBeNull();
         });
+
+        test("findAllIds returns array of string ids", async () => {
+            const finder = setup();
+            const ids = await finder.findAllIds();
+            expect(ids).toBeArray();
+            for (const id of ids) expect(typeof id).toBe("string");
+        });
+
+        test("findAllIds includes every playable game returned by find", async () => {
+            const finder = setup();
+            const all = await finder.find('');
+            const ids = await finder.findAllIds();
+            for (const game of all) {
+                if (game.playable === 1) expect(ids).toContain(game.id);
+            }
+        });
     });
 }
 

@@ -27,5 +27,6 @@ export interface GameFinder {
     findTopRated(languages?: string[]): Promise<GameInfo[]>;
     findRecent(languages?: string[]): Promise<GameInfo[]>;
     findByIds(ids: string[], languages?: string[]): Promise<GameInfo[]>;
+    findAllIds(): Promise<string[]>;
     get(id: string): Promise<GameStory | null>;
 }
