@@ -6,6 +6,10 @@ main = "src/cloudflare/app.ts"
 enabled = true
 head_sampling_rate = 1
 
+[observability.traces]
+enabled = true
+head_sampling_rate = 1
+
 [[d1_databases]]
 binding = "db"
 database_name = "talebrary"
