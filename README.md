@@ -1,6 +1,6 @@
 # Talebrary
 
-[**talebrary.com**](https://talebrary.com/) — an interactive fiction platform for discovering and playing 3,000+ text adventure games in the browser, with AI-generated cover art, scene illustrations, and intelligent command suggestions.
+[**talebrary.com**](https://talebrary.com/) — an interactive fiction platform for discovering and playing 2,000+ playable text adventure games in the browser, with AI-generated cover art, scene illustrations, and intelligent command suggestions.
 
 ## AI Pipelines
 
