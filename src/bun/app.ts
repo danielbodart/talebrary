@@ -19,7 +19,7 @@ const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, PROXY_URL, PROXY_TOKEN} = pr
 function ai(): TalebraryAi {
     if (CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_API_TOKEN) {
         console.log('Using Cloudflare Workers AI via REST API');
-        return new CloudflareAiAdapter(new CloudflareRestAi(CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, client));
+        return new CloudflareAiAdapter(new CloudflareRestAi(CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, client, "default"));
     }
     console.log('Using DumbAi stub');
     return new DumbAi();

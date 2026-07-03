@@ -1,22 +1,32 @@
 import type {ScopedPrompt} from "../types.ts";
 import type {ImagePrompt, TalebraryAi} from "./TalebraryAi.ts";
 
+interface RunOptions {
+    gateway?: {id: string; collectLog?: boolean; metadata?: Record<string, string | number | boolean>};
+}
+
 interface CloudflareAi {
-    run(model: string, input: any): Promise<any>;
+    run(model: string, input: any, options?: RunOptions): Promise<any>;
 }
 
 export class CloudflareAiAdapter implements TalebraryAi {
-    constructor(private ai: CloudflareAi) {
+    // gateway: AI Gateway id to route requests through for logging/caching/limits.
+    // Pass "default" to use (and auto-create) the account default gateway.
+    constructor(private ai: CloudflareAi, private gateway?: string) {
+    }
+
+    private options(): RunOptions | undefined {
+        return this.gateway ? {gateway: {id: this.gateway, collectLog: true}} : undefined;
     }
 
     async generateText<T = any>(model: string, prompt: ScopedPrompt): Promise<T> {
-        const result = await this.ai.run(model, prompt);
+        const result = await this.ai.run(model, prompt, this.options());
         return parseTextResponse<T>(result);
     }
 
     async generateImage(model: string, input: ImagePrompt): Promise<Uint8Array> {
         const cloudflareInput = toCloudflareImageInput(model, input);
-        const result = await this.ai.run(model, cloudflareInput);
+        const result = await this.ai.run(model, cloudflareInput, this.options());
         return normalizeImageResponse(result);
     }
 }

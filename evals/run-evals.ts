@@ -20,7 +20,7 @@ if (!accountId || !apiToken) {
     process.exit(1);
 }
 
-const ai = new CachedAi(new CloudflareAiAdapter(new CloudflareRestAi(accountId, apiToken, client)));
+const ai = new CachedAi(new CloudflareAiAdapter(new CloudflareRestAi(accountId, apiToken, client, "default")));
 const enableVisionJudge = process.argv.includes("--vision-judge");
 const suite = process.argv[2];
 

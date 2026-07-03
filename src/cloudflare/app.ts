@@ -22,7 +22,7 @@ function deps(env: Env) {
         digest: md5,
         db: new D1Adapter(env.db),
         bucket: new CloudflareR2Adapter(env.r2),
-        ai: new CloudflareAiAdapter(env.ai),
+        ai: new CloudflareAiAdapter(env.ai, "default"),
         coverArtRunner: new CloudflareWorkflowRunner<CoverArtParams, CoverArtResult>(env.COVER_ART_WORKFLOW),
         illustrationRunner: new CloudflareWorkflowRunner<IllustrationParams, IllustrationResult>(env.ILLUSTRATION_WORKFLOW),
     };

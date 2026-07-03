@@ -3,7 +3,9 @@ import type {Http} from "../http/mod.ts";
 export class CloudflareRestAi {
     private readonly baseUrl: string;
 
-    constructor(accountId: string, private apiToken: string, private http: Http) {
+    // gateway: AI Gateway id to route requests through for logging/caching/limits.
+    // Pass "default" to use (and auto-create) the account default gateway.
+    constructor(accountId: string, private apiToken: string, private http: Http, private gateway?: string) {
         this.baseUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run`;
     }
 
@@ -13,6 +15,7 @@ export class CloudflareRestAi {
             'Authorization': `Bearer ${this.apiToken}`,
         };
         if (contentType) headers['Content-Type'] = contentType;
+        if (this.gateway) headers['cf-aig-gateway-id'] = this.gateway;
 
         const request = new Request(`${this.baseUrl}/${model}`, {
             method: 'POST',
