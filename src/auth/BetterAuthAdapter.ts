@@ -25,6 +25,7 @@ export class BetterAuthAdapter implements Auth {
 
     constructor(db: D1Database, config: BetterAuthConfig) {
         this.auth = betterAuth({
+            appName: "Talebrary",
             database: db as any,
             secret: config.secret,
             baseURL: config.baseURL,
