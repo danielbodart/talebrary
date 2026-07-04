@@ -27,6 +27,8 @@ export class BetterAuthAdapter implements Auth {
         this.auth = betterAuth({
             appName: "Talebrary",
             database: db as any,
+            // Single joined query instead of N queries per session read — bigger win on D1's latency.
+            experimental: {joins: true},
             secret: config.secret,
             baseURL: config.baseURL,
             // Behind Cloudflare: cf-connecting-ip is the true client IP (x-forwarded-for as fallback).
