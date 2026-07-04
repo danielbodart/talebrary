@@ -28,6 +28,11 @@ export class BetterAuthAdapter implements Auth {
             database: db as any,
             secret: config.secret,
             baseURL: config.baseURL,
+            // Behind Cloudflare: cf-connecting-ip is the true client IP (x-forwarded-for as fallback).
+            // Needed for correct rate-limiting and dashboard activity/geo.
+            advanced: {
+                ipAddress: {ipAddressHeaders: ["cf-connecting-ip", "x-forwarded-for"]},
+            },
             socialProviders: {
                 google: {clientId: config.googleClientId, clientSecret: config.googleClientSecret},
             },
