@@ -20,6 +20,8 @@ import {EventHandler} from "./events/EventHandler.ts";
 import {CatalogueHandler} from "./catalogue/CatalogueHandler.tsx";
 import {SitemapHandler} from "./sitemap/SitemapHandler.ts";
 import {RobotsHandler} from "./sitemap/RobotsHandler.ts";
+import {AuthHandler} from "./auth/AuthHandler.tsx";
+import type {Auth} from "./auth/Auth.ts";
 import {constructor, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
@@ -34,6 +36,7 @@ export interface ApplicationDependencies extends
     Dependency<'bucket', TalebraryBucket>,
     Dependency<'digest', Digest>,
     Dependency<'ai', TalebraryAi>,
+    Dependency<'auth', Auth>,
     Dependency<'coverArtRunner', WorkflowRunner<CoverArtParams, CoverArtResult>>,
     Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>> {
 }
@@ -60,6 +63,7 @@ export function application(deps: ApplicationDependencies) {
         .set('content', constructor(ContentHandler))
         .set('sitemap', constructor(SitemapHandler))
         .set('robots', constructor(RobotsHandler))
+        .set('authHandler', constructor(AuthHandler))
         .set('handler', constructor(Routing))
         .decorate('handler', ({handler}) => templateHandler(request => handler.handle(request), renderers))
         .decorate('handler', ({handler}) => cacheControlHandler(handler))

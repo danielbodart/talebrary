@@ -6,6 +6,8 @@ import type {EventHandler} from "./events/EventHandler.ts";
 import type {CatalogueHandler} from "./catalogue/CatalogueHandler.tsx";
 import type {SitemapHandler} from "./sitemap/SitemapHandler.ts";
 import type {RobotsHandler} from "./sitemap/RobotsHandler.ts";
+import type {Auth} from "./auth/Auth.ts";
+import type {AuthHandler} from "./auth/AuthHandler.tsx";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface RouterDependencies extends
@@ -18,6 +20,8 @@ export interface RouterDependencies extends
     Dependency<'suggestions', BucketCachingHandler>,
     Dependency<'sitemap', SitemapHandler>,
     Dependency<'robots', RobotsHandler>,
+    Dependency<'auth', Auth>,
+    Dependency<'authHandler', AuthHandler>,
     Dependency<'events', EventHandler> {}
 
 export class Routing {
@@ -61,6 +65,14 @@ export class Routing {
 
         if(section === 'events') {
             return this.deps.events.handle(request);
+        }
+
+        if (section === 'api' && id === 'auth') {
+            return this.deps.auth.handle(request);
+        }
+
+        if (section === 'login' || section === 'account' || section === 'logout') {
+            return this.deps.authHandler.handle(request);
         }
 
         if (section === 'sitemap.xml') {

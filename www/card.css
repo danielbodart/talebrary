@@ -322,7 +322,7 @@ img[state=failed] + div {
     border-top: none !important;
 }
 
-.title, div.header:first-child, div.subheader:first-child, img + div.header, img + div.subheader, .suggestions {
+.title, div.header:first-child, div.subheader:first-child, img + div.header, img + div.subheader, .suggestions, .auth-actions {
     font-family: "League Spartan", sans-serif;
     font-optical-sizing: auto;
     font-weight: 700;
@@ -346,7 +346,7 @@ img[state=failed] + div {
     border-top: none;
 }
 
-.title:last-child, div.header:last-child, div.subheader:last-child, .suggestions:last-child {
+.title:last-child, div.header:last-child, div.subheader:last-child, .suggestions:last-child, .auth-actions:last-child {
     border-bottom: none;
 }
 
@@ -390,7 +390,7 @@ img[state=failed] + div {
     margin-left: 10px;
 }
 
-.suggestions x-instruction {
+.suggestions x-instruction, .auth-actions a {
     border: 2px solid var(--white-smoke);
     border-radius: 7px;
     padding: 6px 7px 6px 6px;
@@ -402,7 +402,7 @@ img[state=failed] + div {
     visibility: hidden;
 }
 
-.suggestions x-instruction:hover {
+.suggestions x-instruction:hover, .auth-actions a:hover {
     text-decoration: none;
     background-color: var(--white-smoke);
     color: var(--eerie-black);
@@ -627,4 +627,62 @@ buffer-window section.card:first-child {
 
 body {
     padding-bottom: 80px;
+}
+
+/* --- Account nav icon (all pages) + auth page CTA --- */
+
+/* Sits in the fixed breadcrumb banner (.window.grid, ~38px, z-20). */
+.account-link {
+    position: fixed;
+    top: 9px;
+    right: 14px;
+    z-index: 30;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+}
+
+.account-link::before {
+    content: "";
+    width: 22px;
+    height: 22px;
+    background-color: var(--white-smoke);
+    -webkit-mask: url('icons/circle-user-solid.svg') center / contain no-repeat;
+    mask: url('icons/circle-user-solid.svg') center / contain no-repeat;
+}
+
+.account-link:hover::before {
+    background-color: var(--sunset);
+}
+
+/* On the account/sign-in pages the breadcrumb (Atrium › Account) is the entry — hide the icon. */
+.account-page .account-link {
+    display: none;
+}
+
+/* Push the card below the sticky breadcrumb bar — mirrors catalogue.css's
+   `.catalogue .window.grid + .scene-card` offset so it lines up with the Atrium. */
+.account-page .window.grid + .card {
+    margin-top: calc(56px + var(--border-size) + var(--padding));
+}
+
+/* Auth CTA reuses the .suggestions dark-bar + pill styling (see grouped rules
+   above); only the container layout and link reset live here. */
+.auth-copy {
+    padding: 12px;
+}
+
+.auth-actions {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* Small centred button (not full-width) — flex-grow:0 overrides the shared pill rule. */
+.auth-actions a {
+    flex-grow: 0;
+    padding: 6px 24px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
 }

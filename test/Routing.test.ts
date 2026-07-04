@@ -26,6 +26,8 @@ function createRouting(overrides: Partial<RouterDependencies> = {}): Routing {
         suggestions: stubHandler('suggestions') as any,
         sitemap: stubHandler('sitemap') as any,
         robots: stubHandler('robots') as any,
+        auth: {handle: async () => new Response('auth', {status: 200})} as any,
+        authHandler: stubHandler('authHandler') as any,
         events: stubHandler('events') as any,
         ...overrides,
     } as any);
@@ -129,6 +131,38 @@ describe("Routing", () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/robots.txt"));
             expect(await response.text()).toBe("robots");
+        });
+    });
+
+    describe("auth routes", () => {
+        test("/api/auth/* routes to auth engine", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/api/auth/callback/google"));
+            expect(await response.text()).toBe("auth");
+        });
+
+        test("/login routes to authHandler", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/login"));
+            expect(await response.text()).toBe("authHandler");
+        });
+
+        test("/login/google routes to authHandler", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/login/google"));
+            expect(await response.text()).toBe("authHandler");
+        });
+
+        test("/account routes to authHandler", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/account"));
+            expect(await response.text()).toBe("authHandler");
+        });
+
+        test("/logout routes to authHandler", async () => {
+            const routing = createRouting();
+            const response = await routing.handle(new Request("http://test/logout"));
+            expect(await response.text()).toBe("authHandler");
         });
     });
 

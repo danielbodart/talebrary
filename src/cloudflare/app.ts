@@ -6,6 +6,7 @@ import {proxyHandler} from "./proxyHandler.ts";
 import {CloudflareAiAdapter} from "../ai/CloudflareAiAdapter.ts";
 import {CloudflareR2Adapter} from "../storage/CloudflareR2Adapter.ts";
 import {D1Adapter} from "../database/D1Adapter.ts";
+import {BetterAuthAdapter} from "../auth/BetterAuthAdapter.ts";
 import {CloudflareWorkflowRunner} from "./CloudflareWorkflowRunner.ts";
 import {coverArtWorkflow} from "../workflows/coverArt.ts";
 import {illustrationWorkflow} from "../workflows/illustration.ts";
@@ -23,6 +24,13 @@ function deps(env: Env) {
         db: new D1Adapter(env.db),
         bucket: new CloudflareR2Adapter(env.r2),
         ai: new CloudflareAiAdapter(env.ai, "default"),
+        auth: new BetterAuthAdapter(env.db, {
+            secret: env.BETTER_AUTH_SECRET,
+            baseURL: env.BETTER_AUTH_URL,
+            googleClientId: env.GOOGLE_CLIENT_ID,
+            googleClientSecret: env.GOOGLE_CLIENT_SECRET,
+            dashApiKey: env.BETTER_AUTH_API_KEY,
+        }),
         coverArtRunner: new CloudflareWorkflowRunner<CoverArtParams, CoverArtResult>(env.COVER_ART_WORKFLOW),
         illustrationRunner: new CloudflareWorkflowRunner<IllustrationParams, IllustrationResult>(env.ILLUSTRATION_WORKFLOW),
     };
