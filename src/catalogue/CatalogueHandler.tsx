@@ -4,9 +4,11 @@ import {html5} from "../templates/LinkedomHelpers.ts";
 import {type GameQuery, type Room, resolveRoom} from "./CatalogueConfig.ts";
 import {Uri} from "../http/Uri.ts";
 import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
-import {treeToSuggestions} from "../player/PrefixTree.ts";
+import {treeToNodes} from "../player/SuggestionNodes.ts";
+import {buildSuggestionList} from "../player/SuggestionList.ts";
 import {librarianResponse, librarianTopics} from "./Librarian.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
+import type {JSX2DOM, SupportedElement} from "@bodar/jsx2dom/JSX2DOM.ts";
 
 export class CatalogueHandler {
     constructor(deps: Dependency<'finder', GameFinder>, private finder = deps.finder) {
@@ -40,6 +42,12 @@ export class CatalogueHandler {
     }
 }
 
+function navList(tree: Record<string, string[]>, jsx: JSX2DOM): SupportedElement {
+    const el = buildSuggestionList(treeToNodes(tree), jsx);
+    el.classList.add('nav');
+    return el;
+}
+
 function render(room: Room, search: string | undefined, games: GameInfo[]): string {
     const illustrationUrl = `/cards/art?prompt=${encodeURIComponent(JSON.stringify({
         story: {title: 'The Talebrary Athenaeum', description: 'A vast library of interactive fiction games'},
@@ -53,7 +61,6 @@ function render(room: Room, search: string | undefined, games: GameInfo[]): stri
         look: [],
         inventory: [],
     };
-    const suggestions = treeToSuggestions(tree);
 
     const librarianText = search ? librarianResponse(search, games) : undefined;
 
@@ -86,16 +93,12 @@ function render(room: Room, search: string | undefined, games: GameInfo[]): stri
                 <img is="x-image" reloadable class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
                 <div class="title">{room.title}</div>
                 <div class="normal">{room.narrative}</div>
-                <div class="suggestions nav">
-                    {suggestions.map(s =>
-                        s.completions.length > 0
-                            ? <x-instruction data-completions={JSON.stringify(s.completions)}>{s.text}</x-instruction>
-                            : <x-instruction>{s.text}</x-instruction>
-                    )}
+                <div class="exit-links hidden">
                     {room.exits.map(exit =>
-                        <a href={exit.path} class="hidden">go {exit.label}</a>
+                        <a href={exit.path}>go {exit.label}</a>
                     )}
                 </div>
+                {navList(tree, jsx)}
             </div>
 
             {librarianText ? <div class="card librarian-card">

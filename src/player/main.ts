@@ -8,8 +8,8 @@ import {InteractiveFiction} from "./InteractiveFiction.ts";
 import {BufferWindow} from "./BufferWindow.ts";
 import {GridWindow} from "./GridWindow.ts";
 import {UserInput} from "./UserInput.ts";
-import {Suggestions} from "./Suggestions.ts";
 import {type InstructionDetail, Instruction, InstructionEventName} from "./Instruction.ts";
+import {observeCarousels} from "./SuggestionCarousel.ts";
 
 const story = document.querySelector<HTMLLinkElement>('#story');
 if (!story) throw new Error("Could not find story");
@@ -30,23 +30,23 @@ const app = LazyMap.create()
     .set('HTMLImageElement', instance(HTMLImageElement))
     .set('ImageElement', customElement(ImageElement))
     .set('Instruction', customElement(Instruction))
-    .set('Suggestions', customElement(Suggestions))
     .set('UserInput', customElement(UserInput))
     .set('GridWindow', customElement(GridWindow))
     .set('BufferWindow', customElement(BufferWindow))
     .set('InteractiveFiction', customElement(InteractiveFiction))
-realise(app.ImageElement, app.Instruction, app.Suggestions, app.UserInput, app.GridWindow, app.BufferWindow, app.InteractiveFiction);
+realise(app.ImageElement, app.Instruction, app.UserInput, app.GridWindow, app.BufferWindow, app.InteractiveFiction);
 
 controlKeys(document);
+observeCarousels(document);
 
 document.addEventListener(InstructionEventName, (ev: Event) => {
-    const {text, partial, completions} = (ev as CustomEvent<InstructionDetail>).detail;
+    const {text, action} = (ev as CustomEvent<InstructionDetail>).detail;
     const input = document.querySelector('user-input') as any;
     if (!input) return;
-    if (partial) {
-        input.setPrefix(text, completions);
+    if (action === 'prefill') {
+        input.setPrefix(text);
     } else {
-        input.appendText(text);
+        input.submitText(text);
     }
 });
 

@@ -23,32 +23,9 @@
     background-image: url('icons/dungeon-solid.svg');
 }
 
-.catalogue .suggestions.nav a,
-.catalogue .suggestions.nav x-instruction {
-    border: 2px solid var(--white-smoke);
-    border-radius: 7px;
-    padding: 6px 7px 6px 6px;
-    flex-grow: 1;
-    text-align: center;
-    text-decoration: none;
-    color: inherit;
-    cursor: pointer;
-    font-weight: 700;
-}
-
-.catalogue .suggestions.nav a.hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-}
-
-.catalogue .suggestions.nav a:hover,
-.catalogue .suggestions.nav x-instruction:hover {
-    text-decoration: none;
-    background-color: var(--white-smoke);
-    color: var(--eerie-black);
+/* Exit paths are data for the "go <exit>" command lookup, not shown. */
+.exit-links {
+    display: none;
 }
 
 /* --- Search form --- */

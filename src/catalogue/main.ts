@@ -2,11 +2,12 @@ import {constructor, instance, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import {SystemClock} from "../system/clock.ts";
 import {ImageElement} from "../components/ImageElement.ts";
 import {type InstructionDetail, Instruction, InstructionEventName} from "../player/Instruction.ts";
-import {Suggestions} from "../player/Suggestions.ts";
 import {customElement, realise} from "../components/misc.ts";
 import {controlKeys} from "../player/controlKeys.ts";
 import {type Room, resolveRoom} from "./CatalogueConfig.ts";
-import {treeToSuggestions} from "../player/PrefixTree.ts";
+import {treeToNodes} from "../player/SuggestionNodes.ts";
+import {buildSuggestionList} from "../player/SuggestionList.ts";
+import {observeCarousels} from "../player/SuggestionCarousel.ts";
 import {librarianTopics} from "./Librarian.ts";
 
 const app = LazyMap.create()
@@ -15,18 +16,16 @@ const app = LazyMap.create()
     .set('HTMLElement', instance(HTMLElement))
     .set('HTMLImageElement', instance(HTMLImageElement))
     .set('ImageElement', customElement(ImageElement))
-    .set('Instruction', customElement(Instruction))
-    .set('Suggestions', customElement(Suggestions));
-realise(app.ImageElement, app.Instruction, app.Suggestions);
+    .set('Instruction', customElement(Instruction));
+realise(app.ImageElement, app.Instruction);
 
 controlKeys(document);
+observeCarousels(document);
 
 const main = document.querySelector<HTMLElement>('main.catalogue')!;
 const inputControl = main.querySelector<HTMLElement>('.input-control')!;
 const form = inputControl.querySelector<HTMLFormElement>('form')!;
 const input = form.querySelector<HTMLInputElement>('input')!;
-
-let activePrefix = '';
 
 function getTopics(): Record<string, string> {
     const el = document.querySelector('.librarian-topics');
@@ -88,23 +87,18 @@ function renderRoom(room: Room) {
         look: [],
         inventory: [],
     };
-    const suggestions = treeToSuggestions(tree);
-
-    const nav = document.createElement('div');
-    nav.className = 'suggestions nav';
-    for (const s of suggestions) {
-        const el = document.createElement('x-instruction');
-        el.textContent = s.text;
-        if (s.completions.length > 0) el.dataset.completions = JSON.stringify(s.completions);
-        nav.appendChild(el);
-    }
+    const exits = document.createElement('div');
+    exits.className = 'exit-links hidden';
     for (const exit of room.exits) {
         const a = document.createElement('a');
         a.href = exit.path;
-        a.className = 'hidden';
         a.textContent = `go ${exit.label}`;
-        nav.appendChild(a);
+        exits.appendChild(a);
     }
+    card.appendChild(exits);
+
+    const nav = buildSuggestionList(treeToNodes(tree));
+    nav.classList.add('nav');
     card.appendChild(nav);
 
     main.insertBefore(card, inputControl);
@@ -203,24 +197,8 @@ function scrollToLatest() {
     }
 }
 
-function clearCompletions() {
-    inputControl.querySelector('.completions')?.remove();
-}
-
-function showCompletions(completions: string[]) {
-    clearCompletions();
-    const container = document.createElement('div');
-    container.className = 'completions';
-    for (const word of completions) {
-        const el = document.createElement('x-instruction');
-        el.textContent = word;
-        container.appendChild(el);
-    }
-    inputControl.insertBefore(container, inputControl.firstChild);
-}
-
 function findExit(label: string): {path: string; label: string} | undefined {
-    const links = main.querySelectorAll<HTMLAnchorElement>('.suggestions.nav a[href]');
+    const links = main.querySelectorAll<HTMLAnchorElement>('.exit-links a[href]');
     for (const link of links) {
         const linkText = link.textContent?.trim().toLowerCase() ?? '';
         if (linkText === `go ${label}` || linkText === label) {
@@ -233,24 +211,12 @@ function findExit(label: string): {path: string; label: string} | undefined {
 // --- Instruction event handler (same pattern as player) ---
 
 document.addEventListener(InstructionEventName, (ev: Event) => {
-    const {text, partial, completions} = (ev as CustomEvent<InstructionDetail>).detail;
-
-    if (partial) {
-        activePrefix = text;
-        if (completions.length > 0) {
-            showCompletions(completions);
-        } else {
-            clearCompletions();
-            input.value = `${text} `;
-            input.focus({preventScroll: true});
-        }
+    const {text, action} = (ev as CustomEvent<InstructionDetail>).detail;
+    if (action === 'prefill') {
+        input.value = `${text} `;
+        input.focus({preventScroll: true});
     } else {
-        clearCompletions();
-        if (activePrefix) {
-            input.value = `${activePrefix} ${text}`;
-        } else {
-            input.value = text;
-        }
+        input.value = text;
         form.dispatchEvent(new SubmitEvent('submit'));
     }
 });
@@ -264,10 +230,8 @@ form.addEventListener('submit', async (ev: SubmitEvent) => {
     if (!raw) return;
 
     input.value = '';
-    clearCompletions();
 
     const command = raw.toLowerCase();
-    activePrefix = '';
 
     // go <exit>
     const goMatch = command.match(/^go\s+(.+)$/);

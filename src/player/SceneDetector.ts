@@ -1,6 +1,7 @@
 import type {Describable, SceneContext} from "../types.ts";
 import type {SuggestionTree} from "../prompts/SuggestionsTreePrompt.ts";
-import {treeToSuggestions} from "./PrefixTree.ts";
+import {treeToNodes} from "./SuggestionNodes.ts";
+import {buildSuggestionList} from "./SuggestionList.ts";
 
 export class SceneDetector {
     detect(card: HTMLElement) {
@@ -41,17 +42,7 @@ export class SceneDetector {
             .then(response => {
                 if (!response.ok) return;
                 response.json().then((json: SuggestionTree) => {
-                    const collapsed = treeToSuggestions(json.tree);
-                    const suggestions = document.createElement('x-suggestions');
-                    for (const {text, completions} of collapsed) {
-                        const instruction = document.createElement('x-instruction');
-                        instruction.textContent = text;
-                        if (completions.length > 0) {
-                            instruction.dataset.completions = JSON.stringify(completions);
-                        }
-                        suggestions.appendChild(instruction);
-                    }
-                    card.appendChild(suggestions);
+                    card.appendChild(buildSuggestionList(treeToNodes(json.tree)));
                 });
             });
 

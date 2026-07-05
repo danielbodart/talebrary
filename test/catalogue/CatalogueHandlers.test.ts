@@ -19,20 +19,20 @@ describe("CatalogueHandler", () => {
             expect(html).toContain("/collections");
         });
 
-        test("renders go... suggestion with exit completions", async () => {
+        test("renders go… group with exits as leaf commands", async () => {
             const response = await handler.handle(new Request("http://test/"));
             const html = await response.text();
-            expect(html).toContain("go...");
-            expect(html).toContain("genres");
-            expect(html).toContain("collections");
+            expect(html).toContain("go…");
+            expect(html).toContain('data-command="go genres"');
+            expect(html).toContain('data-command="go collections"');
         });
 
-        test("always shows ask... suggestion with librarian and topics", async () => {
+        test("always shows ask… group with librarian and topics as leaf commands", async () => {
             const response = await handler.handle(new Request("http://test/"));
             const html = await response.text();
-            expect(html).toContain("ask...");
-            expect(html).toContain("librarian");
-            expect(html).toContain("about the athenaeum");
+            expect(html).toContain("ask…");
+            expect(html).toContain('data-command="ask librarian"');
+            expect(html).toContain('data-command="ask about the athenaeum"');
         });
 
         test("illustration uses x-image custom element with reloadable", async () => {

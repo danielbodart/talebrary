@@ -1,6 +1,8 @@
 import type {InputRequest} from "@bodar/wasiglk";
 import {AdjustKeys} from "./KeyMapping.ts";
 import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
+import {buildSuggestionList} from "./SuggestionList.ts";
+import {defaultSuggestions} from "./SuggestionNodes.ts";
 
 interface UserInputDeps {
     HTMLElement: typeof HTMLElement;
@@ -11,11 +13,15 @@ export class UserInput {
         return new CustomElementDefinition('user-input', class extends HTMLElement {
             private inputEl: HTMLInputElement | null = null;
             private sendInput: ((value: string) => void) | null = null;
-            private completionsEl: HTMLElement | null = null;
 
             configure(update: InputRequest, sendInput: (value: string) => void) {
                 this.sendInput = sendInput;
                 this.classList.add('card', 'input-control');
+
+                // Always-visible default suggestion panel (its own independent nav state).
+                if (update.type !== 'char') {
+                    this.appendChild(buildSuggestionList(defaultSuggestions()));
+                }
 
                 const form = document.createElement('form');
                 form.className = 'input';
@@ -35,7 +41,6 @@ export class UserInput {
                     e.preventDefault();
                     this.submit(input.value);
                     input.value = '';
-                    this.clearCompletions();
                 });
 
                 // Android: keydown e.key returns 'Unidentified', so use input event for char mode
@@ -57,41 +62,18 @@ export class UserInput {
                 this.sendInput?.(value);
             }
 
-            appendText(text: string) {
+            submitText(text: string) {
                 if (this.inputEl) {
-                    this.inputEl.value = `${this.inputEl.value} ${text}`.trim();
+                    this.inputEl.value = text;
                     this.inputEl.form?.dispatchEvent(new SubmitEvent('submit'));
                 }
             }
 
-            setPrefix(text: string, completions: string[] = []) {
+            setPrefix(text: string) {
                 if (this.inputEl) {
                     this.inputEl.value = `${text} `;
                     this.inputEl.focus({preventScroll: true});
                 }
-                if (completions.length > 0) {
-                    this.showCompletions(completions);
-                } else {
-                    this.clearCompletions();
-                }
-            }
-
-            private showCompletions(completions: string[]) {
-                this.clearCompletions();
-                const container = document.createElement('div');
-                container.className = 'completions';
-                for (const word of completions) {
-                    const el = document.createElement('x-instruction');
-                    el.textContent = word;
-                    container.appendChild(el);
-                }
-                this.insertBefore(container, this.firstChild);
-                this.completionsEl = container;
-            }
-
-            private clearCompletions() {
-                this.completionsEl?.remove();
-                this.completionsEl = null;
             }
 
             focus() {
