@@ -6,9 +6,19 @@ import {Uri} from "../http/Uri.ts";
 import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
 import {treeToNodes} from "../player/SuggestionNodes.ts";
 import {buildSuggestionList} from "../player/SuggestionList.ts";
-import {librarianResponse, librarianTopics} from "./Librarian.ts";
+import {librarianResponse} from "./Librarian.ts";
+import {Engine} from "@bodar/text-engine";
+import {athenaeumDisk} from "./athenaeumDisk.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {JSX2DOM, SupportedElement} from "@bodar/jsx2dom/JSX2DOM.ts";
+
+/** Normalise a URL path to an engine room id, mirroring resolveRoom (strips the
+ *  optional /catalogue and /content prefixes and trailing slashes). */
+function roomId(path: string): string {
+    const segments = path.replace(/\/+$/, "").split("/").filter(Boolean);
+    if (segments[0] === "catalogue" || segments[0] === "content") segments.shift();
+    return "/" + segments.join("/");
+}
 
 export class CatalogueHandler {
     constructor(deps: Dependency<'finder', GameFinder>, private finder = deps.finder) {
@@ -23,7 +33,7 @@ export class CatalogueHandler {
         const languages = parseAcceptLanguage(request.headers.get('accept-language'));
         const games = room.gameQuery ? await this.executeQuery(room.gameQuery, languages) : [];
 
-        return new Response(render(room, search, games), {status: 200, headers: {'Content-Type': 'text/html'}});
+        return new Response(render(room, roomId(uri.path), search, games), {status: 200, headers: {'Content-Type': 'text/html'}});
     }
 
     private async executeQuery(query: GameQuery, languages: string[]): Promise<GameInfo[]> {
@@ -48,19 +58,15 @@ function navList(tree: Record<string, string[]>, jsx: JSX2DOM): SupportedElement
     return el;
 }
 
-function render(room: Room, search: string | undefined, games: GameInfo[]): string {
+function render(room: Room, path: string, search: string | undefined, games: GameInfo[]): string {
     const illustrationUrl = `/cards/art?prompt=${encodeURIComponent(JSON.stringify({
         story: {title: 'The Talebrary Athenaeum', description: 'A vast library of interactive fiction games'},
         scene: room.illustration,
     }))}`;
 
-    const topicMap = Object.fromEntries(librarianTopics.map(t => [t.id, t.response]));
-    const tree: Record<string, string[]> = {
-        go: room.exits.map(e => e.label),
-        ask: [...librarianTopics.map(t => t.id), 'librarian'],
-        look: [],
-        inventory: [],
-    };
+    // Suggestions come from the engine, so the server-rendered chips match the
+    // client's built-in, state-derived actions exactly.
+    const tree = new Engine(athenaeumDisk).goto(path).suggestions;
 
     const librarianText = search ? librarianResponse(search, games) : undefined;
 
@@ -76,7 +82,6 @@ function render(room: Room, search: string | undefined, games: GameInfo[]): stri
         <main class="story catalogue">
             <div class="window grid">
                 <div class="card">
-                    <script type="application/json" class="librarian-topics">{JSON.stringify(topicMap)}</script>
                     <script type="application/ld+json" class="breadcrumb">{JSON.stringify({
                         '@type': 'BreadcrumbList',
                         itemListElement: room.breadcrumb.map((b, i) => ({
@@ -93,6 +98,7 @@ function render(room: Room, search: string | undefined, games: GameInfo[]): stri
                 <img is="x-image" reloadable class="image" src={illustrationUrl} loading="eager" alt="" aria-hidden="true"></img>
                 <div class="title">{room.title}</div>
                 <div class="normal">{room.narrative}</div>
+                {/* Real links so the catalogue graph stays crawlable and works without JS. */}
                 <div class="exit-links hidden">
                     {room.exits.map(exit =>
                         <a href={exit.path}>go {exit.label}</a>

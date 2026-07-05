@@ -27,12 +27,10 @@ describe("CatalogueHandler", () => {
             expect(html).toContain('data-command="go collections"');
         });
 
-        test("always shows ask… group with librarian and topics as leaf commands", async () => {
+        test("offers talking to the librarian (topics surface once in conversation)", async () => {
             const response = await handler.handle(new Request("http://test/"));
             const html = await response.text();
-            expect(html).toContain("ask…");
-            expect(html).toContain('data-command="ask librarian"');
-            expect(html).toContain('data-command="ask about the athenaeum"');
+            expect(html).toContain('data-command="talk librarian"');
         });
 
         test("illustration uses x-image custom element with reloadable", async () => {
@@ -169,6 +167,14 @@ describe("CatalogueHandler", () => {
             expect(response.status).toBe(200);
             const html = await response.text();
             expect(html).toContain("Fantasy Aisle");
+        });
+
+        test("prefixed path shows the aisle's own suggestions, not the atrium's", async () => {
+            const response = await handler.handle(new Request("http://test/catalogue/genres/fantasy"));
+            const html = await response.text();
+            expect(html).toContain("go…");
+            // the atrium-only "talk librarian" chip must not leak onto an aisle page
+            expect(html).not.toContain('data-command="talk librarian"');
         });
     });
 
