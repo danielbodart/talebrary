@@ -1,3 +1,13 @@
+---
+title: Interactive Fiction New Client Implementation
+date: 2025-11-14
+author: Daniel Bodart
+type: plan
+status: superseded
+tags: [client, web-components, rewrite, interactive-fiction]
+last_updated: 2026-02-06
+---
+
 # Interactive Fiction New Client Implementation Plan
 
 ## Overview

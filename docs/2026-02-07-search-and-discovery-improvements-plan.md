@@ -1,3 +1,13 @@
+---
+title: Search & Discovery Improvements
+date: 2026-02-07
+author: Daniel Bodart
+type: plan
+status: complete
+tags: [search, discovery, i18n, browse, catalogue]
+last_updated: 2026-02-07
+---
+
 # Search & Discovery Improvements
 
 ## Context

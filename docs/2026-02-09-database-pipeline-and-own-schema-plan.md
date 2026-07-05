@@ -1,3 +1,13 @@
+---
+title: Database Pipeline & Own Schema
+date: 2026-02-09
+author: Daniel Bodart
+type: plan
+status: complete
+tags: [database, pipeline, schema, d1, ifdb]
+last_updated: 2026-02-09
+---
+
 # Database Pipeline & Own Schema
 
 ## Overview

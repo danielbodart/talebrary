@@ -1,14 +1,13 @@
 ---
-date: 2025-11-14T12:32:45+00:00
-researcher: Claude (Sonnet 4.5)
+title: New Client Rewrite Status and Architecture Analysis
+date: 2025-11-14
+author: Claude (Sonnet 4.5)
+type: research
+status: complete
+tags: [research, codebase, client, web-components, architecture, interactive-fiction]
+last_updated: 2025-11-14
 git_commit: 4d66d0ea2ab512ea69cabe7f900a7816684be732
 branch: master
-repository: danielbodart/talebrary
-topic: "New Client Rewrite Status and Architecture Analysis"
-tags: [research, codebase, client, web-components, architecture, interactive-fiction]
-status: complete
-last_updated: 2025-11-14
-last_updated_by: Claude (Sonnet 4.5)
 ---
 
 # Research: New Client Rewrite Status and Architecture Analysis
