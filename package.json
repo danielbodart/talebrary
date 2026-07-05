@@ -4,7 +4,7 @@
   "dependencies": {
     "@better-auth/infra": "0.3.4",
     "@bodar/jsx2dom": "npm:@jsr/bodar__jsx2dom",
-    "@bodar/wasiglk": "npm:@jsr/bodar__wasiglk@0.91.20",
+    "@bodar/wasiglk": "npm:@jsr/bodar__wasiglk@0.104.30",
     "@bodar/yadic": "npm:@jsr/bodar__yadic",
     "better-auth": "1.6.23",
     "fast-xml-parser": "^4.5.3",
