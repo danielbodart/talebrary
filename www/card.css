@@ -666,17 +666,18 @@ grid-window {
     left: 0;
     right: 0;
     z-index: 10;
-    margin: 0 auto;
-    min-width: 300px;
-    max-width: calc(600px + var(--border-size) * 2);
 }
 
+/* Card carries the width + centering (mirrors user-input exactly) so the
+   status bar lines up with the fixed input bar. */
 grid-window .card:first-child {
     display: flex;
     align-items: center;
     flex-direction: column;
     background: var(--eerie-black);
-    max-width: none;   /* fill the grid-window (matches the input bar width) */
+    min-width: 300px;
+    max-width: calc(600px + var(--border-size) * 2);
+    margin: 0 auto;
 }
 
 grid-window .card:first-child, .buffer div.preformatted {
@@ -687,6 +688,11 @@ grid-window .card:first-child, .buffer div.preformatted {
     font-weight: 400;
     font-style: normal;
     font-variation-settings: "wdth" 75;
+}
+
+/* Bold like the input bar (keeps monospace for status alignment). */
+grid-window .card:first-child {
+    font-weight: 700;
 }
 
 buffer-window section.card:first-child {
@@ -706,10 +712,10 @@ buffer-window section.card:first-child {
     max-width: calc(600px + var(--border-size) * 2);
 }
 
-/* Clear the fixed input + its suggestion panel so the last card (and its
-   own suggestions, which load a moment later) can scroll fully into view. */
+/* Clear the fixed input + its suggestion panel (~135px) so the last card and
+   its own suggestions can scroll fully into view. */
 body {
-    padding-bottom: 200px;
+    padding-bottom: 150px;
 }
 
 /* --- Account nav icon (all pages) + auth page CTA --- */
