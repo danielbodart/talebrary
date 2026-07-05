@@ -675,6 +675,8 @@ grid-window .card:first-child {
     display: flex;
     align-items: center;
     flex-direction: column;
+    background: var(--eerie-black);
+    max-width: none;   /* fill the grid-window (matches the input bar width) */
 }
 
 grid-window .card:first-child, .buffer div.preformatted {
@@ -704,8 +706,10 @@ buffer-window section.card:first-child {
     max-width: calc(600px + var(--border-size) * 2);
 }
 
+/* Clear the fixed input + its suggestion panel so the last card (and its
+   own suggestions, which load a moment later) can scroll fully into view. */
 body {
-    padding-bottom: 80px;
+    padding-bottom: 200px;
 }
 
 /* --- Account nav icon (all pages) + auth page CTA --- */
