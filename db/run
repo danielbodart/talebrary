@@ -23,9 +23,13 @@ function download() {
     curl -f -o "$SCRIPT_DIR/ifdb-latest.zip" "$base/$latest"
 
     unzip -o "$SCRIPT_DIR/ifdb-latest.zip" -d "$SCRIPT_DIR/"
-    # The ZIP contains a single .sql file
-    mv "$SCRIPT_DIR"/ifdb-archive-*.sql "$SCRIPT_DIR/ifdb-archive.sql"
     rm "$SCRIPT_DIR/ifdb-latest.zip"
+    # The ZIP holds one SQL dump, named either ifdb-archive.sql or
+    # ifdb-archive-YYYYMMDD.sql depending on the release — normalize the name.
+    shopt -s nullglob
+    for f in "$SCRIPT_DIR"/ifdb-archive-*.sql; do mv "$f" "$SCRIPT_DIR/ifdb-archive.sql"; done
+    shopt -u nullglob
+    [ -f "$SCRIPT_DIR/ifdb-archive.sql" ] || { echo "ERROR: no ifdb-archive.sql after unzip" >&2; exit 1; }
 }
 
 function convert-ifdb() {
