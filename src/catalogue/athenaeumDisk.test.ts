@@ -35,13 +35,41 @@ describe("athenaeumDisk", () => {
         }
     });
 
-    test("navigating the atrium into the genres wing works", () => {
+    test("the atrium lists every category, collections before genres", () => {
+        const view = new Engine(athenaeumDisk).peek();
+        const exits = view.exits.map((e) => e.roomId);
+        expect(exits).toEqual([
+            "/collections/top-rated",
+            "/collections/recent",
+            "/collections/classics",
+            "/genres/fantasy",
+            "/genres/horror",
+            "/genres/science-fiction",
+            "/genres/mystery",
+            "/genres/humor",
+            "/genres/slice-of-life",
+            "/genres/surreal",
+            "/genres/historical",
+        ]);
+    });
+
+    test("navigating the atrium jumps straight into a category (no wing stage)", () => {
         const engine = new Engine(athenaeumDisk);
-        const view = engine.execute("go genres");
-        expect(view.roomId).toBe("/genres");
-        expect(view.title).toBe("Genre Wings");
-        expect(leafCommands(view.suggestions)).toContain("go fantasy");
+        const view = engine.execute("go fantasy");
+        expect(view.roomId).toBe("/genres/fantasy");
+        expect(view.title).toBe("Fantasy Aisle");
         expect(leafCommands(view.suggestions)).toContain("go back");
+    });
+
+    test("a category's back exit returns to the atrium", () => {
+        const room = resolveRoom("/genres/fantasy")!;
+        expect(room.exits[0]).toEqual({path: "/", label: "back"});
+        expect(room.breadcrumb).toEqual([{name: "Atrium", item: "/"}, {name: "Fantasy Aisle"}]);
+    });
+
+    test("wing paths no longer resolve to a room (handler 301s them)", () => {
+        expect(resolveRoom("/genres")).toBeUndefined();
+        expect(resolveRoom("/collections")).toBeUndefined();
     });
 
     test("find is advertised as a prefill suggestion in every room", () => {
@@ -62,7 +90,6 @@ describe("athenaeumDisk", () => {
 
     test("category rooms carry a gameQuery in meta", () => {
         const engine = new Engine(athenaeumDisk);
-        engine.execute("go genres");
         const view = engine.execute("go fantasy");
         expect(view.roomId).toBe("/genres/fantasy");
         expect((view.meta as unknown as RoomMeta).gameQuery).toEqual({type: "genre", genre: "Fantasy"});

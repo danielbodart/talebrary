@@ -46,12 +46,13 @@ describe("SitemapHandler", () => {
 });
 
 describe("browsePaths", () => {
-    test("includes atrium, wings and categories", () => {
+    test("includes atrium and categories, but not the collapsed wings", () => {
         const paths = browsePaths();
         expect(paths).toContain('/');
-        expect(paths).toContain('/genres');
         expect(paths).toContain('/genres/fantasy');
-        expect(paths).toContain('/collections');
         expect(paths).toContain('/collections/top-rated');
+        // Wing URLs 301 to the atrium, so they're kept out of the sitemap.
+        expect(paths).not.toContain('/genres');
+        expect(paths).not.toContain('/collections');
     });
 });

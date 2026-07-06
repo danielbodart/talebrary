@@ -18,11 +18,10 @@ export const defaultActions: SuggestionNode[] = [
     {label: "inventory", command: "inventory", action: "submit"},
 ];
 
-/** Every navigable path in the catalogue, in depth-first order (atrium first). */
+/** Every navigable room: the atrium and its categories (wings are collapsed away). */
 export function cataloguePaths(): string[] {
     const paths = ["/"];
     for (const wing of CATALOGUE) {
-        paths.push(`/${wing.id}`);
         for (const category of wing.categories) paths.push(`/${wing.id}/${category.id}`);
     }
     return paths;

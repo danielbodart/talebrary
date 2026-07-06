@@ -1,7 +1,7 @@
 import type {GameFinder, GameInfo} from "../games/GameFinder.ts";
 import {wellFormed, safeHtml} from "../templates/misc.ts";
 import {html5} from "../templates/LinkedomHelpers.ts";
-import {type GameQuery, type Room, resolveRoom} from "./CatalogueConfig.ts";
+import {findWing, type GameQuery, type Room, resolveRoom} from "./CatalogueConfig.ts";
 import {Uri} from "../http/Uri.ts";
 import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
 import {buildSuggestionList} from "../player/SuggestionList.ts";
@@ -25,6 +25,14 @@ export class CatalogueHandler {
 
     async handle(request: Request): Promise<Response> {
         const uri = new Uri(request.url);
+        const path = roomId(uri.path);
+
+        // Legacy wing URLs (/genres, /collections) are collapsed into the atrium.
+        const segments = path.split('/').filter(Boolean);
+        if (segments.length === 1 && findWing(segments[0])) {
+            return new Response(null, {status: 301, headers: {Location: '/'}});
+        }
+
         const search = new URLSearchParams(uri.query).get('search') ?? undefined;
         const room = resolveRoom(uri.path, search);
         if (!room) return new Response('Not Found', {status: 404});
@@ -32,7 +40,7 @@ export class CatalogueHandler {
         const languages = parseAcceptLanguage(request.headers.get('accept-language'));
         const games = room.gameQuery ? await this.executeQuery(room.gameQuery, languages) : [];
 
-        return new Response(render(room, roomId(uri.path), search, games), {status: 200, headers: {'Content-Type': 'text/html'}});
+        return new Response(render(room, path, search, games), {status: 200, headers: {'Content-Type': 'text/html'}});
     }
 
     private async executeQuery(query: GameQuery, languages: string[]): Promise<GameInfo[]> {

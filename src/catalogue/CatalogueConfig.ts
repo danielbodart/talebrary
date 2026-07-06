@@ -229,6 +229,12 @@ function categoryToQuery(category: AnyCategory): GameQuery {
     return {type: category.type};
 }
 
+/** The atrium's exits: every category, flattened, collections before genres. */
+function atriumExits(): Exit[] {
+    return [collections, genres].flatMap(w =>
+        w.categories.map(c => ({path: `/${w.id}/${c.id}`, label: c.id})));
+}
+
 export function resolveRoom(path: string, search?: string): Room | undefined {
     const segments = path.replace(/\/+$/, '').split('/').filter(Boolean);
     // Strip optional /catalogue prefix for backwards compat
@@ -241,32 +247,13 @@ export function resolveRoom(path: string, search?: string): Room | undefined {
             pageTitle: 'The Talebrary Athenaeum',
             narrative: 'You find yourself standing in the atrium of a vast library. Before you stands the librarian, ready to help you find whatever tale you require. To either side, grand archways lead to different wings of the collection. A brass plaque on the wall reads: "Over 2,000 interactive tales await within."',
             illustration: atriumIllustration,
-            exits: CATALOGUE.map(w => ({path: `/${w.id}`, label: w.id})),
+            exits: atriumExits(),
             breadcrumb: [{name: 'Atrium'}],
             gameQuery: search ? {type: 'search', search} : undefined,
         };
     }
 
-    // /<wingId>
-    if (segments.length === 1) {
-        const wing = findWing(segments[0]);
-        if (!wing) return undefined;
-        return {
-            title: wing.title,
-            pageTitle: `${wing.title} - Talebrary`,
-            narrative: wing.narrative,
-            illustration: wing.illustration,
-            exits: [
-                {path: '/', label: 'back'},
-                ...wing.categories.map(c => ({path: `/${wing.id}/${c.id}`, label: c.id})),
-            ],
-            breadcrumb: [
-                {name: 'Atrium', item: '/'},
-                {name: wing.title},
-            ],
-            gameQuery: search ? {type: 'search', search} : undefined,
-        };
-    }
+    // /<wingId> — wings are collapsed into the atrium; the handler 301s these to /.
 
     // /<wingId>/<categoryId>
     if (segments.length === 2) {
@@ -281,12 +268,11 @@ export function resolveRoom(path: string, search?: string): Room | undefined {
             narrative: category.narrative,
             illustration: category.illustration,
             exits: [
-                {path: `/${wing.id}`, label: 'back'},
+                {path: '/', label: 'back'},
                 ...siblings.map(c => ({path: `/${wing.id}/${c.id}`, label: c.id})),
             ],
             breadcrumb: [
                 {name: 'Atrium', item: '/'},
-                {name: wing.title, item: `/${wing.id}`},
                 {name: category.title},
             ],
             // Searching within a genre aisle scopes the search to that genre.

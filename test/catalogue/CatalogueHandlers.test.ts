@@ -9,22 +9,26 @@ describe("CatalogueHandler", () => {
     const handler = new CatalogueHandler({finder});
 
     describe("atrium", () => {
-        test("renders homepage with wings", async () => {
+        test("renders homepage listing every category (wings flattened away)", async () => {
             const response = await handler.handle(new Request("http://test/"));
             expect(response.status).toBe(200);
             const html = await response.text();
             expect(html).toContain("The Talebrary Athenaeum");
             expect(html).toContain("The Atrium");
-            expect(html).toContain("/genres");
-            expect(html).toContain("/collections");
+            expect(html).toContain("/collections/top-rated");
+            expect(html).toContain("/genres/fantasy");
         });
 
-        test("renders go… group with exits as leaf commands", async () => {
+        test("renders go… group with category exits as leaf commands", async () => {
             const response = await handler.handle(new Request("http://test/"));
             const html = await response.text();
             expect(html).toContain("go…");
-            expect(html).toContain('data-command="go genres"');
-            expect(html).toContain('data-command="go collections"');
+            // Collections come first, then genres.
+            expect(html).toContain('data-command="go top-rated"');
+            expect(html).toContain('data-command="go fantasy"');
+            // Wings are no longer navigable stops.
+            expect(html).not.toContain('data-command="go genres"');
+            expect(html).not.toContain('data-command="go collections"');
         });
 
         test("offers talking to the librarian (topics surface once in conversation)", async () => {
@@ -60,27 +64,17 @@ describe("CatalogueHandler", () => {
         });
     });
 
-    describe("wing", () => {
-        test("renders genres wing", async () => {
+    describe("wing (legacy — collapsed into the atrium)", () => {
+        test("301s /genres to the atrium", async () => {
             const response = await handler.handle(new Request("http://test/genres"));
-            expect(response.status).toBe(200);
-            const html = await response.text();
-            expect(html).toContain("Genre Wings");
-            expect(html).toContain("/genres/fantasy");
+            expect(response.status).toBe(301);
+            expect(response.headers.get("Location")).toBe("/");
         });
 
-        test("renders collections wing", async () => {
+        test("301s /collections to the atrium", async () => {
             const response = await handler.handle(new Request("http://test/collections"));
-            expect(response.status).toBe(200);
-            const html = await response.text();
-            expect(html).toContain("Special Collections");
-            expect(html).toContain("/collections/top-rated");
-        });
-
-        test("has go back exit", async () => {
-            const response = await handler.handle(new Request("http://test/genres"));
-            const html = await response.text();
-            expect(html).toContain("go back");
+            expect(response.status).toBe(301);
+            expect(response.headers.get("Location")).toBe("/");
         });
 
         test("returns 404 for unknown wing", async () => {
@@ -88,19 +82,10 @@ describe("CatalogueHandler", () => {
             expect(response.status).toBe(404);
         });
 
-        test("breadcrumb shows atrium and wing", async () => {
-            const response = await handler.handle(new Request("http://test/genres"));
-            const html = await response.text();
-            expect(html).toContain('"name":"Atrium"');
-            expect(html).toContain('"item":"/"');
-            expect(html).toContain('"name":"Genre Wings"');
-        });
-
-        test("/catalogue/genres still resolves", async () => {
+        test("301s the prefixed /catalogue/genres to the atrium", async () => {
             const response = await handler.handle(new Request("http://test/catalogue/genres"));
-            expect(response.status).toBe(200);
-            const html = await response.text();
-            expect(html).toContain("Genre Wings");
+            expect(response.status).toBe(301);
+            expect(response.headers.get("Location")).toBe("/");
         });
     });
 
@@ -153,13 +138,13 @@ describe("CatalogueHandler", () => {
             expect(response.status).toBe(404);
         });
 
-        test("breadcrumb shows atrium, wing and aisle", async () => {
+        test("breadcrumb shows atrium and aisle (no wing crumb)", async () => {
             const response = await handler.handle(new Request("http://test/genres/horror"));
             const html = await response.text();
             expect(html).toContain('"name":"Atrium"');
             expect(html).toContain('"item":"/"');
-            expect(html).toContain('"item":"/genres"');
             expect(html).toContain('"name":"Horror Aisle"');
+            expect(html).not.toContain('"item":"/genres"');
         });
 
         test("/catalogue/genres/fantasy still resolves", async () => {

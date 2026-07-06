@@ -11,14 +11,12 @@ function escapeXml(value: string): string {
         .replace(/'/g, '&apos;');
 }
 
-/** Static, in-code browse pages: atrium, wings, and their categories. */
+/** Static, in-code browse pages: the atrium and its categories (wings 301 to the atrium). */
 export function browsePaths(): string[] {
     return [
         '/',
-        ...CATALOGUE.flatMap(wing => [
-            `/${wing.id}`,
-            ...wing.categories.map(category => `/${wing.id}/${category.id}`),
-        ]),
+        ...CATALOGUE.flatMap(wing =>
+            wing.categories.map(category => `/${wing.id}/${category.id}`)),
     ];
 }
 
