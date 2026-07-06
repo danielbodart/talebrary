@@ -6,15 +6,27 @@ import type {Dependency} from "@bodar/yadic/types.ts";
 const supportedFormats = `('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
                     'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3')`;
 
+// The link's URL file extension is in the format's declared extension list.
+const extensionMatch = `(' ' || l.extension || ' ' LIKE
+                       '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
+                                      INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
+                       ' %')`;
+
+// A compressed archive we can extract the story from at serve time (see archive.ts).
+const archiveMatch = `(lower(l.url) LIKE '%.zip' OR lower(l.url) LIKE '%.tgz'
+                       OR lower(l.url) LIKE '%.gz' OR lower(l.url) LIKE '%.tar')`;
+
+// A link is playable when it is a supported format and either a bare story file
+// or an archive we can unpack. Prefer bare files over archives (isArchive ASC).
+const playableLink = `l.format IN ${supportedFormats}
+                  AND (${extensionMatch} OR ${archiveMatch})
+                  AND l.url NOT LIKE '%.z6'`;
+const preferBareFile = `(CASE WHEN ${archiveMatch} THEN 1 ELSE 0 END) ASC, l.display_order ASC`;
+
 const playableSubquery = `(SELECT CASE WHEN count(*) > 0 THEN 1 ELSE 0 END
                 FROM talebrary_gamelinks l
                 WHERE l.game_id = g.id
-                  AND l.format IN ${supportedFormats}
-                  AND (' ' || l.extension || ' ' LIKE
-                       '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7),
-                                      INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
-                       ' %')
-                  AND l.url NOT LIKE '%.z6')`;
+                  AND ${playableLink})`;
 
 const selectGameInfo = `SELECT fg.id,
                    fg.rating,
@@ -227,12 +239,8 @@ export class SqlGameFinder implements GameFinder {
             JOIN talebrary_gamelinks l ON g.id = l.game_id
             WHERE g.id = ?
               AND g.enabled = 1
-              AND l.format IN ${supportedFormats}
-              AND (' ' || l.extension || ' ' LIKE
-                   '% ' || SUBSTR(SUBSTR(l.url, LENGTH(l.url) - 7), INSTR(SUBSTR(l.url, LENGTH(l.url) - 7), '.')) ||
-                   ' %')
-              AND l.url NOT LIKE '%.z6'
-            ORDER BY l.display_order ASC
+              AND ${playableLink}
+            ORDER BY ${preferBareFile}
             LIMIT 1
         `;
         return await this.db.prepare(sql).bind(id).first<GameStory>();
