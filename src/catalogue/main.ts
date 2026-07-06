@@ -6,7 +6,7 @@ import {customElement, realise} from "../components/misc.ts";
 import {controlKeys} from "../player/controlKeys.ts";
 import {buildSuggestionList} from "../player/SuggestionList.ts";
 import {observeCarousels} from "../player/SuggestionCarousel.ts";
-import {Engine, type EngineView, type SuggestionNode, type ViewItem} from "@bodar/text-engine";
+import {Engine, type EngineView, type SuggestionNode, type ViewItem} from "@bodar/dullahan";
 import {athenaeumDisk, type RoomMeta} from "./athenaeumDisk.ts";
 import type {Describable} from "../types.ts";
 

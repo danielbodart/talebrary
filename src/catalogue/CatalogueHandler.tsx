@@ -6,7 +6,7 @@ import {Uri} from "../http/Uri.ts";
 import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
 import {buildSuggestionList} from "../player/SuggestionList.ts";
 import {librarianResponse} from "./Librarian.ts";
-import {Engine, type SuggestionNode} from "@bodar/text-engine";
+import {Engine, type SuggestionNode} from "@bodar/dullahan";
 import {athenaeumDisk, defaultActions} from "./athenaeumDisk.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {JSX2DOM, SupportedElement} from "@bodar/jsx2dom/JSX2DOM.ts";

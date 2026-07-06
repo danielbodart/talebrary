@@ -1,5 +1,5 @@
 import {describe, expect, test} from "bun:test";
-import {Engine, type SuggestionNode} from "@bodar/text-engine";
+import {Engine, type SuggestionNode} from "@bodar/dullahan";
 import {athenaeumDisk, cataloguePaths, type RoomMeta} from "./athenaeumDisk.ts";
 import {resolveRoom} from "./CatalogueConfig.ts";
 

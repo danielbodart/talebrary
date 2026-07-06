@@ -1,4 +1,4 @@
-import type {Disk, Room, SuggestionNode, Topic} from "@bodar/text-engine";
+import type {Disk, Room, SuggestionNode, Topic} from "@bodar/dullahan";
 import type {BreadcrumbItem, GameQuery, Room as CatalogueRoom} from "./CatalogueConfig.ts";
 import {CATALOGUE, resolveRoom} from "./CatalogueConfig.ts";
 import {librarianTopics} from "./Librarian.ts";
