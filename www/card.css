@@ -144,19 +144,6 @@ body.search {
     background-image: url('icons/magnifying-glass-solid.svg');
 }
 
-.input-control form::after {
-    content: "";
-    display: block;
-    background-image: url('icons/microphone-solid.svg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center center;
-    width: 1em;
-    height: 1em;
-    font-size: 2rem;
-    margin-left: 10px;
-}
-
 .completions {
     display: flex;
     flex-wrap: wrap;
@@ -337,6 +324,7 @@ img[state=failed] + div {
 .title, div.header:first-child, div.subheader:first-child, img + div.header, img + div.subheader {
     font-size: 1.5rem;
     text-align: center;
+    text-transform: capitalize;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;

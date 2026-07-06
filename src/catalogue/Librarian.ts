@@ -18,14 +18,20 @@ export const librarianTopics: LibrarianTopic[] = [
         id: 'about the collection',
         response: 'The librarian\u2019s voice takes on a reverent tone. "Over two thousand interactive tales rest on these shelves, spanning half a century of storytelling. The earliest date from the 1970s \u2014 a time when pioneers first discovered that stories could be more than words on a page. They could be conversations. Adventures you step into rather than merely read." He pauses. "The collection spans every genre you can imagine \u2014 fantasy, mystery, horror, science fiction, and many more. Browse the wings, or simply tell me what you seek."',
     },
+    {
+        id: 'about finding',
+        response: 'The librarian straightens, suddenly businesslike. "Looking for something in particular? Nothing easier. Tell me a title, an author, or even just a mood, and I shall search the stacks in a heartbeat. Simply say \u2018find\u2019 and name what you\u2019re after \u2014 and if you\u2019re standing in one of the genre aisles, I\u2019ll confine my search to those shelves."',
+    },
 ];
 
-export function librarianResponse(search: string, games: GameInfo[]): string {
+export function librarianResponse(search: string, games: GameInfo[], genre?: string): string {
+    const kind = genre ? `${genre.toLowerCase()} titles` : `titles`;
+    const where = genre ? ` in the ${genre.toLowerCase()} aisle` : ``;
     if (games.length === 0) {
-        return `The librarian adjusts his spectacles and shakes his head slowly. "I'm afraid I can't find anything matching '${search}' in our collection. Perhaps try a different search?"`;
+        return `The librarian adjusts his spectacles and shakes his head slowly. "I'm afraid I can't find anything matching '${search}'${where}. Perhaps try a different search?"`;
     }
     if (games.length === 1) {
         return `The librarian nods knowingly. "Ah yes, I believe this is what you're looking for." He produces a single volume from beneath the desk.`;
     }
-    return `The librarian nods and disappears into the stacks. After a moment he returns with ${games.length} titles. "These should match what you're looking for."`;
+    return `The librarian nods and disappears into the stacks. After a moment he returns with ${games.length} ${kind}. "These should match what you're looking for."`;
 }

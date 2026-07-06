@@ -4,11 +4,11 @@ import {ImageElement} from "../components/ImageElement.ts";
 import {type InstructionDetail, Instruction, InstructionEventName} from "../player/Instruction.ts";
 import {customElement, realise} from "../components/misc.ts";
 import {controlKeys} from "../player/controlKeys.ts";
-import {treeToNodes} from "../player/SuggestionNodes.ts";
 import {buildSuggestionList} from "../player/SuggestionList.ts";
 import {observeCarousels} from "../player/SuggestionCarousel.ts";
-import {Engine, type EngineView} from "@bodar/text-engine";
+import {Engine, type EngineView, type SuggestionNode, type ViewItem} from "@bodar/text-engine";
 import {athenaeumDisk, type RoomMeta} from "./athenaeumDisk.ts";
+import type {Describable} from "../types.ts";
 
 const app = LazyMap.create()
     .set('clock', constructor(SystemClock))
@@ -32,11 +32,6 @@ const input = form.querySelector<HTMLInputElement>('input')!;
 const engine = new Engine(athenaeumDisk);
 let currentRoomId = engine.goto(normalisePath(window.location.pathname)).roomId;
 
-const inventoryText = 'You rummage through your pockets and produce:\n\n' +
-    '• Some fluff — Origin unknown. Possibly sentient. Has been accumulating since at least last Tuesday.\n' +
-    '• A button — Brass, slightly tarnished. You don\'t remember which coat it came from, but you\'ve been carrying it for years "just in case."\n' +
-    '• An old sticky sweet — The wrapper has fused permanently to the candy. Any attempt at separation would be futile and probably dangerous.';
-
 // Mirror resolveRoom's normalisation so URL → room id matches the engine's ids,
 // including the optional /catalogue and /content prefixes.
 function normalisePath(path: string): string {
@@ -45,30 +40,77 @@ function normalisePath(path: string): string {
     return '/' + segments.join('/');
 }
 
-/** Commands the engine drives in the Athenaeum; everything else is a collection search. */
-function isNavigation(command: string): boolean {
-    const first = command.split(/\s+/)[0];
-    if (['go', 'look', 'talk', 'discuss'].includes(first)) return true;
-    // a bare exit label typed directly, e.g. "genres"
-    return engine.peek().exits.some(e => e.label.toLowerCase() === command);
-}
-
 function meta(view: EngineView): RoomMeta {
     return view.meta as unknown as RoomMeta;
 }
 
-function illustrationUrl(view: EngineView): string {
+function artUrl(scene: Describable): string {
     return `/cards/art?prompt=${encodeURIComponent(JSON.stringify({
         story: {title: 'The Talebrary Athenaeum', description: 'A vast library of interactive fiction games'},
-        scene: meta(view).illustration,
+        scene,
     }))}`;
 }
 
-/** Build the suggestion carousel panel from the engine's built-in, state-derived actions. */
-function suggestionBar(view: EngineView): HTMLElement {
-    const nav = buildSuggestionList(treeToNodes(view.suggestions)) as HTMLElement;
+function sceneImage(scene: Describable): HTMLImageElement {
+    const img = document.createElement('img', {is: 'x-image'});
+    img.setAttribute('is', 'x-image');
+    img.setAttribute('reloadable', '');
+    img.className = 'image';
+    img.src = artUrl(scene);
+    img.loading = 'eager';
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    return img;
+}
+
+/** Build a suggestion carousel panel from the given nodes. */
+function navPanel(nodes: SuggestionNode[]): HTMLElement {
+    const nav = buildSuggestionList(nodes) as HTMLElement;
     nav.classList.add('nav');
     return nav;
+}
+
+/** A verb over items. Chips mirror the raw command (parser noun), not the display
+ *  name — a leaf's label IS its command, a group's children are the bare nouns. */
+function itemActionGroup(verb: string, items: ViewItem[]): SuggestionNode {
+    if (items.length === 1) return {label: `${verb} ${items[0].name}`, command: `${verb} ${items[0].name}`, action: 'submit'};
+    return {label: `${verb}…`, children: items.map(i => ({label: i.name, command: `${verb} ${i.name}`, action: 'submit'}))};
+}
+
+/** Item-context actions for the inventory / examine cards — just examine and drop.
+ *  look / inventory live on the default panel, so no "back" chip is needed here. */
+function inventoryActions(items: ViewItem[], focusName?: string): SuggestionNode[] {
+    const nodes: SuggestionNode[] = [];
+    if (focusName) {
+        const focused = items.find(i => i.name === focusName);
+        const others = items.filter(i => i.name !== focusName);
+        if (others.length) nodes.push(itemActionGroup('examine', others));
+        if (focused) nodes.push({label: `drop ${focused.name}`, command: `drop ${focused.name}`, action: 'submit'});
+    } else if (items.length) {
+        nodes.push(itemActionGroup('examine', items));
+        nodes.push(itemActionGroup('drop', items));
+    }
+    return nodes;
+}
+
+/** A verb over bare nouns: collapsed leaf for one, drill-in group for several. */
+function commandGroup(verb: string, names: string[]): SuggestionNode {
+    if (names.length === 1) return {label: `${verb} ${names[0]}`, command: `${verb} ${names[0]}`, action: 'submit'};
+    return {label: `${verb}…`, children: names.map(n => ({label: n, command: `${verb} ${n}`, action: 'submit'}))};
+}
+
+/** Actions on an examined character — talk to them, or ask them to find something. */
+function characterActions(name: string): SuggestionNode[] {
+    return [
+        {label: `talk ${name}`, command: `talk ${name}`, action: 'submit'},
+        {label: 'find', command: 'find', action: 'prefill'},
+    ];
+}
+
+/** Natural-language list join: "a, b and c". */
+function joinList(items: string[]): string {
+    if (items.length <= 1) return items.join('');
+    return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 }
 
 function echoInput(text: string) {
@@ -81,35 +123,46 @@ function echoInput(text: string) {
     main.insertBefore(section, inputControl);
 }
 
-function appendSceneCard(view: EngineView) {
+/** A scene card: optional illustration + title + description + suggestions.
+ *  Used for both rooms and examined items/characters — they differ only in content. */
+function appendCard(content: {title: string; description: string; illustration?: Describable; items?: string[]}, nodes: SuggestionNode[]) {
     const card = document.createElement('div');
     card.classList.add('card', 'scene-card', 'scroll');
-
-    const img = document.createElement('img', {is: 'x-image'});
-    img.setAttribute('is', 'x-image');
-    img.setAttribute('reloadable', '');
-    img.className = 'image';
-    img.src = illustrationUrl(view);
-    img.loading = 'eager';
-    img.alt = '';
-    img.setAttribute('aria-hidden', 'true');
-    card.appendChild(img);
+    if (content.illustration) card.appendChild(sceneImage(content.illustration));
 
     const title = document.createElement('div');
     title.className = 'title';
-    title.textContent = view.title;
+    title.textContent = content.title;
     card.appendChild(title);
 
-    const narrative = document.createElement('div');
-    narrative.className = 'normal';
-    narrative.textContent = view.description;
-    card.appendChild(narrative);
+    const desc = document.createElement('div');
+    desc.className = 'normal';
+    desc.textContent = content.description;
+    card.appendChild(desc);
 
-    card.appendChild(suggestionBar(view));
+    // Anything left in the room (e.g. an item you dropped here earlier).
+    if (content.items?.length) {
+        const here = document.createElement('div');
+        here.className = 'normal';
+        here.textContent = `You can see ${joinList(content.items)} here.`;
+        card.appendChild(here);
+    }
+
+    card.appendChild(navPanel(nodes));
     main.insertBefore(card, inputControl);
 }
 
-/** A text card for command output (dialogue lines, look, take confirmations). */
+/** The full scene for the current room: illustration, title, description, contents, actions. */
+function appendScene(view: EngineView) {
+    appendCard({
+        title: view.title,
+        description: view.description,
+        illustration: meta(view).illustration,
+        items: view.items.map(i => i.display),
+    }, view.suggestions);
+}
+
+/** A text card for command output (dialogue lines, take confirmations). */
 function appendMessageCard(view: EngineView) {
     if (!view.messages.length) return;
     const card = document.createElement('div');
@@ -120,32 +173,71 @@ function appendMessageCard(view: EngineView) {
     normal.textContent = view.messages.join('\n\n');
     card.appendChild(normal);
 
-    card.appendChild(suggestionBar(view));
+    card.appendChild(navPanel(view.suggestions));
     main.insertBefore(card, inputControl);
 }
 
-function showInventoryCard() {
+/** A conversation card: the character's line, a real list of topics, and the
+ *  discuss/find/back actions. Leaving is the back chip (no "nothing" in the list). */
+function appendDialogueCard(view: EngineView) {
+    const convo = view.conversation!;
     const card = document.createElement('div');
     card.classList.add('card', 'librarian-card', 'scroll');
 
-    const imgUrl = `/cards/art?prompt=${encodeURIComponent(JSON.stringify({
-        story: {title: 'The Talebrary Athenaeum', description: 'A vast library of interactive fiction games'},
-        scene: 'A handful of pocket treasures laid out on a dark wooden desk: a ball of grey lint, a tarnished brass button, and a sticky sweet with its wrapper fused on. Warm candlelight, still life.',
-    }))}`;
-    const img = document.createElement('img', {is: 'x-image'});
-    img.setAttribute('is', 'x-image');
-    img.setAttribute('reloadable', '');
-    img.className = 'image';
-    img.src = imgUrl;
-    img.loading = 'eager';
-    img.alt = '';
-    img.setAttribute('aria-hidden', 'true');
-    card.appendChild(img);
+    // The character's spoken line(s). The engine also emits a bullet list + prompt,
+    // which we render as a proper list below — so filter those out here.
+    const spoken = view.messages.filter(m => !m.startsWith('•') && m !== 'What would you like to discuss?');
+    for (const line of spoken) {
+        const d = document.createElement('div');
+        d.className = 'normal';
+        d.textContent = line;
+        card.appendChild(d);
+    }
 
-    const normal = document.createElement('div');
-    normal.className = 'normal';
-    normal.textContent = inventoryText;
-    card.appendChild(normal);
+    const prompt = document.createElement('div');
+    prompt.className = 'normal';
+    prompt.textContent = 'What would you like to discuss?';
+    card.appendChild(prompt);
+
+    const list = document.createElement('ul');
+    list.className = 'topics-list';
+    for (const t of convo.topics) {
+        const li = document.createElement('li');
+        li.textContent = t.option;
+        list.appendChild(li);
+    }
+    card.appendChild(list);
+
+    const nodes: SuggestionNode[] = [
+        {label: '‹', command: 'bye', action: 'submit'},
+        commandGroup('discuss', convo.topics.map(t => t.keyword)),
+        {label: 'find', command: 'find', action: 'prefill'},
+    ];
+    card.appendChild(navPanel(nodes));
+    main.insertBefore(card, inputControl);
+}
+
+/** The inventory as a real list, with an examine action per item (a small surprise). */
+function showInventory() {
+    const view = engine.execute('inventory');
+    const card = document.createElement('div');
+    card.classList.add('card', 'librarian-card', 'scroll');
+
+    const intro = document.createElement('div');
+    intro.className = 'normal';
+    intro.textContent = 'You rummage through your pockets and find:';
+    card.appendChild(intro);
+
+    const list = document.createElement('ul');
+    list.className = 'inventory-list';
+    for (const item of view.inventory) {
+        const li = document.createElement('li');
+        li.textContent = item.display;
+        list.appendChild(li);
+    }
+    card.appendChild(list);
+
+    card.appendChild(navPanel(inventoryActions(view.inventory)));
     main.insertBefore(card, inputControl);
 }
 
@@ -156,15 +248,16 @@ async function loadGameCards(path: string) {
     if (!resp.ok) return;
     const html = await resp.text();
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    const buffer = doc.querySelector('.window.buffer');
-    if (buffer) {
-        buffer.classList.add('scroll');
-        main.insertBefore(buffer, inputControl);
-    }
+    // Librarian's remark comes first, then the results he found.
     const librarian = doc.querySelector('.librarian-card');
     if (librarian) {
         librarian.classList.add('scroll');
         main.insertBefore(librarian, inputControl);
+    }
+    const buffer = doc.querySelector('.window.buffer');
+    if (buffer) {
+        buffer.classList.add('scroll');
+        main.insertBefore(buffer, inputControl);
     }
 }
 
@@ -207,11 +300,27 @@ function scrollToLatest() {
     }
 }
 
-/** Render an engine view: a new scene on room change, otherwise a message card. */
+/** Render an engine view: a focus card when examining, a new scene on room change, else a message. */
 async function renderView(view: EngineView) {
+    if (view.focus) {
+        const illustration = (view.focus.meta as {illustration?: Describable} | undefined)?.illustration;
+        // Examining an item/character keeps its own context, not the room's nav.
+        const invItem = view.inventory.find(i => i.display === view.focus!.title);
+        const nodes = invItem ? inventoryActions(view.inventory, invItem.name)
+            : view.characters.includes(view.focus.title) ? characterActions(view.focus.title)
+            : view.suggestions;
+        appendCard({title: view.focus.title, description: view.focus.description, illustration}, nodes);
+        scrollToLatest();
+        return;
+    }
+    if (view.conversation) {
+        appendDialogueCard(view);
+        scrollToLatest();
+        return;
+    }
     if (view.roomId !== currentRoomId) {
         currentRoomId = view.roomId;
-        appendSceneCard(view);
+        appendScene(view);
         updateBreadcrumb(view);
         document.title = meta(view).pageTitle;
         history.pushState({path: view.roomId}, '', view.roomId);
@@ -264,27 +373,39 @@ form.addEventListener('submit', async (ev: SubmitEvent) => {
         return;
     }
 
-    // Inventory is a themed card with its own illustration; keep engine state in sync.
+    // find <query> — advertised by the engine, executed here as a (contextual) search.
+    const findMatch = command.match(/^find\s+(.+)$/);
+    if (findMatch) {
+        echoInput(raw);
+        await search(findMatch[1]);
+        return;
+    }
+    if (command === 'find') {
+        input.value = 'find ';
+        input.focus({preventScroll: true});
+        return;
+    }
+
+    // Inventory: a real list you can examine item by item.
     if (command === 'inventory' || command === 'inv') {
         echoInput(raw);
-        engine.execute(command);
-        showInventoryCard();
+        showInventory();
         scrollToLatest();
         return;
     }
 
-    echoInput(raw);
-
-    // Navigation and dialogue go to the engine; free text searches the collection.
-    if (isNavigation(command)) {
-        const view = engine.execute(raw);
-        if (view.understood) {
-            await renderView(view);
-            return;
-        }
+    // look: re-render the full current scene (not just the description line).
+    if (command === 'look' || command === 'l') {
+        echoInput(raw);
+        appendScene(engine.execute('look'));
+        scrollToLatest();
+        return;
     }
 
-    await search(command.startsWith('ask ') ? command.slice(4) : raw);
+    // Everything else → the engine: navigation, dialogue, examine, or an
+    // unknown-command reply that lists the valid commands (no silent search fallthrough).
+    echoInput(raw);
+    await renderView(engine.execute(raw));
 });
 
 // --- Browser back/forward ---

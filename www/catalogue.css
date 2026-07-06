@@ -17,10 +17,10 @@
     letter-spacing: 0.04em;
 }
 
-/* --- Navigation suggestions: icon + pill links --- */
+/* --- Navigation suggestions: use the standard lightbulb icon (uniform with the rest of the game) --- */
 
 .catalogue .suggestions.nav::before {
-    background-image: url('icons/dungeon-solid.svg');
+    background-image: url('icons/lightbulb-regular.svg');
 }
 
 /* Exit paths are data for the "go <exit>" command lookup, not shown. */
@@ -133,4 +133,34 @@
 
 .catalogue .window.grid + .window.buffer .card:first-child {
     margin-top: calc(56px + var(--border-size) + var(--padding));
+}
+
+/* --- Dialogue "back" chip: small dashed box like the carousel pagers --- */
+
+.catalogue .suggestions .chip[data-command="bye"] {
+    flex: 0 0 auto;
+    width: 30px;
+    padding: 6px 0;
+    border-style: dashed;
+}
+
+/* --- Inventory & dialogue: real bulleted lists --- */
+
+.catalogue .inventory-list,
+.catalogue .topics-list {
+    font-family: "Libre Baskerville", serif;
+    font-size: 1em;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 14px 12px 34px;
+    list-style: disc;
+}
+
+.catalogue .inventory-list li,
+.catalogue .topics-list li {
+    margin: 2px 0;
+}
+
+.catalogue .inventory-list li::first-letter {
+    text-transform: uppercase;
 }

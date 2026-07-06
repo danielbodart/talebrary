@@ -47,8 +47,10 @@ export class SqlGameFinder implements GameFinder {
     constructor(deps: Dependency<'db', TalebraryDatabase>, private db = deps.db) {
     }
 
-    async find(search: string, languages?: string[]): Promise<GameInfo[]> {
+    async find(search: string, languages?: string[], genre?: string): Promise<GameInfo[]> {
         const lang = languageCondition(languages, 2);
+        const genreParam = 2 + lang.params.length;
+        const genreAnd = genre ? `AND g.genre = ?${genreParam}` : '';
         const sql = `
             WITH ranks AS (
                 SELECT g.id, 0 as rank
@@ -71,11 +73,13 @@ export class SqlGameFinder implements GameFinder {
                 FROM ranks r JOIN talebrary_games g ON g.id = r.id
                 WHERE g.enabled = 1
                 ${lang.sql ? `AND ${lang.sql}` : ''}
+                ${genreAnd}
             )
             ${selectGameInfo}
         `;
-        const statement = this.db.prepare(sql).bind(search ?? '', ...lang.params);
-        return (await statement.all<GameInfo>()).results;
+        const params: string[] = [search ?? '', ...lang.params];
+        if (genre) params.push(genre);
+        return (await this.db.prepare(sql).bind(...params).all<GameInfo>()).results;
     }
 
     async findByGenre(genre: string, languages?: string[]): Promise<GameInfo[]> {

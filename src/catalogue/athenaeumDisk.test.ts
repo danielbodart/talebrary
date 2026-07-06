@@ -1,7 +1,11 @@
 import {describe, expect, test} from "bun:test";
-import {Engine} from "@bodar/text-engine";
+import {Engine, type SuggestionNode} from "@bodar/text-engine";
 import {athenaeumDisk, cataloguePaths, type RoomMeta} from "./athenaeumDisk.ts";
 import {resolveRoom} from "./CatalogueConfig.ts";
+
+function leafCommands(nodes: SuggestionNode[]): string[] {
+    return nodes.flatMap((n) => (n.children ? n.children.map((c) => c.command!) : [n.command!]));
+}
 
 describe("athenaeumDisk", () => {
     test("starts in the atrium with the librarian and pocket junk", () => {
@@ -9,7 +13,11 @@ describe("athenaeumDisk", () => {
         expect(view.roomId).toBe("/");
         expect(view.title).toBe("The Atrium");
         expect(view.characters).toContain("librarian");
-        expect(view.inventory).toEqual(["fluff", "button", "sweet"]);
+        expect(view.inventory).toEqual([
+            {name: "fluff", display: "some fluff"},
+            {name: "button", display: "a button"},
+            {name: "sweet", display: "a sweet"},
+        ]);
     });
 
     test("exits mirror the catalogue router", () => {
@@ -32,8 +40,24 @@ describe("athenaeumDisk", () => {
         const view = engine.execute("go genres");
         expect(view.roomId).toBe("/genres");
         expect(view.title).toBe("Genre Wings");
-        expect(view.suggestions.go).toContain("fantasy");
-        expect(view.suggestions.go).toContain("back");
+        expect(leafCommands(view.suggestions)).toContain("go fantasy");
+        expect(leafCommands(view.suggestions)).toContain("go back");
+    });
+
+    test("find is advertised as a prefill suggestion in every room", () => {
+        const view = new Engine(athenaeumDisk).peek();
+        const find = view.suggestions.find((n) => n.command === "find");
+        expect(find?.action).toBe("prefill");
+    });
+
+    test("searching within a genre aisle scopes the query to that genre", () => {
+        const room = resolveRoom("/genres/horror", "ghost")!;
+        expect(room.gameQuery).toEqual({type: "search", search: "ghost", genre: "Horror"});
+    });
+
+    test("searching from the atrium stays global (no genre)", () => {
+        const room = resolveRoom("/", "ghost")!;
+        expect(room.gameQuery).toEqual({type: "search", search: "ghost"});
     });
 
     test("category rooms carry a gameQuery in meta", () => {
@@ -48,8 +72,8 @@ describe("athenaeumDisk", () => {
         const engine = new Engine(athenaeumDisk);
         const view = engine.execute("talk librarian");
         const keywords = view.conversation?.topics.map((t) => t.keyword) ?? [];
-        expect(keywords).toEqual(["athenaeum", "illustrations", "collection"]);
-        expect(view.suggestions.discuss).toContain("athenaeum");
+        expect(keywords).toEqual(["athenaeum", "illustrations", "collection", "finding"]);
+        expect(leafCommands(view.suggestions)).toContain("discuss athenaeum");
     });
 
     test("discussing a topic returns the librarian's response", () => {

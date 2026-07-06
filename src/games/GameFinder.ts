@@ -22,7 +22,8 @@ export interface GameStory extends GameBase {
 }
 
 export interface GameFinder {
-    find(search: string, languages?: string[]): Promise<GameInfo[]>;
+    /** Full-text search; when `genre` is given, results are scoped to that genre. */
+    find(search: string, languages?: string[], genre?: string): Promise<GameInfo[]>;
     findByGenre(genre: string, languages?: string[]): Promise<GameInfo[]>;
     findTopRated(languages?: string[]): Promise<GameInfo[]>;
     findRecent(languages?: string[]): Promise<GameInfo[]>;

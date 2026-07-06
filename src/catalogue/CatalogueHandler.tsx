@@ -4,11 +4,10 @@ import {html5} from "../templates/LinkedomHelpers.ts";
 import {type GameQuery, type Room, resolveRoom} from "./CatalogueConfig.ts";
 import {Uri} from "../http/Uri.ts";
 import {parseAcceptLanguage} from "../http/AcceptLanguage.ts";
-import {treeToNodes} from "../player/SuggestionNodes.ts";
 import {buildSuggestionList} from "../player/SuggestionList.ts";
 import {librarianResponse} from "./Librarian.ts";
-import {Engine} from "@bodar/text-engine";
-import {athenaeumDisk} from "./athenaeumDisk.ts";
+import {Engine, type SuggestionNode} from "@bodar/text-engine";
+import {athenaeumDisk, defaultActions} from "./athenaeumDisk.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 import type {JSX2DOM, SupportedElement} from "@bodar/jsx2dom/JSX2DOM.ts";
 
@@ -47,13 +46,13 @@ export class CatalogueHandler {
             case 'hand-picked':
                 return this.finder.findByIds(query.ids!, languages);
             case 'search':
-                return this.finder.find(query.search!, languages);
+                return this.finder.find(query.search!, languages, query.genre);
         }
     }
 }
 
-function navList(tree: Record<string, string[]>, jsx: JSX2DOM): SupportedElement {
-    const el = buildSuggestionList(treeToNodes(tree), jsx);
+function navList(nodes: SuggestionNode[], jsx: JSX2DOM): SupportedElement {
+    const el = buildSuggestionList(nodes, jsx);
     el.classList.add('nav');
     return el;
 }
@@ -66,9 +65,10 @@ function render(room: Room, path: string, search: string | undefined, games: Gam
 
     // Suggestions come from the engine, so the server-rendered chips match the
     // client's built-in, state-derived actions exactly.
-    const tree = new Engine(athenaeumDisk).goto(path).suggestions;
+    const nodes = new Engine(athenaeumDisk).goto(path).suggestions;
 
-    const librarianText = search ? librarianResponse(search, games) : undefined;
+    const genre = room.gameQuery?.type === 'search' ? room.gameQuery.genre : undefined;
+    const librarianText = search ? librarianResponse(search, games, genre) : undefined;
 
     return html5(jsx =>
         <html lang="en">
@@ -104,7 +104,7 @@ function render(room: Room, path: string, search: string | undefined, games: Gam
                         <a href={exit.path}>go {exit.label}</a>
                     )}
                 </div>
-                {navList(tree, jsx)}
+                {navList(nodes, jsx)}
             </div>
 
             {librarianText ? <div class="card librarian-card">
@@ -112,6 +112,7 @@ function render(room: Room, path: string, search: string | undefined, games: Gam
             </div> : ''}
 
             <div class="card input-control">
+                {navList(defaultActions, jsx)}
                 <form class="input">
                     <input type="text" maxlength={256} name="search" value={search ?? ''}/>
                 </form>

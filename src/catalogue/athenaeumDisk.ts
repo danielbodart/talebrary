@@ -1,4 +1,4 @@
-import type {Disk, Room, Topic} from "@bodar/text-engine";
+import type {Disk, Room, SuggestionNode, Topic} from "@bodar/text-engine";
 import type {BreadcrumbItem, GameQuery, Room as CatalogueRoom} from "./CatalogueConfig.ts";
 import {CATALOGUE, resolveRoom} from "./CatalogueConfig.ts";
 import {librarianTopics} from "./Librarian.ts";
@@ -11,6 +11,12 @@ export interface RoomMeta {
     gameQuery?: GameQuery;
     pageTitle: string;
 }
+
+/** Always-available meta actions, shown beside the input (not on the scene). */
+export const defaultActions: SuggestionNode[] = [
+    {label: "look", command: "look", action: "submit"},
+    {label: "inventory", command: "inventory", action: "submit"},
+];
 
 /** Every navigable path in the catalogue, in depth-first order (atrium first). */
 export function cataloguePaths(): string[] {
@@ -53,15 +59,36 @@ function topicOption(id: string): string {
 const pocketJunk = [
     {
         name: ["fluff", "lint"],
-        desc: "Some fluff — Origin unknown. Possibly sentient. Has been accumulating since at least last Tuesday.",
+        printedName: "some fluff",
+        desc: "Origin unknown. Possibly sentient. Has been accumulating since at least last Tuesday.",
+        meta: {
+            illustration: {
+                title: "Pocket fluff",
+                description: "A small ball of grey lint resting on dark polished wood, soft and fuzzy, warm candlelight, still-life close-up.",
+            },
+        },
     },
     {
         name: "button",
-        desc: 'A button — Brass, slightly tarnished. You don\'t remember which coat it came from, but you\'ve been carrying it for years "just in case."',
+        printedName: "a button",
+        desc: 'Brass, slightly tarnished. You don\'t remember which coat it came from, but you\'ve been carrying it for years "just in case."',
+        meta: {
+            illustration: {
+                title: "A brass button",
+                description: "A single tarnished brass coat button on dark polished wood, warm candlelight, still-life close-up.",
+            },
+        },
     },
     {
         name: ["sweet", "candy"],
-        desc: "An old sticky sweet — The wrapper has fused permanently to the candy. Any attempt at separation would be futile and probably dangerous.",
+        printedName: "a sweet",
+        desc: "The wrapper has fused permanently to the candy. Any attempt at separation would be futile and probably dangerous.",
+        meta: {
+            illustration: {
+                title: "An old boiled sweet",
+                description: "An old boiled sweet with its wrapper fused to it, on dark polished wood, warm candlelight, still-life close-up.",
+            },
+        },
     },
 ];
 
@@ -82,12 +109,21 @@ export function athenaeumDisk(): Disk {
     return {
         roomId: "/",
         rooms,
+        // "find" is advertised by the engine (chip + help) but executed by the
+        // consumer as a catalogue search — contextual to the current aisle.
+        verbs: [{verb: "find", prefill: true}],
         inventory: pocketJunk.map((i) => ({...i})),
         characters: [
             {
                 name: ["librarian", "keeper"],
                 roomId: "/",
-                desc: "The librarian regards you over his spectacles, ready to help you find whatever tale you require.",
+                desc: "An elderly gentleman with half-moon spectacles perched on his nose and ink stains on his fingers. He regards you with the patient, knowing air of someone who has read every spine in the building — and can find any tale you could name.",
+                meta: {
+                    illustration: {
+                        title: "The Librarian",
+                        description: "An elderly librarian with half-moon spectacles and ink-stained fingers standing at a grand desk in a vast library atrium, warm candlelight, dignified portrait.",
+                    },
+                },
                 topics,
             },
         ],

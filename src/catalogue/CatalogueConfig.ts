@@ -289,7 +289,10 @@ export function resolveRoom(path: string, search?: string): Room | undefined {
                 {name: wing.title, item: `/${wing.id}`},
                 {name: category.title},
             ],
-            gameQuery: search ? {type: 'search', search} : categoryToQuery(category),
+            // Searching within a genre aisle scopes the search to that genre.
+            gameQuery: search
+                ? {type: 'search', search, ...(isGenreCategory(category) ? {genre: category.genre} : {})}
+                : categoryToQuery(category),
         };
     }
 
