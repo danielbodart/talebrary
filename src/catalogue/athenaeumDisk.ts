@@ -108,9 +108,9 @@ export function athenaeumDisk(): Disk {
     return {
         roomId: "/",
         rooms,
-        // "find" is advertised by the engine (chip + help) but executed by the
+        // "search" is advertised by the engine (chip + help) but executed by the
         // consumer as a catalogue search — contextual to the current aisle.
-        verbs: [{verb: "find", prefill: true}],
+        verbs: [{verb: "search", prefill: true}],
         inventory: pocketJunk.map((i) => ({...i})),
         characters: [
             {

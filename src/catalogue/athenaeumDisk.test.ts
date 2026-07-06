@@ -72,10 +72,10 @@ describe("athenaeumDisk", () => {
         expect(resolveRoom("/collections")).toBeUndefined();
     });
 
-    test("find is advertised as a prefill suggestion in every room", () => {
+    test("search is advertised as a prefill suggestion in every room", () => {
         const view = new Engine(athenaeumDisk).peek();
-        const find = view.suggestions.find((n) => n.command === "find");
-        expect(find?.action).toBe("prefill");
+        const search = view.suggestions.find((n) => n.command === "search");
+        expect(search?.action).toBe("prefill");
     });
 
     test("searching within a genre aisle scopes the query to that genre", () => {
@@ -99,7 +99,7 @@ describe("athenaeumDisk", () => {
         const engine = new Engine(athenaeumDisk);
         const view = engine.execute("talk librarian");
         const keywords = view.conversation?.topics.map((t) => t.keyword) ?? [];
-        expect(keywords).toEqual(["athenaeum", "illustrations", "collection", "finding"]);
+        expect(keywords).toEqual(["athenaeum", "illustrations", "collection", "searching"]);
         expect(leafCommands(view.suggestions)).toContain("discuss athenaeum");
     });
 

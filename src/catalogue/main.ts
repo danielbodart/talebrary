@@ -99,11 +99,11 @@ function commandGroup(verb: string, names: string[]): SuggestionNode {
     return {label: `${verb}…`, children: names.map(n => ({label: n, command: `${verb} ${n}`, action: 'submit'}))};
 }
 
-/** Actions on an examined character — talk to them, or ask them to find something. */
+/** Actions on an examined character — talk to them, or ask them to search for something. */
 function characterActions(name: string): SuggestionNode[] {
     return [
         {label: `talk ${name}`, command: `talk ${name}`, action: 'submit'},
-        {label: 'find', command: 'find', action: 'prefill'},
+        {label: 'search', command: 'search', action: 'prefill'},
     ];
 }
 
@@ -178,7 +178,7 @@ function appendMessageCard(view: EngineView) {
 }
 
 /** A conversation card: the character's line, a real list of topics, and the
- *  discuss/find/back actions. Leaving is the back chip (no "nothing" in the list). */
+ *  discuss/search/back actions. Leaving is the back chip (no "nothing" in the list). */
 function appendDialogueCard(view: EngineView) {
     const convo = view.conversation!;
     const card = document.createElement('div');
@@ -211,7 +211,7 @@ function appendDialogueCard(view: EngineView) {
     const nodes: SuggestionNode[] = [
         {label: '‹', command: 'bye', action: 'submit'},
         commandGroup('discuss', convo.topics.map(t => t.keyword)),
-        {label: 'find', command: 'find', action: 'prefill'},
+        {label: 'search', command: 'search', action: 'prefill'},
     ];
     card.appendChild(navPanel(nodes));
     main.insertBefore(card, inputControl);
@@ -373,15 +373,15 @@ form.addEventListener('submit', async (ev: SubmitEvent) => {
         return;
     }
 
-    // find <query> — advertised by the engine, executed here as a (contextual) search.
-    const findMatch = command.match(/^find\s+(.+)$/);
-    if (findMatch) {
+    // search <query> — advertised by the engine, executed here as a (contextual) search.
+    const searchMatch = command.match(/^search\s+(.+)$/);
+    if (searchMatch) {
         echoInput(raw);
-        await search(findMatch[1]);
+        await search(searchMatch[1]);
         return;
     }
-    if (command === 'find') {
-        input.value = 'find ';
+    if (command === 'search') {
+        input.value = 'search ';
         input.focus({preventScroll: true});
         return;
     }

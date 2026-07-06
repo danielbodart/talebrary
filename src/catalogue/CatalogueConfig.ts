@@ -220,7 +220,7 @@ export function findCategory(wing: Wing, categoryId: string): AnyCategory | unde
 
 export const atriumIllustration: Describable = {
     title: 'The Atrium',
-    description: 'A vast library atrium with a librarian at a desk, towering bookshelves, grand archways leading to different wings of the collection.',
+    description: 'A vast library atrium with a librarian at a desk, towering bookshelves receding into the stacks in every direction.',
 };
 
 function categoryToQuery(category: AnyCategory): GameQuery {
@@ -245,7 +245,7 @@ export function resolveRoom(path: string, search?: string): Room | undefined {
         return {
             title: 'The Atrium',
             pageTitle: 'The Talebrary Athenaeum',
-            narrative: 'You find yourself standing in the atrium of a vast library. Before you stands the librarian, ready to help you find whatever tale you require. To either side, grand archways lead to different wings of the collection. A brass plaque on the wall reads: "Over 2,000 interactive tales await within."',
+            narrative: 'You find yourself standing in the atrium of a vast library. Before you stands the librarian, ready to help you find whatever tale you require. All around, towering shelves recede into the stacks, every genre and curated collection just a few steps away. A brass plaque on the wall reads: "Over 2,000 interactive tales await within."',
             illustration: atriumIllustration,
             exits: atriumExits(),
             breadcrumb: [{name: 'Atrium'}],
