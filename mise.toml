@@ -5,4 +5,5 @@ _.file = '.env'
 bun = "latest"
 node = "latest"
 rclone = "latest"
+uv = "latest"          # runs db/filter-ifdb.py (sqlglot) for the IFDB conversion
 watchexec = "latest"

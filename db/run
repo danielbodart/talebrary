@@ -33,12 +33,15 @@ function download() {
 }
 
 function convert-ifdb() {
+    local dir="$SCRIPT_DIR"
+    . "$SCRIPT_DIR/../bootstrap.sh"   # sourcing bootstrap resets SCRIPT_DIR to repo root
+    SCRIPT_DIR="$dir"
     pushd "$SCRIPT_DIR"
-    echo "Converting IFDB MySQL dump to SQLite..."
-    rm -f ifdb.sqlite full-ifdb.sql
-    ./mysql2sqlite ifdb-archive.sql > full-ifdb.sql
-    sqlite3 ifdb.sqlite < full-ifdb.sql
-    echo "IFDB SQLite created: $(sqlite3 ifdb.sqlite 'SELECT COUNT(*) FROM games;') games"
+    echo "Converting IFDB MySQL dump → ifdb.sqlite (games/gamelinks/reviews/filetypes)..."
+    rm -f ifdb.sqlite
+    # Parse the MySQL dump with sqlglot and emit only the tables sync.sql reads,
+    # skipping triggers/generated-columns/other tables. See db/filter-ifdb.py.
+    uv run "$SCRIPT_DIR/filter-ifdb.py" ifdb-archive.sql ifdb.sqlite
     popd
 }
 

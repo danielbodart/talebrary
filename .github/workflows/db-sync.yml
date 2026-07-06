@@ -1,9 +1,11 @@
 name: Database Sync
 
 on:
-  # Quarterly: 8th of Jan/Apr/Jul/Oct (week after IFDB's typical ~1st publish)
+  # Monthly, 8th at 02:00 UTC. IFDB dumps are quarterly on no fixed day, so most
+  # months this just re-grabs the newest (idempotent); it also flushes any new
+  # corrections.sql fixes to prod sooner.
   schedule:
-    - cron: '0 2 8 1,4,7,10 *'
+    - cron: '0 2 8 * *'
   # Manual trigger
   workflow_dispatch:
 
