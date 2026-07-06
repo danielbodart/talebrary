@@ -10,6 +10,10 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    # Needed for the "Commit updated database" step to push back to master
+    # (default GITHUB_TOKEN is read-only).
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,6 +37,13 @@ jobs:
 
       - name: Upload to D1
         run: ./db/run upload
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      # Report games removed from IFDB (informational). Soft-disabling stays a
+      # manual decision: run `./db/run prune --disable` locally after reviewing.
+      - name: Report stale games
+        run: ./db/run prune
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
