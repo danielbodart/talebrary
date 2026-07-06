@@ -60,6 +60,7 @@ function sync() {
 ATTACH DATABASE 'ifdb.sqlite' AS ifdb;
 .read sync.sql
 DETACH DATABASE ifdb;
+.read corrections.sql
 EOF
 
     local total=$(sqlite3 talebrary.sqlite "SELECT COUNT(*) FROM talebrary_games;")
