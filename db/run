@@ -9,28 +9,18 @@ function mariadb() {
 }
 
 function download() {
-    local year=$(date +%Y)
-    local month=$(date +%m)
-    # Map to quarter start: 03, 06, 09, 12
-    local qmonth=$(( ((${month#0} - 1) / 3) * 3 + 3 ))
-    local qmonth_padded=$(printf "%02d" $qmonth)
-    local filename="ifdb-archive-${year}${qmonth_padded}01.zip"
-    local url="https://ifarchive.org/if-archive/info/ifdb/${filename}"
-
-    echo "Downloading: $url"
-    if ! curl -f -o "$SCRIPT_DIR/ifdb-latest.zip" "$url"; then
-        # Try previous quarter
-        if [ "$qmonth" -eq 3 ]; then
-            year=$((year - 1)); qmonth=12
-        else
-            qmonth=$((qmonth - 3))
-        fi
-        qmonth_padded=$(printf "%02d" $qmonth)
-        filename="ifdb-archive-${year}${qmonth_padded}01.zip"
-        url="https://ifarchive.org/if-archive/info/ifdb/${filename}"
-        echo "Trying previous quarter: $url"
-        curl -f -o "$SCRIPT_DIR/ifdb-latest.zip" "$url"
+    # IFDB publishes quarterly dumps (ifdb-archive-YYYYMMDD.zip) at an irregular
+    # cadence. Rather than guess the date, list the directory and take the
+    # lexically-newest file. (Runs in CI, which is not geo-blocked by ifarchive.)
+    local base="https://ifarchive.org/if-archive/info/ifdb"
+    echo "Finding latest IFDB dump in $base/ ..."
+    local latest=$(curl -fsSL "$base/" | grep -oE 'ifdb-archive-[0-9]{8}\.zip' | sort -u | tail -1)
+    if [ -z "$latest" ]; then
+        echo "ERROR: no ifdb-archive-*.zip found at $base/" >&2
+        exit 1
     fi
+    echo "Latest dump: $latest"
+    curl -f -o "$SCRIPT_DIR/ifdb-latest.zip" "$base/$latest"
 
     unzip -o "$SCRIPT_DIR/ifdb-latest.zip" -d "$SCRIPT_DIR/"
     # The ZIP contains a single .sql file
@@ -71,13 +61,46 @@ EOF
 }
 
 function upload() {
-    . "$SCRIPT_DIR/../bootstrap.sh"
+    local dir="$SCRIPT_DIR"
+    . "$SCRIPT_DIR/../bootstrap.sh"   # sourcing bootstrap resets SCRIPT_DIR to repo root
+    SCRIPT_DIR="$dir"
     pushd "$SCRIPT_DIR"
-    sqlite3 talebrary.sqlite .dump > d1.sql
-    sed -i '/^BEGIN TRANSACTION;$/d; /^COMMIT;$/d' d1.sql
-    echo "Uploading to D1..."
-    wrangler d1 execute talebrary --remote --file="$SCRIPT_DIR/d1.sql"
+
+    # Safety net: capture a time-travel restore point before writing. If anything
+    # looks wrong afterwards: wrangler d1 time-travel restore talebrary --remote --bookmark=<b>
+    echo "== D1 time-travel bookmark (rollback point) =="
+    bunx wrangler d1 time-travel info talebrary || true
+
+    # Generate the atomic refresh: UPSERT games (preserves curation + incoming FKs),
+    # full-replace gamelinks/search, auth tables untouched. See db/gen-upload.ts.
+    echo "Generating upload SQL..."
+    DB_PATH="$SCRIPT_DIR/talebrary.sqlite" bun run "$SCRIPT_DIR/gen-upload.ts" > d1.sql
+
+    echo "Uploading to D1 (single atomic transaction)..."
+    bunx wrangler d1 execute talebrary --remote --file="$SCRIPT_DIR/d1.sql"
     echo "D1 upload complete."
+    echo "Games removed from IFDB are NOT auto-disabled — review with: ./db/run prune"
+    popd
+}
+
+# Report (and optionally soft-disable) games that exist in prod but are absent
+# from the latest local build — i.e. removed from IFDB. Never hard-deletes, so
+# user data (e.g. favourites) referencing a game is never broken.
+#   ./db/run prune            # report only
+#   ./db/run prune --disable  # set enabled=0 on stale games
+function prune() {
+    local dir="$SCRIPT_DIR"
+    . "$SCRIPT_DIR/../bootstrap.sh"   # sourcing bootstrap resets SCRIPT_DIR to repo root
+    SCRIPT_DIR="$dir"
+    pushd "$SCRIPT_DIR"
+    bunx wrangler d1 execute talebrary --remote --json \
+        --command "SELECT id, enabled FROM talebrary_games" > prod_games.json
+    DB_PATH="$SCRIPT_DIR/talebrary.sqlite" bun run "$SCRIPT_DIR/prune.ts" prod_games.json "$@"
+    if [[ "$*" == *--disable* && -f prune.sql ]]; then
+        echo "Applying prune.sql..."
+        bunx wrangler d1 execute talebrary --remote --file="$SCRIPT_DIR/prune.sql"
+    fi
+    rm -f prod_games.json prune.sql
     popd
 }
 

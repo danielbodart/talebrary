@@ -7,6 +7,8 @@ www/cards/*
 www/new-client/main.*
 db/full.sql
 db/d1.sql
+db/prod_games.json
+db/prune.sql
 db/ifdb-archive.sql
 db/ifdb.sqlite
 db/ifdb-latest.zip
