@@ -10,7 +10,22 @@ last_updated: 2026-07-05
 
 # Transcript Analytics Pipeline — Plan
 
-Status: **design locked, ready to build.** Blocked only on an R2 catalog token (user provides in the morning).
+Status: **phase 1 code built + verified locally (2026-07-07).** Only remaining
+step: create the CF resources (needs the R2 Data Catalog token) + fill the
+stream ID into `wrangler.toml`, then deploy.
+
+## Decisions since design-lock (2026-07-07)
+
+- **No script room detection.** `SceneDetector`'s `/events` beacon (the poor-man's
+  version) is removed. Room is NOT a captured column — it will be an LLM-derived
+  enrichment over the raw lake later (possibly a WS + Durable-Object-per-session
+  live tracker as a phase 2). Raw `input`/`output` JSON is retained precisely so
+  `room` is backfillable. Open question resolved: **no `room` scalar now.**
+- **Keep `sendBeacon`** (not `fetch keepalive`) until batch size actually hits the
+  ~64KB cap. Client sends one beacon per transcript batch.
+- **`seq` is client-assigned** (only ordered vantage point): the beacon carries
+  `{stanzas, seqStart}`; the worker adapter assigns `seq = seqStart + i`, extracts
+  hot columns, and stamps `received_at`.
 
 ## Goal
 

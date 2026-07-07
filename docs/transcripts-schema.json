@@ -1,0 +1,15 @@
+{
+  "fields": [
+    {"name": "session_id", "type": "string", "required": true},
+    {"name": "game_id", "type": "string", "required": true},
+    {"name": "seq", "type": "int32", "required": true},
+    {"name": "input_type", "type": "string", "required": true},
+    {"name": "input_text", "type": "string", "required": false},
+    {"name": "output_text", "type": "string", "required": false},
+    {"name": "input_at", "type": "timestamp", "required": false},
+    {"name": "output_at", "type": "timestamp", "required": false},
+    {"name": "received_at", "type": "timestamp", "required": true},
+    {"name": "input", "type": "json", "required": false},
+    {"name": "output", "type": "json", "required": false}
+  ]
+}

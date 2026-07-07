@@ -8,6 +8,7 @@ import {CloudflareR2Adapter} from "../storage/CloudflareR2Adapter.ts";
 import {D1Adapter} from "../database/D1Adapter.ts";
 import {BetterAuthAdapter} from "../auth/BetterAuthAdapter.ts";
 import {CloudflareWorkflowRunner} from "./CloudflareWorkflowRunner.ts";
+import {CloudflarePipelineAdapter} from "../events/CloudflarePipelineAdapter.ts";
 import {coverArtWorkflow} from "../workflows/coverArt.ts";
 import {illustrationWorkflow} from "../workflows/illustration.ts";
 // @ts-ignore
@@ -24,6 +25,7 @@ function deps(env: Env) {
         db: new D1Adapter(env.db),
         bucket: new CloudflareR2Adapter(env.r2),
         ai: new CloudflareAiAdapter(env.ai, "default"),
+        eventSender: new CloudflarePipelineAdapter(env.TRANSCRIPTS),
         auth: new BetterAuthAdapter(env.db, {
             secret: env.BETTER_AUTH_SECRET,
             baseURL: env.BETTER_AUTH_URL,

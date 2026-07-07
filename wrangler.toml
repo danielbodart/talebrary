@@ -26,6 +26,12 @@ remote = true
 [ai]
 binding = "ai"
 
+# Transcript analytics stream (Cloudflare Pipelines → R2 Data Catalog).
+# stream = talebrary_transcripts (ID); pipeline talebrary_transcripts_pipe → transcripts_sink.
+[[pipelines]]
+binding = "TRANSCRIPTS"
+stream = "60fed8fa599648229f789bc9f34320b2"
+
 [[durable_objects.bindings]]
 name = "IFARCHIVE_PROXY"
 class_name = "IfArchiveProxy"

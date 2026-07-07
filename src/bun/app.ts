@@ -43,6 +43,9 @@ const deps = {
     digest: md5,
     ai: aiInstance,
     auth: new InMemoryAuth(),
+    // Pipelines is Cloudflare-only; locally just log transcript batches so the
+    // /events → capture path is verifiable in dev.
+    eventSender: {send: async (e: any) => { if (e?.stanzas) console.log('[events] transcript stanzas:', e.stanzas.length); }},
     coverArtRunner: new DirectRunner(coverArtWorkflow({http, ai: aiInstance, bucket})),
     illustrationRunner: new DirectRunner(illustrationWorkflow({ai: aiInstance, bucket})),
 };

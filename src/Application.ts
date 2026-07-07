@@ -17,6 +17,7 @@ import {SuggestionsHandler} from "./content/SuggestionsHandler.ts";
 import {SystemTimers} from "./system/timers.ts";
 import {SystemClock} from "./system/clock.ts";
 import {EventHandler} from "./events/EventHandler.ts";
+import type {EventSender} from "./events/EventSender.ts";
 import {CatalogueHandler} from "./catalogue/CatalogueHandler.tsx";
 import {SitemapHandler} from "./sitemap/SitemapHandler.ts";
 import {RobotsHandler} from "./sitemap/RobotsHandler.ts";
@@ -37,6 +38,7 @@ export interface ApplicationDependencies extends
     Dependency<'digest', Digest>,
     Dependency<'ai', TalebraryAi>,
     Dependency<'auth', Auth>,
+    Dependency<'eventSender', EventSender>,
     Dependency<'coverArtRunner', WorkflowRunner<CoverArtParams, CoverArtResult>>,
     Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>> {
 }
@@ -50,7 +52,6 @@ export function application(deps: ApplicationDependencies) {
     return LazyMap.create(deps)
         .set('clock', constructor(SystemClock))
         .set('timers', constructor(SystemTimers))
-        .set('eventSender', _ => ({ send: async () => {} }))
         .set('events', constructor(EventHandler))
         .set('finder', constructor(SqlGameFinder))
         .set('illustration', constructor(IllustrationHandler))

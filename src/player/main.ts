@@ -57,15 +57,33 @@ if (!ifEl.parentElement) document.body.appendChild(ifEl);
 
 const initialColumns = await measureInitialColumns(ifEl);
 
+const gameId = new URL(storyUrl).pathname.split('/')[2] ?? storyUrl;
+
 const client = await createClient({
     storyData,
     workerUrl: '/wasiglk/worker.js',
     interpreterUrl: `/wasiglk/${interpreter}.wasm`,
     filesystem: 'auto',
     metrics: {width: initialColumns, height: 24},
+    recordTranscript: true,
+    transcriptLabel: gameId,
 });
 
 ifEl.run(client);
+captureTranscript(client);
+
+// Forward each transcript batch to /events as it arrives. Runs concurrently
+// with ifEl.run (which drives client.updates()) — transcript() requires that.
+// sendBeacon for now; revisit if batches hit the ~64KB cap.
+async function captureTranscript(client: import("@bodar/wasiglk").WasiGlkClient) {
+    let seq = 0;
+    for await (const batch of client.transcript()) {
+        if (batch.length === 0) continue;
+        const seqStart = seq;
+        seq += batch.length;
+        navigator.sendBeacon('/events', JSON.stringify({stanzas: batch, seqStart}));
+    }
+}
 
 async function measureInitialColumns(container: HTMLElement): Promise<number> {
     await document.fonts.ready;

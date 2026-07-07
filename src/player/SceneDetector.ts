@@ -45,9 +45,6 @@ export class SceneDetector {
                     card.appendChild(buildSuggestionList(treeToNodes(json.tree)));
                 });
             });
-
-        const event = {title: current.title, description: current.description};
-        navigator.sendBeacon('/events', JSON.stringify(event));
     }
 
     private extractScene(card: HTMLElement): Describable {
