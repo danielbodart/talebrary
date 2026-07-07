@@ -16,12 +16,16 @@ describe("SqlGameFinder", () => {
         const finder = new SqlGameFinder({db});
         const result = await finder.find("Adventure");
         expect(result).toBeArray();
-        // Only the IFDB id is stable; titles/authors/ratings move with each dump.
-        const adventure = result.find(g => g.id === 'fft6pu91j85y4acv');
-        expect(adventure).toBeDefined();
-        expect(adventure!.playable).toBe(1);
-        expect(typeof adventure!.score).toBe("number");
-        expect(adventure!.title).toBeTruthy();
+        expect(result.length).toBeGreaterThan(0);
+        // Which specific games rank top shifts with every dump, so assert shape:
+        // results are playable, scored, titled, and sorted by score descending.
+        for (const g of result) {
+            expect(g.playable).toBe(1);
+            expect(typeof g.score).toBe("number");
+            expect(g.title).toBeTruthy();
+        }
+        const scores = result.map(g => g.score);
+        expect(scores).toEqual([...scores].sort((a, b) => b - a));
     });
 
     test("can get story by game id", async () => {
