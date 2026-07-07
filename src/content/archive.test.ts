@@ -82,6 +82,26 @@ describe("extractStory", () => {
         expect(bytes(await extractStory(zip, "zip", "zcode"))).toEqual(zcode);
     });
 
+    test("primary names the exact member — disambiguates a shared comp bundle", async () => {
+        const other = new Uint8Array([0x05, ...new Array(2000).fill(0x43)]); // bigger, same format
+        const bundle = zipSync({"chkn-at.z5": zcode, "chkn-gs.z5": other, "readme.txt": new Uint8Array([1])});
+        // Without primary, largest wins (the wrong game); with primary, exact member.
+        expect(bytes(await extractStory(bundle, "zip", "zcode"))).toEqual(other);
+        expect(bytes(await extractStory(bundle, "zip", "zcode", "chkn-at.z5"))).toEqual(zcode);
+        expect(bytes(await extractStory(bundle, "zip", "zcode", "chkn-gs.z5"))).toEqual(other);
+    });
+
+    test("primary matches case-insensitively and by basename", async () => {
+        const zip = zipSync({"Games/Story.Z5": zcode});
+        expect(bytes(await extractStory(zip, "zip", "zcode", "games/story.z5"))).toEqual(zcode);
+        expect(bytes(await extractStory(zip, "zip", "zcode", "Story.Z5"))).toEqual(zcode);
+    });
+
+    test("missing primary falls back to format selection", async () => {
+        const zip = zipSync({"game.z5": zcode});
+        expect(bytes(await extractStory(zip, "zip", "zcode", "nope.z5"))).toEqual(zcode);
+    });
+
     test("malformed/truncated archive returns null (never throws)", async () => {
         const truncatedZip = zipSync({"game.z5": zcode}).subarray(0, 20); // cut mid-file
         expect(await extractStory(truncatedZip, "zip", "zcode")).toBeNull();

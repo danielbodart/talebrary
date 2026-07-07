@@ -19,6 +19,8 @@ export interface GameStory extends GameBase {
     url: string;
     coverart: string;
     type: SupportedGameType;
+    /** For archive URLs: the story file to extract from inside the archive. */
+    primary?: string | null;
 }
 
 export interface GameFinder {

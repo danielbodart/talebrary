@@ -22,7 +22,7 @@ export function story(deps: Dependency<'http', Http> & Dependency<'finder', Game
         const kind = detectArchive(new Uint8Array(buffer));
         if (!kind) return new Response(buffer, {status: 200, headers: response.headers});
 
-        const extracted = await extractStory(new Uint8Array(buffer), kind, game.type);
+        const extracted = await extractStory(new Uint8Array(buffer), kind, game.type, game.primary);
         // 404 (not ok) so BucketCachingHandler does not cache a failed extraction.
         if (!extracted) return new Response('No story file in archive', {status: 404});
         return new Response(extracted, {status: 200});

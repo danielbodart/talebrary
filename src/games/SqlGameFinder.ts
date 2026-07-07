@@ -234,7 +234,7 @@ export class SqlGameFinder implements GameFinder {
 
     async get(id: string): Promise<GameStory | null> {
         const sql = `
-            SELECT g.id, g.title, g.author, g.description, l.url, l.format AS type, g.coverart
+            SELECT g.id, g.title, g.author, g.description, l.url, l.format AS type, g.coverart, l.primary_file AS "primary"
             FROM talebrary_games g
             JOIN talebrary_gamelinks l ON g.id = l.game_id
             WHERE g.id = ?

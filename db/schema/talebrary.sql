@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS talebrary_gamelinks (
     format TEXT NOT NULL,
     extension TEXT,
     display_order INTEGER NOT NULL DEFAULT 0,
+    primary_file TEXT,
     PRIMARY KEY (game_id, url)
 );
 

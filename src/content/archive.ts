@@ -97,11 +97,25 @@ function readTar(bytes: Uint8Array): Entry[] {
     return entries;
 }
 
-// Choose the story file: prefer a member whose detected format matches the
-// game's IFDB format; otherwise the largest member with a story extension;
-// otherwise fall back to magic-byte detection. Largest wins ties (feelies and
-// readmes are small; the story is the payload).
-function pickStory(entries: Entry[], type: SupportedGameType): Uint8Array | null {
+// Locate the member IFDB names as this game's story inside the archive. Matches
+// exact, then case-insensitively, then by basename (archives may nest in a dir).
+function pickByName(entries: Entry[], primary: string): Uint8Array | null {
+    const lc = primary.toLowerCase();
+    const base = lc.split('/').pop();
+    return (entries.find(e => e.name === primary)
+        ?? entries.find(e => e.name.toLowerCase() === lc)
+        ?? entries.find(e => e.name.toLowerCase().split('/').pop() === base))?.bytes ?? null;
+}
+
+// Choose the story file: if IFDB names it (primary), use that member; otherwise
+// prefer a member whose detected format matches the game's IFDB format, else the
+// largest member with a story extension, else magic-byte detection. Largest wins
+// ties (feelies and readmes are small; the story is the payload).
+function pickStory(entries: Entry[], type: SupportedGameType, primary?: string | null): Uint8Array | null {
+    if (primary) {
+        const named = pickByName(entries, primary);
+        if (named) return named;
+    }
     const want = normalizeFormat(type);
     const byExt = entries
         .map(e => ({e, info: detectFormatFromUrl(e.name)}))
@@ -122,7 +136,7 @@ function pickStory(entries: Entry[], type: SupportedGameType): Uint8Array | null
 
 // Returns the story bytes, or null if the archive is oversized, malformed, or
 // contains no recognisable story (callers return 404 so nothing bad is cached).
-export async function extractStory(bytes: Uint8Array, kind: ArchiveKind, type: SupportedGameType): Promise<ArrayBuffer | null> {
+export async function extractStory(bytes: Uint8Array, kind: ArchiveKind, type: SupportedGameType, primary?: string | null): Promise<ArrayBuffer | null> {
     if (bytes.length > MAX_ARCHIVE_BYTES) return null;
     try {
         let entries: Entry[];
@@ -135,7 +149,7 @@ export async function extractStory(bytes: Uint8Array, kind: ArchiveKind, type: S
         } else {
             entries = readTar(bytes);
         }
-        const story = pickStory(entries, type);
+        const story = pickStory(entries, type, primary);
         return story ? bufferOf(story) : null;
     } catch {
         return null; // malformed/truncated archive

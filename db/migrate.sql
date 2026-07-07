@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS talebrary_gamelinks (
     format TEXT NOT NULL,
     extension TEXT,
     display_order INTEGER NOT NULL DEFAULT 0,
+    primary_file TEXT,
     PRIMARY KEY (game_id, url)
 );
 
@@ -44,8 +45,8 @@ SELECT
 FROM games g;
 
 -- Migrate gamelinks (denormalise with filetypes)
-INSERT OR IGNORE INTO talebrary_gamelinks (game_id, url, format, extension, display_order)
-SELECT l.gameid, l.url, f.externid, f.extension, l.displayorder
+INSERT OR IGNORE INTO talebrary_gamelinks (game_id, url, format, extension, display_order, primary_file)
+SELECT l.gameid, l.url, f.externid, f.extension, l.displayorder, NULLIF(l.compressedprimary, '')
 FROM gamelinks l
 JOIN filetypes f ON l.fmtid = f.id;
 

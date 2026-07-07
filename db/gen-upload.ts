@@ -21,7 +21,7 @@ const GAME_COLS = ["id","title","author","description","genre","language","publi
     "coverart","tags","seriesname","avg_rating","enabled","notes","ifdb_moddate","synced_at"];
 // Curation columns are owned by prod, not IFDB — never overwrite them on update.
 const GAME_PRESERVE = new Set(["id","enabled","notes"]);
-const LINK_COLS = ["game_id","url","format","extension","display_order"];
+const LINK_COLS = ["game_id","url","format","extension","display_order","primary_file"];
 const SEARCH_COLS = ["id","title","author","tags","description","seriesname","genre"];
 
 function lit(v: unknown): string {

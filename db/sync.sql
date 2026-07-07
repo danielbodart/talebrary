@@ -36,10 +36,12 @@ UPDATE talebrary_games SET avg_rating = (
 )
 WHERE EXISTS (SELECT 1 FROM ifdb.reviews r WHERE r.gameid = talebrary_games.id);
 
--- 4. Rebuild gamelinks (full replace - IFDB owns this data)
+-- 4. Rebuild gamelinks (full replace - IFDB owns this data).
+--    compressedprimary names the story file inside an archive (zip/tar/gz) for
+--    this game, so shared comp-bundle archives can be disambiguated per game.
 DELETE FROM talebrary_gamelinks;
-INSERT OR IGNORE INTO talebrary_gamelinks (game_id, url, format, extension, display_order)
-SELECT l.gameid, l.url, f.externid, f.extension, l.displayorder
+INSERT OR IGNORE INTO talebrary_gamelinks (game_id, url, format, extension, display_order, primary_file)
+SELECT l.gameid, l.url, f.externid, f.extension, l.displayorder, NULLIF(l.compressedprimary, '')
 FROM ifdb.gamelinks l
 JOIN ifdb.filetypes f ON l.fmtid = f.id
 WHERE l.gameid IN (SELECT id FROM talebrary_games);
