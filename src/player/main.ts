@@ -102,6 +102,7 @@ function interpreterFor(type: string | undefined): string | undefined {
         'advsys': 'advsys',
         'tads2': 'tads2',
         'tads3': 'tads3',
+        'level9': 'level9',
     };
     return type ? map[type] : undefined;
 }

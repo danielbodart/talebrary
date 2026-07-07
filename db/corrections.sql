@@ -215,3 +215,13 @@ UPDATE talebrary_games SET enabled=0 WHERE id IN ('0iyne3m23v5hdcx7','0ao3c7j1rt
 -- 2026-07-07: format-derivation recovery — disable the newly-enabled archive
 -- games whose archive is dead/not-an-archive (fetch-fail/not-archive).
 UPDATE talebrary_games SET enabled=0 WHERE id IN ('2njx8jit2j13ash','4zzz2snpezvmy7o','7ry4zk5o78jqulky','f2pq6k8vcga6z7d7','gpuph2vzg6hzhfnb','ed0h7uheehrnscmc','jjwfc0kz3k7x7vui','4uqyp5zh49b43zah','nb2q52186kuir6ft','r6csd9z98jjyg1pt','u0jb1u17s7caw7k6','jb03ij8icrpboya7','xftjrkuw7kjjs9w','scnj3jw4zu348cxd','yf14m088oz9wwado');
+
+-- 2026-07-07: enable the genuine Level 9 games hand-verified from the ZX
+-- Spectrum collection (spectrum/zx.zip). These are real Level 9 A-code games
+-- (Austin brothers, Level 9 Computing) that boot in level9.wasm; the other
+-- .sna files in that zip are unrelated Spectrum engines, so this is a curated
+-- allowlist by game id rather than a blanket .sna -> level9 rule. primary_file
+-- names the specific .sna inside the archive.
+UPDATE talebrary_gamelinks SET format='level9', extension='.l9 .sna'
+WHERE lower(url) LIKE '%zx.zip'
+  AND game_id IN ('0odl661ptrlyo1ld','42b18ov4c4ao88za','ohwkcbpfdtjrzrz6','9xifpt8k3n3s4ky5','q6kx2h2dm6cr1sbt');
