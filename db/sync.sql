@@ -46,6 +46,12 @@ FROM ifdb.gamelinks l
 JOIN ifdb.filetypes f ON l.fmtid = f.id
 WHERE l.gameid IN (SELECT id FROM talebrary_games);
 
+-- 4b. Resolve format from the actual story filename (archive's primary, else the
+--     URL) when IFDB's tag isn't a directly-supported interpreter format. This
+--     recovers generic 'storyfile'/'*' links and ADRIFT version variants
+--     (adrift38/adrift39 -> adrift, playable by scare).
+.read derive-format.sql
+
 -- 5. Rebuild FTS5 search index (only enabled games)
 DELETE FROM talebrary_search;
 INSERT INTO talebrary_search (id, title, author, tags, description, seriesname, genre)
