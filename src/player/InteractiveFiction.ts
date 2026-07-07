@@ -71,6 +71,20 @@ export class InteractiveFiction {
                     return;
                 }
 
+                // RemGlk sends the complete window list whenever the set of
+                // windows changes. Drop any window we're still holding that is
+                // no longer present — e.g. a status window the interpreter
+                // closed and reopened on an arrange event. Without this the old
+                // DOM element lingers as a stale, duplicate window.
+                const liveIds = new Set(windows.map(w => w.id));
+                for (const [id, el] of this.windows) {
+                    if (!liveIds.has(id)) {
+                        el.remove();
+                        this.windows.delete(id);
+                        this.windowTypes.delete(id);
+                    }
+                }
+
                 for (const win of windows) {
                     let el = this.windows.get(win.id);
                     if (!el) {
