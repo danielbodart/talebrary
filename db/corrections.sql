@@ -225,3 +225,17 @@ UPDATE talebrary_games SET enabled=0 WHERE id IN ('2njx8jit2j13ash','4zzz2snpezv
 UPDATE talebrary_gamelinks SET format='level9', extension='.l9 .sna'
 WHERE lower(url) LIKE '%zx.zip'
   AND game_id IN ('0odl661ptrlyo1ld','42b18ov4c4ao88za','ohwkcbpfdtjrzrz6','9xifpt8k3n3s4ky5','q6kx2h2dm6cr1sbt');
+
+-- 2026-07-07: showcase games for the ScottFree (scott) and JACL (jacl)
+-- interpreters. Curated by game id (formats collide with generic extensions,
+-- and the archives are shared), verified booting in-browser.
+--   scott: Voodoo Castle (adv04.dat in AdamsGames.zip), Golden Baton (a
+--          Mysterious Adventure; ScottFree runs these too).
+--   jacl:  The Unholy Grail (grail.j2 in grail.zip).
+UPDATE talebrary_gamelinks SET format='jacl', extension='.j2 .jacl'
+  WHERE game_id='7p2rxk0e667yraf2' AND lower(url) LIKE '%jacl/grail.zip';
+UPDATE talebrary_gamelinks SET format='scott', extension='.dat', primary_file='adv04.dat'
+  WHERE game_id='ay2jy3sc3e6s9j4k' AND lower(url) LIKE '%adamsgames.zip';
+UPDATE talebrary_gamelinks SET format='scott', extension='.dat', primary_file='1_baton.dat',
+       url='https://ifarchive.org/if-archive/scott-adams/games/scottfree/mysterious.tar.gz'
+  WHERE game_id='v148gq1vx7leo8al' AND lower(url) LIKE '%mysterious.tar.gz';

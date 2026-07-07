@@ -103,6 +103,8 @@ function interpreterFor(type: string | undefined): string | undefined {
         'tads2': 'tads2',
         'tads3': 'tads3',
         'level9': 'level9',
+        'scott': 'scott',
+        'jacl': 'jacl',
     };
     return type ? map[type] : undefined;
 }

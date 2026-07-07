@@ -11,7 +11,9 @@ export type SupportedGameType =
     | 'advsys'
     | 'tads2'
     | 'tads3'
-    | 'level9';
+    | 'level9'
+    | 'scott'
+    | 'jacl';
 
 export interface Describable {
     title: string;

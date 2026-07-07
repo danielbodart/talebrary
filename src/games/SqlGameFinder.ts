@@ -4,7 +4,7 @@ import type {GameFinder, GameInfo, GameStory} from "./GameFinder.ts";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 const supportedFormats = `('zcode', 'blorb/zcode', 'glulx', 'blorb/glulx', 'hugo', 'adrift',
-                    'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3', 'level9')`;
+                    'alan2', 'alan3', 'agt', 'advsys', 'tads2', 'tads3', 'level9', 'scott', 'jacl')`;
 
 // The link's URL file extension is in the format's declared extension list.
 const extensionMatch = `(' ' || l.extension || ' ' LIKE
