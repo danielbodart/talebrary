@@ -1,4 +1,4 @@
-import {unzip, type Unzipped} from "fflate";
+import {unzipSync} from "fflate";
 import {detectFormatFromUrl, detectFormatFromData} from "@bodar/wasiglk";
 import type {SupportedGameType} from "../types.ts";
 
@@ -68,11 +68,11 @@ async function gunzip(bytes: Uint8Array): Promise<Uint8Array> {
 }
 
 // Unzip only members within the size cap; oversized entries are skipped by the
-// filter so fflate never allocates for them (zip-bomb defence).
-function unzipCapped(bytes: Uint8Array): Promise<Unzipped> {
-    return new Promise((resolve, reject) => {
-        unzip(bytes, {filter: f => f.originalSize <= MAX_DECOMPRESSED_BYTES}, (err, data) => err ? reject(err) : resolve(data));
-    });
+// filter so fflate never allocates for them (zip-bomb defence). Synchronous —
+// fflate's async unzip spawns web workers, which are unavailable/unreliable in
+// Workers and Bun.
+function unzipCapped(bytes: Uint8Array): Record<string, Uint8Array> {
+    return unzipSync(bytes, {filter: f => f.originalSize <= MAX_DECOMPRESSED_BYTES});
 }
 
 // Minimal tar reader: iterate 512-byte headers, collecting regular files.
@@ -141,7 +141,7 @@ export async function extractStory(bytes: Uint8Array, kind: ArchiveKind, type: S
     try {
         let entries: Entry[];
         if (kind === 'zip') {
-            entries = Object.entries(await unzipCapped(bytes)).map(([name, b]) => ({name, bytes: b}));
+            entries = Object.entries(unzipCapped(bytes)).map(([name, b]) => ({name, bytes: b}));
         } else if (kind === 'gzip') {
             const inner = await gunzip(bytes);
             if (!isTar(inner)) return bufferOf(inner); // plain gzip is single-stream: the story itself

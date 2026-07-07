@@ -102,6 +102,11 @@ describe("extractStory", () => {
         expect(bytes(await extractStory(zip, "zip", "zcode", "nope.z5"))).toEqual(zcode);
     });
 
+    test("extracts a DEFLATE-compressed member (not just stored)", async () => {
+        const zip = zipSync({"game.z5": [zcode, {level: 9}]});
+        expect(bytes(await extractStory(zip, "zip", "zcode"))).toEqual(zcode);
+    });
+
     test("malformed/truncated archive returns null (never throws)", async () => {
         const truncatedZip = zipSync({"game.z5": zcode}).subarray(0, 20); // cut mid-file
         expect(await extractStory(truncatedZip, "zip", "zcode")).toBeNull();
