@@ -38,6 +38,12 @@ function copy-wasiglk() {
   local dest="./www/wasiglk"
   mkdir -p "${dest}"
   cp "${src}"/*.wasm "${dest}/"
+  # agt2agx is a server-side converter, not a player interpreter: keep it out of
+  # the client assets and place it next to the worker root for a clean bundled
+  # import (the CompiledWasm rule picks it up). This is the one node_modules
+  # reference, same pattern as bundle-worker above.
+  rm -f "${dest}/agt2agx.wasm"
+  cp "${src}/agt2agx.wasm" ./src/cloudflare/agt2agx.wasm
 }
 
 function bundle-worker() {

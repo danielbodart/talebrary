@@ -1,4 +1,6 @@
 import {serve} from "bun";
+import {readFileSync} from "node:fs";
+import {fileURLToPath} from "node:url";
 import {application} from "../Application.ts";
 import {talebrary} from "./SqliteDatabase.ts";
 import {localhostHandler} from "./FileHandler.ts";
@@ -36,6 +38,12 @@ if (PROXY_URL && PROXY_TOKEN) {
 }
 
 const aiInstance = ai();
+// The Cloudflare root gets agt2agx as a bundled WebAssembly.Module (CompiledWasm);
+// here we produce the same injected result differently — locate the wasm via the
+// wasiglk package export (no node_modules path juggling) and compile it. Bun's
+// own *.wasm import only yields a path, and runtime compile is fine off-worker.
+const agtWasm = new URL("../wasm/agt2agx.wasm", import.meta.resolve("@bodar/wasiglk"));
+const agtModule = new WebAssembly.Module(readFileSync(fileURLToPath(agtWasm)));
 const deps = {
     http,
     db: talebrary(),
@@ -48,6 +56,7 @@ const deps = {
     eventSender: {send: async (e: any) => { if (e?.stanzas) console.log('[events] transcript stanzas:', e.stanzas.length); }},
     coverArtRunner: new DirectRunner(coverArtWorkflow({http, ai: aiInstance, bucket})),
     illustrationRunner: new DirectRunner(illustrationWorkflow({ai: aiInstance, bucket})),
+    agtModule,
 };
 const app = application(deps);
 const handler = (req: Request) => app.handler(req);

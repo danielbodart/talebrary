@@ -2,6 +2,12 @@ import {unzipSync} from "fflate";
 import {detectFormatFromUrl, detectFormatFromData} from "@bodar/wasiglk";
 import type {SupportedGameType} from "../types.ts";
 
+// Packs a classic multi-file AGT game into a single AGX. Injected by the caller
+// (Story.ts) so archive.ts stays free of the agt2agx wasm module, which each
+// composition root loads differently (Cloudflare: bundled WebAssembly.Module;
+// Bun: compiled from disk).
+export type AgtConverter = (files: Record<string, Uint8Array>) => Uint8Array;
+
 // Some IFDB story links point at a compressed archive rather than a bare story
 // file. We fetch the archive, pull out the story file matching the game's format
 // and serve that (BucketCachingHandler then caches the extracted bytes). The
@@ -134,9 +140,42 @@ function pickStory(entries: Entry[], type: SupportedGameType, primary?: string |
     return byMagic.length ? byMagic[0].bytes : null;
 }
 
+function basename(name: string): string {
+    return name.split('/').pop() ?? name;
+}
+
+// Classic AGT games are multi-file (.da1–.da6, .ttl, .d$$, .cfg …) and have no
+// single member that runs on its own, so pickStory can't handle them. Convert
+// the whole set into one AGX (AGiliTy's portable container) via the injected
+// converter. If the archive already ships a compiled .agx, serve that directly.
+// The base name (which member set is the game) comes from IFDB's primary_file
+// when present, else the sole .da1. Members are matched by that base so nested
+// layouts and stray feelies are handled; the converter opens only what it needs.
+function agtStory(entries: Entry[], convert: AgtConverter, primary?: string | null): Uint8Array | null {
+    const primaryBase = primary ? basename(primary).replace(/\.[^.]*$/, '') : null;
+
+    const agx = entries.find(e =>
+        e.name.toLowerCase().endsWith('.agx') &&
+        (!primaryBase || basename(e.name).toLowerCase().startsWith(primaryBase.toLowerCase() + '.')));
+    if (agx) return agx.bytes;
+
+    const da1 = primaryBase
+        ? entries.find(e => basename(e.name).toLowerCase() === primaryBase.toLowerCase() + '.da1')
+        : entries.find(e => e.name.toLowerCase().endsWith('.da1'));
+    if (!da1) return null;
+
+    const base = basename(da1.name).replace(/\.da1$/i, '').toLowerCase();
+    const files: Record<string, Uint8Array> = {};
+    for (const e of entries) {
+        const bn = basename(e.name);
+        if (bn.toLowerCase().startsWith(base + '.')) files[bn] = e.bytes;
+    }
+    return convert(files);
+}
+
 // Returns the story bytes, or null if the archive is oversized, malformed, or
 // contains no recognisable story (callers return 404 so nothing bad is cached).
-export async function extractStory(bytes: Uint8Array, kind: ArchiveKind, type: SupportedGameType, primary?: string | null): Promise<ArrayBuffer | null> {
+export async function extractStory(bytes: Uint8Array, kind: ArchiveKind, type: SupportedGameType, primary?: string | null, convertAgt?: AgtConverter): Promise<ArrayBuffer | null> {
     if (bytes.length > MAX_ARCHIVE_BYTES) return null;
     try {
         let entries: Entry[];
@@ -148,6 +187,11 @@ export async function extractStory(bytes: Uint8Array, kind: ArchiveKind, type: S
             entries = readTar(inner);                   // .tar.gz / .tgz
         } else {
             entries = readTar(bytes);
+        }
+        if (normalizeFormat(type) === 'agt') {
+            if (!convertAgt) return null;
+            const agx = agtStory(entries, convertAgt, primary);
+            return agx ? bufferOf(agx) : null;
         }
         const story = pickStory(entries, type, primary);
         return story ? bufferOf(story) : null;

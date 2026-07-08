@@ -1,4 +1,9 @@
 import {application} from "../Application.ts";
+// Bundled as a pre-compiled WebAssembly.Module (wrangler CompiledWasm rule);
+// Workers can't fetch/compile wasm at runtime, so it must be a static import.
+// `copy-wasiglk` (see ./run) copies agt2agx.wasm here from the package, so this
+// stays a clean local import rather than reaching into node_modules.
+import agtModule from "./agt2agx.wasm";
 import {Uri} from "../http/Uri.ts";
 import {md5} from "../system/digest.ts";
 import {ifArchiveHttp} from "./IfArchiveHttp.ts";
@@ -35,6 +40,7 @@ function deps(env: Env) {
         }),
         coverArtRunner: new CloudflareWorkflowRunner<CoverArtParams, CoverArtResult>(env.COVER_ART_WORKFLOW),
         illustrationRunner: new CloudflareWorkflowRunner<IllustrationParams, IllustrationResult>(env.ILLUSTRATION_WORKFLOW),
+        agtModule,
     };
 }
 

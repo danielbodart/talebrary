@@ -3,6 +3,14 @@ compatibility_flags = ["nodejs_compat"]
 name = "talebrary"
 main = "src/cloudflare/app.ts"
 
+# agt2agx.wasm (from @bodar/wasiglk) is imported server-side to convert classic
+# multi-file AGT games into a single AGX. Workers require Wasm to be bundled as a
+# pre-compiled module — it cannot be fetched/compiled at request time.
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+fallthrough = true
+
 [observability]
 enabled = true
 head_sampling_rate = 1

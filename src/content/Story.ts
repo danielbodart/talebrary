@@ -1,11 +1,13 @@
 import {get, type Http} from "../http/mod.ts";
+import {agtToAgx} from "@bodar/wasiglk";
 import type {GameFinder} from "../games/GameFinder.ts";
 import {Uri} from "../http/Uri.ts";
 import {detectArchive, extractStory, MAX_ARCHIVE_BYTES} from "./archive.ts";
 
 import type {Dependency} from "@bodar/yadic/types.ts";
 
-export function story(deps: Dependency<'http', Http> & Dependency<'finder', GameFinder>): Http {
+export function story(deps: Dependency<'http', Http> & Dependency<'finder', GameFinder> & Dependency<'agtModule', WebAssembly.Module>): Http {
+    const convertAgt = (files: Record<string, Uint8Array>) => agtToAgx(deps.agtModule, files);
     return async request => {
         const uri = new Uri(request.url);
         const [, , id] = uri.path.split('/');
@@ -22,7 +24,7 @@ export function story(deps: Dependency<'http', Http> & Dependency<'finder', Game
         const kind = detectArchive(new Uint8Array(buffer));
         if (!kind) return new Response(buffer, {status: 200, headers: response.headers});
 
-        const extracted = await extractStory(new Uint8Array(buffer), kind, game.type, game.primary);
+        const extracted = await extractStory(new Uint8Array(buffer), kind, game.type, game.primary, convertAgt);
         // 404 (not ok) so BucketCachingHandler does not cache a failed extraction.
         if (!extracted) return new Response('No story file in archive', {status: 404});
         return new Response(extracted, {status: 200});

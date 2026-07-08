@@ -7,6 +7,10 @@ function stubFinder(game: GameStory | null) {
     return {get: async () => game} as any as GameFinder;
 }
 
+// Empty but valid wasm module (\0asm + version). These tests use non-AGT games,
+// so the converter is never invoked; the module only satisfies the dependency.
+const agtModule = new WebAssembly.Module(new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
+
 describe("story", () => {
     test("fetches story URL for known game", async () => {
         let fetchedUrl = '';
@@ -23,7 +27,8 @@ describe("story", () => {
                 url: "http://ifarchive.org/games/adventure.z5",
                 coverart: "",
                 type: "zcode",
-            })
+            }),
+            agtModule,
         });
 
         const response = await handler(new Request("http://test/content/abc/story"));
@@ -35,6 +40,7 @@ describe("story", () => {
         const handler = story({
             http: async () => new Response("", {status: 200}),
             finder: stubFinder(null),
+            agtModule,
         });
 
         const response = await handler(new Request("http://test/content/unknown/story"));

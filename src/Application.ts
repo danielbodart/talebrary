@@ -40,7 +40,9 @@ export interface ApplicationDependencies extends
     Dependency<'auth', Auth>,
     Dependency<'eventSender', EventSender>,
     Dependency<'coverArtRunner', WorkflowRunner<CoverArtParams, CoverArtResult>>,
-    Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>> {
+    Dependency<'illustrationRunner', WorkflowRunner<IllustrationParams, IllustrationResult>>,
+    // agt2agx.wasm module, loaded per-runtime (CF: bundled import; Bun: from disk).
+    Dependency<'agtModule', WebAssembly.Module> {
 }
 
 
