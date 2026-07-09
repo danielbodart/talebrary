@@ -1,4 +1,4 @@
-import {createClient, detectFormat} from "@bodar/wasiglk";
+import {createClient, detectFormat, measureMetrics, type Metrics} from "@bodar/wasiglk";
 import {constructor, instance, LazyMap} from "@bodar/yadic/LazyMap.ts";
 import {SystemClock} from "../system/clock.ts";
 import {ImageElement} from "../components/ImageElement.ts";
@@ -55,7 +55,7 @@ const ifEl = document.querySelector('interactive-fiction') as any
 
 if (!ifEl.parentElement) document.body.appendChild(ifEl);
 
-const initialColumns = await measureInitialColumns(ifEl);
+const initialMetrics = await measureInitialMetrics(ifEl);
 
 const gameId = new URL(storyUrl).pathname.split('/')[2] ?? storyUrl;
 
@@ -64,7 +64,7 @@ const client = await createClient({
     workerUrl: '/wasiglk/worker.js',
     interpreterUrl: `/wasiglk/${interpreter}.wasm`,
     filesystem: 'auto',
-    metrics: {width: initialColumns, height: 24},
+    metrics: initialMetrics,
     recordTranscript: true,
     transcriptLabel: gameId,
 });
@@ -85,25 +85,28 @@ async function captureTranscript(client: import("@bodar/wasiglk").WasiGlkClient)
     }
 }
 
-async function measureInitialColumns(container: HTMLElement): Promise<number> {
+// The game's windows don't exist until the interpreter starts, so build
+// throwaway grid + buffer windows styled exactly like the real ones (the CSS
+// keys off `interactive-fiction grid-window section` etc.) and let measureMetrics
+// probe them for real pixel + character metrics.
+async function measureInitialMetrics(container: HTMLElement): Promise<Metrics> {
     await document.fonts.ready;
 
-    const gridWindow = document.createElement('grid-window');
-    const section = document.createElement('section');
-    section.classList.add('card');
-    const probe = document.createElement('span');
-    probe.style.cssText = 'visibility:hidden;white-space:pre;';
-    probe.textContent = '0';
-    section.appendChild(probe);
-    gridWindow.appendChild(section);
-    container.appendChild(gridWindow);
+    const grid = document.createElement('grid-window');
+    const gridSection = document.createElement('section');
+    gridSection.classList.add('card');
+    grid.appendChild(gridSection);
 
-    const available = section.clientWidth;
-    const charWidth = probe.getBoundingClientRect().width;
-    gridWindow.remove();
+    const buffer = document.createElement('buffer-window');
+    const bufferSection = document.createElement('section');
+    bufferSection.classList.add('card');
+    buffer.appendChild(bufferSection);
 
-    if (charWidth === 0) return 80;
-    return Math.floor(available / charWidth);
+    container.append(grid, buffer);
+    const metrics = measureMetrics({area: container, grid: gridSection, buffer: bufferSection});
+    grid.remove();
+    buffer.remove();
+    return metrics;
 }
 
 function interpreterFor(type: string | undefined): string | undefined {

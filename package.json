@@ -5,7 +5,7 @@
     "@better-auth/infra": "0.3.4",
     "@bodar/dullahan": "npm:@jsr/bodar__dullahan@0.1.0",
     "@bodar/jsx2dom": "npm:@jsr/bodar__jsx2dom",
-    "@bodar/wasiglk": "npm:@jsr/bodar__wasiglk@0.109.35",
+    "@bodar/wasiglk": "npm:@jsr/bodar__wasiglk@0.121.47",
     "@bodar/yadic": "npm:@jsr/bodar__yadic",
     "better-auth": "1.6.23",
     "fast-xml-parser": "^4.5.3",

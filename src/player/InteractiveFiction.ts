@@ -1,4 +1,4 @@
-import type {WasiGlkClient, RemGlkUpdate, WindowUpdate, ContentUpdate, InputRequest, ContentSpan, TextSpan, TextParagraph, GridLine} from "@bodar/wasiglk";
+import {measureMetrics, type WasiGlkClient, type RemGlkUpdate, type WindowUpdate, type ContentUpdate, type InputRequest, type ContentSpan, type TextSpan, type TextParagraph, type GridLine} from "@bodar/wasiglk";
 import {CustomElementDefinition} from "../components/CustomElementDefinition.ts";
 import type {GridLineUpdate} from "./GridWindow.ts";
 
@@ -14,29 +14,30 @@ export class InteractiveFiction {
             private windowTypes = new Map<number, 'buffer' | 'grid'>();
             private resizeObserver = new ResizeObserver(() => this.scheduleResize());
             private resizeTimeout: ReturnType<typeof setTimeout> | null = null;
-            private currentColumns = 0;
+            private lastWidth = 0;
 
             async run(client: WasiGlkClient) {
                 this.client = client;
+                // Observe the whole game area so a viewport resize re-arranges even
+                // buffer-only games (no grid/status window to observe).
+                this.resizeObserver.observe(this);
 
                 for await (const update of client.updates()) {
                     this.handle(update);
                 }
             }
 
-            private observeGridWindow(el: HTMLElement) {
-                this.resizeObserver.observe(el);
-            }
-
             private scheduleResize() {
                 if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
                 this.resizeTimeout = setTimeout(() => {
-                    const gridWindow = this.querySelector('grid-window');
-                    if (!gridWindow) return;
-                    const columns = measureColumns(gridWindow as HTMLElement);
-                    if (columns > 0 && columns !== this.currentColumns) {
-                        this.currentColumns = columns;
-                        this.client?.sendArrange({width: columns, height: 24});
+                    const grid = this.querySelector<HTMLElement>('grid-window section');
+                    const buffer = this.querySelector<HTMLElement>('buffer-window section.card');
+                    const textEl = grid ?? buffer;
+                    if (!textEl) return;
+                    const metrics = measureMetrics({area: this, grid: textEl, buffer: buffer ?? textEl});
+                    if (metrics.width !== this.lastWidth) {
+                        this.lastWidth = metrics.width;
+                        this.client?.sendArrange(metrics);
                     }
                 }, 300);
             }
@@ -106,7 +107,6 @@ export class InteractiveFiction {
                     }
                     if (win.type === 'grid' && 'setGridSize' in el) {
                         (el as any).setGridSize(win.gridheight ?? 0);
-                        this.observeGridWindow(el);
                     }
                 }
             }
@@ -172,22 +172,3 @@ function extractGridLines(lines: GridLine[]): GridLineUpdate[] {
     }));
 }
 
-function measureColumns(gridWindow: HTMLElement): number {
-    const section = gridWindow.querySelector('section');
-    if (!section) return 0;
-
-    const style = getComputedStyle(section);
-    const paddingLeft = parseFloat(style.paddingLeft) || 0;
-    const paddingRight = parseFloat(style.paddingRight) || 0;
-    const available = section.clientWidth - paddingLeft - paddingRight;
-
-    const probe = document.createElement('span');
-    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;';
-    probe.textContent = '0';
-    section.appendChild(probe);
-    const charWidth = probe.getBoundingClientRect().width;
-    probe.remove();
-
-    if (charWidth === 0) return 0;
-    return Math.floor(available / charWidth);
-}
