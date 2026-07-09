@@ -34,7 +34,8 @@ export class InteractiveFiction {
                     const buffer = this.querySelector<HTMLElement>('buffer-window section.card');
                     const textEl = grid ?? buffer;
                     if (!textEl) return;
-                    const metrics = measureMetrics({area: this, grid: textEl, buffer: buffer ?? textEl});
+                    // Height from the viewport: `this` is display:inline (height 0).
+                    const metrics = measureMetrics({area: document.documentElement, grid: textEl, buffer: buffer ?? textEl});
                     if (metrics.width !== this.lastWidth) {
                         this.lastWidth = metrics.width;
                         this.client?.sendArrange(metrics);

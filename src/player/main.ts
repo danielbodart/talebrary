@@ -88,7 +88,8 @@ async function captureTranscript(client: import("@bodar/wasiglk").WasiGlkClient)
 // The game's windows don't exist until the interpreter starts, so build
 // throwaway grid + buffer windows styled exactly like the real ones (the CSS
 // keys off `interactive-fiction grid-window section` etc.) and let measureMetrics
-// probe them for real pixel + character metrics.
+// probe them for real pixel + character metrics. Height comes from the viewport
+// (documentElement): the container is `display:inline` so its own height is 0.
 async function measureInitialMetrics(container: HTMLElement): Promise<Metrics> {
     await document.fonts.ready;
 
@@ -103,7 +104,7 @@ async function measureInitialMetrics(container: HTMLElement): Promise<Metrics> {
     buffer.appendChild(bufferSection);
 
     container.append(grid, buffer);
-    const metrics = measureMetrics({area: container, grid: gridSection, buffer: bufferSection});
+    const metrics = measureMetrics({area: document.documentElement, grid: gridSection, buffer: bufferSection});
     grid.remove();
     buffer.remove();
     return metrics;
