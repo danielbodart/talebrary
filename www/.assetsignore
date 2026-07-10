@@ -1,0 +1,6 @@
+# Runtime-written content lives in R2, not in the deployed asset bundle.
+# Guards against a local `./run deploy` after `./run pull` accidentally
+# bundling downloaded cover images / generated art as static assets.
+content
+cards/art
+workflow-images

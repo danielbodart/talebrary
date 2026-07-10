@@ -125,9 +125,11 @@ function check-rclone() {
 
 function deploy() {
   check
+  # `wrangler deploy` bundles www/ as Workers Static Assets ([assets] in
+  # wrangler.toml), versioned atomically with the Worker. The old rclone push
+  # of www/ → R2 is gone; R2 now holds only runtime-written content. rclone is
+  # still used by pull/purge for syncing that content locally.
   bunx wrangler deploy
-  check-rclone
-  rclone --config rclone.conf copy www/ cloudflare:talebrary --header="Cache-Control:public, max-age=60" -v
 }
 
 function pull() {

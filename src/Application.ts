@@ -35,6 +35,10 @@ export interface ApplicationDependencies extends
     Dependency<'http', Http>,
     Dependency<'db', TalebraryDatabase>,
     Dependency<'bucket', TalebraryBucket>,
+    // Build-time static assets. CF: the Workers Static Assets binding
+    // (env.ASSETS); Bun: FolderBucket over www/. Distinct from `bucket` (R2),
+    // which holds only runtime-written content.
+    Dependency<'assets', Http>,
     Dependency<'digest', Digest>,
     Dependency<'ai', TalebraryAi>,
     Dependency<'auth', Auth>,

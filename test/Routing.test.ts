@@ -6,18 +6,15 @@ function stubHandler(name: string) {
     return {handle: async (_request: Request) => new Response(name, {status: 200})};
 }
 
-function stubBucket() {
-    return {
-        get: async (key: string) => new Response(`static:${key}`, {
-            headers: {'content-type': 'text/html', 'etag': '"test"'},
-        }),
-        put: async () => {},
-    };
+function stubAssets() {
+    return async (request: Request) => new Response(`static:${new URL(request.url).pathname}`, {
+        headers: {'content-type': 'text/html', 'etag': '"test"'},
+    });
 }
 
 function createRouting(overrides: Partial<RouterDependencies> = {}): Routing {
     return new Routing({
-        bucket: stubBucket(),
+        assets: stubAssets(),
         catalogue: stubHandler('catalogue') as any,
         coverArt: stubHandler('coverArt') as any,
         story: stubHandler('story') as any,
@@ -167,7 +164,7 @@ describe("Routing", () => {
     });
 
     describe("static file fallback", () => {
-        test("serves static files from bucket", async () => {
+        test("serves static files via assets", async () => {
             const routing = createRouting();
             const response = await routing.handle(new Request("http://test/player/main.js"));
             expect(response.status).toBe(200);

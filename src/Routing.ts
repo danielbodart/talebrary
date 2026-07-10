@@ -1,5 +1,5 @@
 import type {BucketCachingHandler} from "./storage/BucketCachingHandler.ts";
-import type {TalebraryBucket} from "./storage/TalebraryBucket.ts";
+import type {Http} from "./http/mod.ts";
 import type {ContentHandler} from "./content/ContentHandler.tsx";
 import {Uri} from "./http/Uri.ts";
 import type {EventHandler} from "./events/EventHandler.ts";
@@ -11,7 +11,7 @@ import type {AuthHandler} from "./auth/AuthHandler.tsx";
 import type {Dependency} from "@bodar/yadic/types.ts";
 
 export interface RouterDependencies extends
-    Dependency<'bucket', TalebraryBucket>,
+    Dependency<'assets', Http>,
     Dependency<'catalogue', CatalogueHandler>,
     Dependency<'coverArt', BucketCachingHandler>,
     Dependency<'story', BucketCachingHandler>,
@@ -83,10 +83,13 @@ export class Routing {
             return this.deps.robots.handle(request);
         }
 
-        // Static files (path contains file extension)
+        // Static files (path contains file extension). In production these are
+        // served by the Workers Static Assets layer before the Worker runs; this
+        // fallthrough only fires for the template-processed HTML (run_worker_first)
+        // and for the Bun local runtime, where `assets` is backed by FolderBucket.
         const lastSegment = uri.path.split('/').pop() ?? '';
         if (lastSegment.includes('.')) {
-            return this.deps.bucket.get(uri.path.slice(1));
+            return this.deps.assets(request);
         }
 
         // Everything else → catalogue rooms

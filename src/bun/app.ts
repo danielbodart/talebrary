@@ -51,6 +51,9 @@ const deps = {
     http,
     db: talebrary(),
     bucket,
+    // No Workers Assets layer locally: serve build assets from the same www/
+    // FolderBucket, matching production's asset serving for parity.
+    assets: (request: Request) => bucket.get(new URL(request.url).pathname.slice(1)),
     digest: md5,
     ai: aiInstance,
     auth: new InMemoryAuth(),

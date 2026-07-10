@@ -31,6 +31,21 @@ bucket_name = 'talebrary'
 preview_bucket_name = 'talebrary'
 remote = true
 
+# Build-time client assets (CSS/JS/HTML/images/wasm) are served by the Workers
+# Static Assets layer and versioned atomically with each `wrangler deploy` —
+# they no longer live in R2 (only runtime-written content/, cards/art/,
+# workflow-images/ do). html_handling=none preserves current behaviour: bare
+# /cards and /player stay 404 (no index.html rewriting). not_found_handling=none
+# lets every non-asset path fall through to the Worker. run_worker_first lists
+# the two template-processed HTML files (they carry <meta template=default> and
+# must pass through templateHandler for the head/fonts/analytics-beacon wrapper).
+[assets]
+directory = "./www"
+binding = "ASSETS"
+html_handling = "none"
+not_found_handling = "none"
+run_worker_first = [ "/cards/index.html", "/player/index.html" ]
+
 [ai]
 binding = "ai"
 

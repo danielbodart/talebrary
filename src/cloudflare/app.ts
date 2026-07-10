@@ -29,6 +29,8 @@ function deps(env: Env) {
         digest: md5,
         db: new D1Adapter(env.db),
         bucket: new CloudflareR2Adapter(env.r2),
+        // Static build assets served by the Workers Static Assets binding.
+        assets: (request: Request) => env.ASSETS.fetch(request),
         // AI Gateway "default" for logging/caching. The adapter falls back to a
         // direct Workers AI call when the gateway can't proxy a request (currently
         // the ReadableStream multipart body flux-2-klein img2img needs), so this

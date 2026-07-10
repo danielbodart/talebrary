@@ -89,7 +89,8 @@ The production deployment runs entirely on Cloudflare's edge platform:
 | **Workers** | Application runtime — server-rendered HTML, API endpoints, routing |
 | **Workers AI** | All model inference (Llama 3.3, FLUX.2, Leonardo Phoenix) |
 | **D1** | Game catalogue database (synced from IFDB) |
-| **R2** | Object storage for generated images, story files, and static assets |
+| **R2** | Object storage for runtime-written content — generated images and cached story files |
+| **Workers Static Assets** | Build-time client assets (CSS/JS/HTML/images/wasm), bundled and versioned with each deploy |
 | **Durable Objects** | IF Archive proxy — routes all ifarchive.org requests through a US-East data centre to avoid UK geo-blocking (HTTP 451) |
 | **Workflows** | Durable orchestration of multi-step AI pipelines with step-level persistence |
 
