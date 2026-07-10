@@ -239,3 +239,13 @@ UPDATE talebrary_gamelinks SET format='scott', extension='.dat', primary_file='a
 UPDATE talebrary_gamelinks SET format='scott', extension='.dat', primary_file='1_baton.dat',
        url='https://ifarchive.org/if-archive/scott-adams/games/scottfree/mysterious.tar.gz'
   WHERE game_id='v148gq1vx7leo8al' AND lower(url) LIKE '%mysterious.tar.gz';
+
+-- 2026-07-10: coverart URLs arrive malformed from the IFDB dump — the field is
+-- stored as "https://ifdb.org/coverart&id=<tuid>" (& instead of ?), which 404s.
+-- Correct form "coverart?id=<tuid>" returns the cover. Verified: ?id=->200,
+-- &id=->404. Affects every game with a cover (all 7949 in the dump); only games
+-- whose cover was generated + cached in R2 before this rendered — fresh ones
+-- 500'd (Failed to fetch cover art: 404). Not our conversion: sync copies the
+-- IFDB value verbatim and sqlglot preserves '?'. Re-applied every rebuild here.
+UPDATE talebrary_games SET coverart = REPLACE(coverart, 'coverart&id=', 'coverart?id=')
+WHERE coverart LIKE '%coverart&id=%';

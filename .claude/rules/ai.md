@@ -6,6 +6,25 @@ paths:
   - "evals/**"
 ---
 
+# AI Gateway is DISABLED (do not re-enable without checking this)
+
+`CloudflareAiAdapter` / `CloudflareRestAi` accept a `gateway` arg. It is
+intentionally **not passed** (was `"default"`, removed 2026-07-10).
+
+**Why:** AI Gateway cannot proxy a `ReadableStream` request body — it fails with
+`AiInternalError: AI Gateway does not support ReadableStreams yet`. flux-2-klein
+img2img (style transfer) *must* send its multipart body as a stream via the
+`env.AI` binding (see below), so every style-transfer call through the gateway
+threw. The cover-art workflow silently caught the error and fell back to the
+plain phoenix text-to-image book cover — cover art looked "generated" but was
+never the real style-transferred image. Text/JSON calls (llama, phoenix) went
+through the gateway fine, which is why the breakage was subtle.
+
+Landed in commit b2152a5 (2026-07-03), removed once diagnosed. **Re-enable only
+after confirming Cloudflare supports streamed multipart bodies through the
+gateway** — until then, pass no gateway id. Illustrations were unaffected (they
+use phoenix JSON text-to-image, never the multipart stream path).
+
 # FLUX.2 on Cloudflare Workers AI
 
 **IMPORTANT**: The official Cloudflare docs do NOT document the img2img / multipart binding format. Do not search the web for this — the information below was gathered through experimentation and is the authoritative reference for this project.

@@ -29,7 +29,11 @@ function deps(env: Env) {
         digest: md5,
         db: new D1Adapter(env.db),
         bucket: new CloudflareR2Adapter(env.r2),
-        ai: new CloudflareAiAdapter(env.ai, "default"),
+        // AI Gateway disabled: it can't handle the ReadableStream multipart body
+        // flux-2-klein img2img needs ("AI Gateway does not support ReadableStreams
+        // yet"), which silently broke cover-art style transfer. Re-add "default"
+        // once Cloudflare supports streamed multipart through the gateway.
+        ai: new CloudflareAiAdapter(env.ai),
         eventSender: new CloudflarePipelineAdapter(env.TRANSCRIPTS),
         auth: new BetterAuthAdapter(env.db, {
             secret: env.BETTER_AUTH_SECRET,

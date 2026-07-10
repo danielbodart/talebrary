@@ -193,7 +193,6 @@ export const collections: Wing = {
                 '0dbnusxunq7fw5ro', // Zork I
                 'yzzm4puxyjakk8c4', // Zork II
                 'vrsot1zgy1wfcdru', // Zork III
-                'xe6kb3cuqwie2q38', // Planetfall
                 'j18kjz80hxjtyayw', // Trinity
                 '4h62dvooeg9ajtfa', // A Mind Forever Voyaging
                 'vu4xhul3abknifcr', // Enchanter
