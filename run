@@ -158,6 +158,30 @@ function db-migrate() {
     ./db/run migrate
 }
 
+# --- Ad-hoc queries -------------------------------------------------------
+# Query the R2 SQL analytics warehouse (Iceberg transcripts table).
+# See .claude/skills/query-transcripts/SKILL.md for schema + recipes.
+#   ./run r2sql "SELECT * FROM talebrary.transcripts LIMIT 5"
+function r2sql() {
+  ./analytics/r2sql "$@"
+}
+
+# Reconstruct a readable playthrough from the transcripts table (parses the
+# GlkOte output JSON into prose).  ./run transcript <game_id> [--limit n]
+function transcript() {
+  bun analytics/transcript.ts "$@"
+}
+
+# Ad-hoc query against production D1. Read-only SELECTs are fine as-is; for ANY
+# write (UPDATE/DELETE/INSERT/ALTER/…) capture a time-travel bookmark FIRST —
+# see .claude/rules/database.md. Extra wrangler flags pass through after the SQL:
+#   ./run d1sql "SELECT COUNT(*) FROM talebrary_games"
+#   ./run d1sql "SELECT * FROM talebrary_games LIMIT 1" --json
+function d1sql() {
+  local query="${1:?Usage: ./run d1sql \"<SQL>\" [wrangler flags...]}"; shift
+  bunx wrangler d1 execute talebrary --remote --command "${query}" "$@"
+}
+
 function evals() {
   bun run evals/run-evals.ts "$@"
 }

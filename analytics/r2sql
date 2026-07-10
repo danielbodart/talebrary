@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Run a SQL query against the Talebrary R2 SQL analytics warehouse.
+# The warehouse holds the Iceberg `talebrary.transcripts` table (player sessions).
+#
+#   ./analytics/r2sql "SELECT * FROM talebrary.transcripts LIMIT 5"
+#   ./analytics/r2sql "SHOW TABLES IN talebrary;"
+#   ./analytics/r2sql "DESCRIBE talebrary.transcripts;"
+#
+# See analytics/../.claude/skills/query-transcripts/SKILL.md for schema + recipes.
+set -Eeuo pipefail
+
+# Warehouse = <account_id>_<bucket>. Regenerate with:
+#   bunx wrangler r2 bucket catalog get talebrary-analytics
+WAREHOUSE="3bbeb229e66e19d6e65b2360d0e225b8_talebrary-analytics"
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+ENV_FILE="${SCRIPT_DIR}/../.env"
+
+# R2 SQL needs a bearer token — an OAuth `wrangler login` does NOT work here.
+# Resolve in order: explicit env var, then CLOUDFLARE_API_TOKEN, then .env
+# (parsed even when the line is commented out, which is its default state).
+token="${WRANGLER_R2_SQL_AUTH_TOKEN:-${CLOUDFLARE_API_TOKEN:-}}"
+if [[ -z "$token" && -f "$ENV_FILE" ]]; then
+  token=$(grep -E '^#?[[:space:]]*CLOUDFLARE_API_TOKEN=' "$ENV_FILE" | head -1 \
+    | sed -E 's/^#?[[:space:]]*CLOUDFLARE_API_TOKEN=//; s/^["'"'"']//; s/["'"'"']$//')
+fi
+if [[ -z "$token" ]]; then
+  echo "r2sql: no token. Set WRANGLER_R2_SQL_AUTH_TOKEN or CLOUDFLARE_API_TOKEN," \
+       "or add CLOUDFLARE_API_TOKEN to .env. Token needs R2 read + Data Catalog read." >&2
+  exit 1
+fi
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: $0 \"<SQL>\"" >&2
+  exit 1
+fi
+
+WRANGLER_R2_SQL_AUTH_TOKEN="$token" exec bunx wrangler r2 sql query "$WAREHOUSE" "$@"
