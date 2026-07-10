@@ -20,15 +20,39 @@ export class CloudflareAiAdapter implements TalebraryAi {
     }
 
     async generateText<T = any>(model: string, prompt: ScopedPrompt): Promise<T> {
-        const result = await this.ai.run(model, prompt, this.options());
+        const result = await this.run(model, () => prompt);
         return parseTextResponse<T>(result);
     }
 
     async generateImage(model: string, input: ImagePrompt): Promise<Uint8Array> {
-        const cloudflareInput = toCloudflareImageInput(model, input);
-        const result = await this.ai.run(model, cloudflareInput, this.options());
+        const result = await this.run(model, () => toCloudflareImageInput(model, input));
         return normalizeImageResponse(result);
     }
+
+    // Route through the AI Gateway when one is configured. If the gateway rejects a
+    // request body it can't proxy — currently a ReadableStream multipart body, which
+    // flux-2-klein img2img requires — retry that one request straight to Workers AI.
+    // Self-healing in both directions: no gateway id -> always direct; once Cloudflare
+    // supports streamed multipart the retry simply never fires. Only that exact error
+    // triggers the fallback, so a genuine failure surfaces once, not twice.
+    //
+    // buildInput is re-invoked per attempt because the multipart body is a single-use
+    // stream that must be rebuilt for the retry. The underlying image bytes are already
+    // in memory (see coverArt.ts readBase64), so this is a cheap re-serialize, not a re-fetch.
+    private async run(model: string, buildInput: () => any): Promise<any> {
+        const options = this.options();
+        if (!options) return this.ai.run(model, buildInput());
+        try {
+            return await this.ai.run(model, buildInput(), options);
+        } catch (e) {
+            if (isGatewayStreamUnsupported(e)) return this.ai.run(model, buildInput());
+            throw e;
+        }
+    }
+}
+
+function isGatewayStreamUnsupported(e: any): boolean {
+    return String(e?.message ?? e).includes('AI Gateway does not support ReadableStreams');
 }
 
 function parseTextResponse<T>(result: any): T {

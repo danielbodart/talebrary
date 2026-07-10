@@ -112,6 +112,54 @@ aiContractTests("CloudflareAiAdapter (native binding)", () => {
     return new CloudflareAiAdapter(nativeBinding);
 });
 
+// Gateway self-healing: try through the gateway, fall back to a direct call ONLY on
+// the exact ReadableStream rejection — and rebuild the (single-use) stream per attempt.
+describe("CloudflareAiAdapter - gateway fallback", () => {
+    const jpeg = () => new Uint8Array([0xFF, 0xD8, 0xFF]);
+    const streamRejection = 'AiInternalError: AI Gateway does not support ReadableStreams yet';
+
+    function recordingBinding(behaviour: (attempt: number, withGateway: boolean) => any) {
+        const calls: {withGateway: boolean; bodyIsStream: boolean}[] = [];
+        return {
+            calls,
+            async run(_model: string, input: any, options?: any) {
+                const withGateway = !!options?.gateway;
+                calls.push({withGateway, bodyIsStream: input?.multipart?.body instanceof ReadableStream});
+                return behaviour(calls.length, withGateway);
+            },
+        };
+    }
+
+    const img2img = () => ({prompt: "graphic novel style", sourceImage: btoa("\x01\x02\x03\x04"), num_steps: 4});
+
+    test("retries without the gateway when it rejects the ReadableStream body", async () => {
+        const binding = recordingBinding((_attempt, withGateway) => {
+            if (withGateway) throw new Error(streamRejection);
+            return jpeg();
+        });
+        const ai = new CloudflareAiAdapter(binding, "default");
+        const result = await ai.generateImage("@cf/black-forest-labs/flux-2-klein-9b", img2img());
+        expect(result).toBeInstanceOf(Uint8Array);
+        expect(binding.calls.map(c => c.withGateway)).toEqual([true, false]);
+        // Both attempts got a fresh, non-consumed multipart stream.
+        expect(binding.calls.every(c => c.bodyIsStream)).toBe(true);
+    });
+
+    test("does NOT retry on other errors (no double run, error surfaces)", async () => {
+        const binding = recordingBinding(() => { throw new Error("model exploded"); });
+        const ai = new CloudflareAiAdapter(binding, "default");
+        await expect(ai.generateImage("@cf/black-forest-labs/flux-2-klein-9b", img2img())).rejects.toThrow("model exploded");
+        expect(binding.calls).toHaveLength(1);
+    });
+
+    test("no gateway configured: single direct call, never wrapped", async () => {
+        const binding = recordingBinding(() => jpeg());
+        const ai = new CloudflareAiAdapter(binding); // no gateway id
+        await ai.generateImage("@cf/black-forest-labs/flux-2-klein-9b", img2img());
+        expect(binding.calls).toEqual([{withGateway: false, bodyIsStream: true}]);
+    });
+});
+
 // CloudflareAiAdapter wrapping CloudflareRestAi with canned HTTP responses
 aiContractTests("CloudflareAiAdapter", () => {
     const cannedSuggestionsResponse = {

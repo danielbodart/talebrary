@@ -22,7 +22,9 @@ const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, PROXY_URL, PROXY_TOKEN} = pr
 function ai(): TalebraryAi {
     if (CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_API_TOKEN) {
         console.log('Using Cloudflare Workers AI via REST API');
-        // AI Gateway disabled — see src/cloudflare/app.ts (breaks flux-2-klein img2img).
+        // Local dev calls Workers AI directly (no gateway). The gateway + self-heal
+        // fallback lives on the prod binding path (src/cloudflare/app.ts); the REST
+        // path buffers multipart to bytes so it never hits the stream error anyway.
         return new CloudflareAiAdapter(new CloudflareRestAi(CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, client));
     }
     console.log('Using DumbAi stub');

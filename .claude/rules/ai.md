@@ -6,24 +6,36 @@ paths:
   - "evals/**"
 ---
 
-# AI Gateway is DISABLED (do not re-enable without checking this)
+# AI Gateway: ON, with a self-healing fallback (do not "simplify" the retry away)
 
-`CloudflareAiAdapter` / `CloudflareRestAi` accept a `gateway` arg. It is
-intentionally **not passed** (was `"default"`, removed 2026-07-10).
+Prod (`src/cloudflare/app.ts`) routes Workers AI through the `"default"` AI
+Gateway for logging/caching. `CloudflareAiAdapter.run()` wraps every call: it
+tries through the gateway and, **only** on the exact error
+`AiInternalError: AI Gateway does not support ReadableStreams yet`, retries the
+same request directly against Workers AI (no gateway).
 
-**Why:** AI Gateway cannot proxy a `ReadableStream` request body — it fails with
-`AiInternalError: AI Gateway does not support ReadableStreams yet`. flux-2-klein
-img2img (style transfer) *must* send its multipart body as a stream via the
-`env.AI` binding (see below), so every style-transfer call through the gateway
-threw. The cover-art workflow silently caught the error and fell back to the
-plain phoenix text-to-image book cover — cover art looked "generated" but was
-never the real style-transferred image. Text/JSON calls (llama, phoenix) went
-through the gateway fine, which is why the breakage was subtle.
+**Why the fallback exists:** the gateway cannot proxy a `ReadableStream` request
+body. flux-2-klein img2img (style transfer) *must* send its multipart body as a
+stream via the `env.AI` binding (see below), so those calls fail through the
+gateway. Without the fallback the cover-art workflow silently caught the error
+and served the plain phoenix book cover instead of the real style transfer
+(regression from commit b2152a5, 2026-07-03; text/JSON calls were unaffected,
+which is why it was subtle).
 
-Landed in commit b2152a5 (2026-07-03), removed once diagnosed. **Re-enable only
-after confirming Cloudflare supports streamed multipart bodies through the
-gateway** — until then, pass no gateway id. Illustrations were unaffected (they
-use phoenix JSON text-to-image, never the multipart stream path).
+**Why match the exact error string (not a blanket catch):** a blanket retry
+would re-run — and double-bill — a genuinely failed generation. The gateway
+stream rejection is a *pre-flight* error (no model runs), so the real
+invocation happens exactly once, on the direct retry.
+
+**Why `run()` takes a `buildInput` thunk, not a value:** the multipart body is a
+single-use stream; the retry must rebuild it. The image bytes are already in
+memory (`coverArt.ts` `readBase64`), so rebuilding is a cheap re-serialize, not
+a re-fetch — no file is read twice.
+
+Self-healing both ways: no gateway id -> always direct; if Cloudflare later
+supports streamed multipart, the retry simply stops firing. Local dev
+(`src/bun/app.ts`) calls Workers AI directly and buffers multipart to bytes, so
+it never hits this path.
 
 # FLUX.2 on Cloudflare Workers AI
 
